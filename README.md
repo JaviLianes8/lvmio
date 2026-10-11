@@ -37,6 +37,44 @@ Keyword arguments override file header fields: `operator`, `date`, `time`,
 `separator` (`"Tab"` or `"Comma"`), `decimal_separator`, and `precision` (the
 number of decimal places used for numeric output).
 
+### Working with a parsed file
+
+The parsed objects are frozen dataclasses with convenient access:
+
+```python
+lvm = read_lvm("run.lvm")
+segment = lvm.segments[0]
+
+for channel in segment:            # Segment iterates over its channels
+    print(channel.name, len(channel))
+
+voltage = segment["Voltage"]       # access a channel by name
+axis = voltage.time_axis()         # [x0, x0 + delta_x, ...], one value per sample
+missing = segment.get("absent")    # None when the channel is not present
+```
+
+Empty cells in the data (unconnected channels, or rows without a value) parse to
+`float('nan')`, so every channel keeps one value per row and stays aligned with its
+own time axis.
+
+`parse_lvm(text)` parses a `.lvm` string already in memory; `read_lvm(path)` is the
+path based convenience that calls it.
+
+## Command line
+
+Installing the package adds an `lvmio` console command:
+
+```
+lvmio header run.lvm            # file metadata, add --json for JSON
+lvmio channels run.lvm          # list the channels per segment
+lvmio dump run.lvm --channel Voltage --time    # one channel as CSV with its time axis
+lvmio dump run.lvm --format json               # all channels of a segment as JSON
+cat run.lvm | lvmio header -    # read from standard input
+```
+
+Errors go to standard error and the process exits with status 1. Run `lvmio --help`
+or `lvmio <command> --help` for the full list of options.
+
 ## Supported subset
 
 The format has a file header block (`LabVIEW Measurement`, `Writer_Version`,
@@ -46,11 +84,17 @@ own channel header and tab-delimited rows.
 
 Covered:
 
-- Tab and comma separators, and a configurable decimal separator.
+- Tab and comma separators, and a configurable decimal separator (including the
+  decimal comma and scientific notation that European LabVIEW writes).
 - Single or multiple segments (`Multi_Headings` is set from the segment count).
-- `X_Columns` set to `One` (a shared X axis from `X0` and `Delta_X`) or `No`.
+- `X_Columns` set to `One` (a shared X axis from `X0` and `Delta_X`) or `No`. Real
+  `No` files still carry an empty leading X column, and the reader handles that.
 - Per-channel `Y_Unit_Label`, `X_Dimension`, `X0` and `Delta_X`.
-- The trailing `Comment` column on the data header.
+- The trailing `Comment` column on the data header, and comments on some rows.
+- Empty data cells, which become `float('nan')`.
+
+Behaviour on genuine LabVIEW output is locked in by golden fixtures under
+`tests/fixtures/` and cross-checked against the independent `lvm_read` package.
 
 Out of scope for now: `X_Columns` set to `Multi` (one X column per channel) and
 absolute-time X axes. These parse as plain columns but are not modelled.

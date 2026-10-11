@@ -8,8 +8,8 @@ delivered in this round.
 ## 1. Correct column handling for real `X_Columns=No` files (DONE, correctness)
 
 Genuine LabVIEW files with `X_Columns=No` still emit the `X_Value` column in the
-data header and a leading empty X field on every data row (see `short.lvm`,
-`long.lvm`, `comments_on_some_rows.lvm`). The old reader keyed the column offset
+data header and a leading empty X field on every data row (see the committed
+`short.lvm` and `comments_on_some_rows.lvm`). The old reader keyed the column offset
 off the `X_Columns` header field, so it read channel 0 from the empty X column and
 shifted every signal by one. The reader now derives the offset from the data
 header itself (a leading `X_Value` token), which matches NI output and `lvm_read`
@@ -74,5 +74,6 @@ fixtures now lock that behaviour in with golden tests.
 - Absolute-time X axes as `datetime` objects. The per-channel `Date`/`Time` are
   captured as strings; turning them into timestamps needs a documented timezone
   policy and is deferred.
-- Streaming / chunked reading for very large captures (`long.lvm` is multi-MB).
-  The current reader loads the whole file, which is fine for typical use.
+- Streaming / chunked reading for very large captures (the upstream `long.lvm`
+  sample, not committed here, is several MB). The current reader loads the whole
+  file, which is fine for typical use.

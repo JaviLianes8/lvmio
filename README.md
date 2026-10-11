@@ -45,12 +45,12 @@ The parsed objects are frozen dataclasses with convenient access:
 lvm = read_lvm("run.lvm")
 segment = lvm.segments[0]
 
-for channel in segment:            # Segment iterates over its channels
+for channel in segment:  # Segment iterates over its channels
     print(channel.name, len(channel))
 
-voltage = segment["Voltage"]       # access a channel by name
-axis = voltage.time_axis()         # [x0, x0 + delta_x, ...], one value per sample
-missing = segment.get("absent")    # None when the channel is not present
+voltage = segment["Voltage"]  # access a channel by name
+axis = voltage.time_axis()  # [x0, x0 + delta_x, ...], one value per sample
+missing = segment.get("absent")  # None when the channel is not present
 ```
 
 Empty cells in the data (unconnected channels, or rows without a value) parse to

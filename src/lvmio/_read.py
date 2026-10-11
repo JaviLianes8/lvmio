@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from ._errors import LvmError
@@ -12,8 +13,12 @@ _END = "***End_of_Header***"
 
 def read_lvm(path: str | Path) -> LvmFile:
     """Read a LabVIEW Measurement file and return its typed representation."""
-    raw = Path(path).read_text(encoding="utf-8")
-    lines = raw.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    return parse_lvm(Path(path).read_text(encoding="utf-8"))
+
+
+def parse_lvm(text: str) -> LvmFile:
+    """Parse LabVIEW Measurement text and return its typed representation."""
+    lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     delim = _detect_delimiter(lines)
 
     if not lines or _key(lines[0], delim) != "LabVIEW Measurement":
@@ -31,10 +36,11 @@ def read_lvm(path: str | Path) -> LvmFile:
         fields, index = _collect_segment_fields(lines, index, delim)
         if index >= len(lines):
             break
-        names = _channel_names([p.strip() for p in lines[index].split(delim)], x_columns)
+        offset = 1 if _first_token(lines[index], delim) == "X_Value" else 0
+        names = _channel_names([p.strip() for p in lines[index].split(delim)], offset)
         index += 1
         rows, index = _collect_rows(lines, index, delim)
-        segments.append(_build_segment(names, rows, fields, x_columns, decimal))
+        segments.append(_build_segment(names, rows, fields, offset, decimal))
 
     return LvmFile(
         segments=segments,
@@ -58,6 +64,10 @@ def _detect_delimiter(lines: list[str]) -> str:
 
 
 def _key(line: str, delim: str) -> str:
+    return line.split(delim)[0].strip()
+
+
+def _first_token(line: str, delim: str) -> str:
     return line.split(delim)[0].strip()
 
 
@@ -96,9 +106,8 @@ def _collect_rows(lines: list[str], index: int, delim: str) -> tuple[list[list[s
     return rows, index
 
 
-def _channel_names(parts: list[str], x_columns: str) -> list[str]:
-    start = 0 if x_columns.strip().lower() == "no" else 1
-    names = list(parts[start:])
+def _channel_names(parts: list[str], offset: int) -> list[str]:
+    names = list(parts[offset:])
     while names and names[-1] == "":
         names.pop()
     if names and names[-1].lower() == "comment":
@@ -110,10 +119,9 @@ def _build_segment(
     names: list[str],
     rows: list[list[str]],
     fields: dict[str, list[str]],
-    x_columns: str,
+    offset: int,
     decimal: str,
 ) -> Segment:
-    offset = 0 if x_columns.strip().lower() == "no" else 1
     units = fields.get("Y_Unit_Label", [])
     dims = fields.get("X_Dimension", [])
     x0s = fields.get("X0", [])
@@ -121,7 +129,7 @@ def _build_segment(
     channels: list[Channel] = []
     for idx, name in enumerate(names):
         col = offset + idx
-        data = [_to_float(r[col], decimal) for r in rows if col < len(r) and r[col].strip()]
+        data = [_cell(r[col], decimal) if col < len(r) else math.nan for r in rows]
         channels.append(
             Channel(
                 name=name,
@@ -141,6 +149,13 @@ def _skip_blank(lines: list[str], index: int) -> int:
     while index < len(lines) and lines[index].strip() == "":
         index += 1
     return index
+
+
+def _cell(text: str, decimal: str) -> float:
+    """A data cell: empty means a missing sample (NaN), as LabVIEW leaves gaps."""
+    if text.strip() == "":
+        return math.nan
+    return _to_float(text, decimal)
 
 
 def _to_float(text: str, decimal: str) -> float:

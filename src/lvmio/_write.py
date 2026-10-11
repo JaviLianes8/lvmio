@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from pathlib import Path
 
 from ._model import Channel, LvmFile, Segment
@@ -29,16 +31,16 @@ def write_lvm(
     arguments override the matching file header fields.
     """
     lvm = _as_file(data)
-    if operator is not None:
-        lvm.operator = operator
-    if date is not None:
-        lvm.date = date
-    if time is not None:
-        lvm.time = time
-    if decimal_separator is not None:
-        lvm.decimal_separator = decimal_separator
-    if separator is not None:
-        lvm.separator = separator
+    lvm = replace(
+        lvm,
+        operator=lvm.operator if operator is None else operator,
+        date=lvm.date if date is None else date,
+        time=lvm.time if time is None else time,
+        decimal_separator=(
+            lvm.decimal_separator if decimal_separator is None else decimal_separator
+        ),
+        separator=lvm.separator if separator is None else separator,
+    )
     text = _EOL.join(_render(lvm, precision)) + _EOL
     Path(path).write_text(text, encoding="utf-8", newline="")
 
@@ -123,5 +125,7 @@ def _segment(seg: Segment, lvm: LvmFile, delim: str, precision: int) -> list[str
 
 
 def _num(value: float, precision: int, decimal: str) -> str:
+    if math.isnan(value):
+        return ""
     text = f"{value:.{precision}f}"
     return text.replace(".", decimal) if decimal != "." else text

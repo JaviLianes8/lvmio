@@ -1,1 +1,5 @@
 * text=auto eol=lf
+
+# Golden LabVIEW fixtures are kept byte for byte, so their hashes keep matching the
+# upstream samples. No end of line conversion is applied to them.
+tests/fixtures/*.lvm -text

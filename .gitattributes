@@ -1,1 +1,4 @@
 * text=auto eol=lf
+
+# Golden LabVIEW fixtures are kept byte for byte (genuine CRLF, as NI writes them).
+tests/fixtures/*.lvm -text

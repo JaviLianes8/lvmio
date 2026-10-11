@@ -9,3 +9,10 @@ All notable changes to this project are documented here. The format follows
 ## [0.1.0]
 
 - First release.
+- `write_lvm` serialises channels to a spec-faithful `.lvm` file, filling the
+  writer gap that existing readers leave open.
+- `read_lvm` parses the file header and data segments back into typed objects.
+- `Channel`, `Segment` and `LvmFile` model the format; `LvmError` reports invalid
+  input.
+- Supports Tab and Comma separators, a configurable decimal separator, multiple
+  segments, and `X_Columns` set to `One` or `No`.

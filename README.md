@@ -57,11 +57,14 @@ absolute-time X axes. These parse as plain columns but are not modelled.
 
 ## Why
 
-`lvm-read` reads `.lvm` files well, but it is read-only: there is no maintained,
-typed Python package that **writes** a `.lvm` file a LabVIEW VI will read back.
-`lvmio` fills that writer gap and keeps a small, correct reader alongside it, so
-a round trip stays within one dependency-free package. It uses the standard
-library only.
+LabVIEW produces and consumes `.lvm` natively with its Write/Read To Measurement File
+express VIs, and on the Python side `lvm-read` already reads the format well. Reading,
+then, is a solved problem. What is missing is the writer: there is no maintained,
+typed Python package that **writes** a `.lvm` file a LabVIEW VI will read back, which
+otherwise means matching NI's header blocks and tab-delimited segments by hand.
+`lvmio` fills that writer gap and keeps a small, correct reader alongside it as a
+convenience, not as the novelty, so a round trip stays within one dependency-free
+package. It uses the standard library only.
 
 ## License
 

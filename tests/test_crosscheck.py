@@ -1,7 +1,7 @@
-"""Real interoperability: parse the same genuine .lvm file with lvmio and with the
+"""Interoperability: parse the same .lvm file with lvmio and with the
 independent ``lvm_read`` package, and assert the numeric data agrees element for
-element. This proves lvmio reads what real LabVIEW tools read, not just what a spec
-reading suggests.
+element. This checks lvmio against an independent reader, not just against a spec
+reading.
 """
 
 import math
@@ -16,7 +16,7 @@ np = pytest.importorskip("numpy")
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
-REAL_FILES = [
+FILES = [
     "short.lvm",
     "comma_separator.lvm",
     "comments_on_some_rows.lvm",
@@ -28,7 +28,7 @@ def _same(a: float, b: float) -> bool:
     return (math.isnan(a) and math.isnan(b)) or abs(a - b) < 1e-9
 
 
-@pytest.mark.parametrize("name", REAL_FILES)
+@pytest.mark.parametrize("name", FILES)
 def test_numeric_data_matches_lvm_read(name: str) -> None:
     path = FIXTURES / name
     ours = read_lvm(path)

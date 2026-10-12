@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lvmio"
-version = "0.2.0"
+version = "0.2.1"
 description = "Typed reader and writer for the LabVIEW Measurement (.lvm) file format, stdlib only"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,6 +36,19 @@ Funding = "https://buymeacoffee.com/jlianesglrs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lvmio"]
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "src/lvmio",
+    "tests",
+    "scripts/make_lvm_fixtures.py",
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "pyproject.toml",
+]
+exclude = ["**/__pycache__", "**/*.pyc"]
 
 [tool.ruff]
 line-length = 100

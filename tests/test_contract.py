@@ -1,7 +1,7 @@
 """Contract test: the complete, documented promise of every public name.
 
-Every exported symbol is exercised end to end against the genuine LabVIEW
-fixtures committed under ``tests/fixtures``. If a public behaviour changes, a
+Every exported symbol is exercised end to end against the hand-made
+LabVIEW-layout fixtures committed under ``tests/fixtures``. If a public behaviour changes, a
 claim here breaks.
 """
 
@@ -49,16 +49,16 @@ def test_the_package_ships_type_information() -> None:
     assert importlib.resources.files("lvmio").joinpath("py.typed").is_file()
 
 
-def test_read_lvm_parses_a_genuine_file() -> None:
+def test_read_lvm_parses_a_file() -> None:
     lvm = read_lvm(FIXTURES / "short.lvm")
     assert isinstance(lvm, LvmFile)
-    assert lvm.operator == "JS"
+    assert lvm.operator == "lvmio"
     assert lvm.separator == "Tab"
     assert lvm.decimal_separator == ","
     assert lvm.x_columns == "No"
     names = lvm.segments[0].names
-    assert names == ["Excitation (Trigger)", "Response (Trigger)"]
-    assert lvm.segments[0].channels[0].data[0] == pytest.approx(0.914018)
+    assert names == ["Load (Cell A)", "Accel (Frame)"]
+    assert lvm.segments[0].channels[0].data[0] == pytest.approx(0.5)
 
 
 def test_parse_lvm_matches_read_lvm_on_the_same_bytes() -> None:
@@ -69,22 +69,22 @@ def test_parse_lvm_matches_read_lvm_on_the_same_bytes() -> None:
 
 
 def test_x_columns_no_file_reads_the_real_channels() -> None:
-    # Genuine X_Columns=No files still carry an empty leading X column; the reader
+    # X_Columns=No files still carry an empty leading X column; the reader
     # must skip it, not read channel zero from it.
     lvm = read_lvm(FIXTURES / "short.lvm")
-    excitation = lvm.segments[0]["Excitation (Trigger)"]
+    excitation = lvm.segments[0]["Load (Cell A)"]
     assert len(excitation) == 10
-    assert excitation.data[0] == pytest.approx(0.914018)
+    assert excitation.data[0] == pytest.approx(0.5)
     assert not any(math.isnan(v) for v in excitation.data)
 
 
 def test_empty_fields_become_nan() -> None:
     lvm = read_lvm(FIXTURES / "with_empty_fields.lvm")
-    untitled = lvm.segments[0]["Untitled"]
-    assert len(untitled) == 7
+    untitled = lvm.segments[0]["Spare"]
+    assert len(untitled) == 8
     assert all(math.isnan(v) for v in untitled.data)
-    connected = lvm.segments[0]["Dev0/Ai0"]
-    assert connected.data[0] == pytest.approx(-0.011923)
+    connected = lvm.segments[0]["Dev1/ai0"]
+    assert connected.data[0] == pytest.approx(-0.02)
 
 
 def test_channel_is_frozen_iterable_and_sized() -> None:

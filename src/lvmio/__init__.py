@@ -7,7 +7,7 @@ from ._model import Channel, LvmFile, Segment
 from ._read import parse_lvm, read_lvm
 from ._write import write_lvm
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     "Channel",

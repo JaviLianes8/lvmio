@@ -72,10 +72,10 @@ def test_version_flag(cli: Path) -> None:
     assert all(part.isdigit() for part in parts)
 
 
-def test_header_subcommand_on_real_file(cli: Path) -> None:
+def test_header_subcommand_on_a_file(cli: Path) -> None:
     result = _run(cli, "header", str(FIXTURES / "short.lvm"))
     assert result.returncode == 0
-    assert "operator: JS" in result.stdout
+    assert "operator: lvmio" in result.stdout
     assert "separator: Tab" in result.stdout
 
 
@@ -90,31 +90,31 @@ def test_header_json_is_valid_json(cli: Path) -> None:
 def test_channels_subcommand(cli: Path) -> None:
     result = _run(cli, "channels", str(FIXTURES / "comma_separator.lvm"))
     assert result.returncode == 0
-    assert "p_st1 [Volts]" in result.stdout
+    assert "inlet [Volts]" in result.stdout
 
 
-def test_dump_json_matches_real_values(cli: Path) -> None:
+def test_dump_json_matches_the_file_values(cli: Path) -> None:
     result = _run(
-        cli, "dump", str(FIXTURES / "comma_separator.lvm"), "--channel", "TC1", "--format", "json"
+        cli, "dump", str(FIXTURES / "comma_separator.lvm"), "--channel", "T1", "--format", "json"
     )
     assert result.returncode == 0
     payload = json.loads(result.stdout)
-    assert payload[0]["name"] == "TC1"
-    assert payload[0]["data"][0] == pytest.approx(0.163976)
+    assert payload[0]["name"] == "T1"
+    assert payload[0]["data"][0] == pytest.approx(0.25)
 
 
 def test_dump_csv_has_header_and_time_column(cli: Path) -> None:
     result = _run(cli, "dump", str(FIXTURES / "short.lvm"), "--time")
     assert result.returncode == 0
     lines = result.stdout.splitlines()
-    assert lines[0].startswith("X_Value,Excitation (Trigger)")
+    assert lines[0].startswith("X_Value,Load (Cell A)")
 
 
 def test_reads_from_stdin(cli: Path) -> None:
     text = (FIXTURES / "short.lvm").read_text(encoding="utf-8")
     result = _run(cli, "header", "-", stdin=text)
     assert result.returncode == 0
-    assert "operator: JS" in result.stdout
+    assert "operator: lvmio" in result.stdout
 
 
 def test_missing_file_exits_one_with_stderr(cli: Path) -> None:

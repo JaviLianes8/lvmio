@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1]
+
+### Changed
+
+- The `.lvm` test fixtures, whose origin was not recorded, are replaced by files generated
+  by `scripts/make_lvm_fixtures.py` with the same layouts (tab and comma separators, decimal
+  comma, empty X column, row comments, empty channels). The sdist is limited to the package,
+  the tests, the fixture generator and the docs.
+
 ## [0.2.0]
 
 ### Added

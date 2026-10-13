@@ -6,28 +6,29 @@ Decimal_Separator	,
 Multi_Headings	Yes
 X_Columns	No
 Time_Pref	Absolute
-Operator	JS
-Date	2013/02/19
-Time	09:51:39,1970510124996275989
+Operator	lvmio
+Description	Hand-made lvmio test fixture, written by scripts/make_lvm_fixtures.py
+Date	2026/10/13
+Time	10:15:30,5
 ***End_of_Header***	
 	
 Channels	2		
 Samples	10	10	
-Date	2013/02/19	2013/02/19	
-Time	09:51:40,7271890640258789063	09:51:40,7271890640258789063	
+Date	2026/10/13	2026/10/13	
+Time	10:15:31,25	10:15:31,25	
 Y_Unit_Label	Newtons	m/s^2	
 X_Dimension	Time	Time	
 X0	0,0000000000000000E+0	0,0000000000000000E+0	
-Delta_X	3,906250E-5	3,906250E-5	
+Delta_X	2,500000E-4	2,500000E-4	
 ***End_of_Header***			
-X_Value	Excitation (Trigger)	Response (Trigger)	Comment
-	0,914018	1,204792
-	0,537321	1,208403
-	0,616905	1,213915
-	0,895449	1,212205
-	0,574460	1,222088
-	0,516099	1,218223
-	1,046658	1,213408
-	0,394070	1,221011
-	0,741586	1,211888
-	0,680572	1,212775
+X_Value	Load (Cell A)	Accel (Frame)	Comment
+	0,500000	1,220000
+	0,757687	1,212432
+	0,894180	1,195456
+	0,845284	1,181919
+	0,633995	1,182065
+	0,359687	1,195784
+	0,151370	1,212694
+	0,107019	1,219997
+	0,247493	1,212167
+	0,506726	1,195129

@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import sysconfig
+from importlib import metadata
 from pathlib import Path
 
 import lvmio
@@ -21,8 +22,22 @@ def env() -> dict[str, str]:
     return child
 
 
+def installed_from_a_wheel() -> bool:
+    """Whether lvmio is imported from an installed distribution, not from a source tree."""
+    try:
+        dist = metadata.distribution("lvmio")
+    except metadata.PackageNotFoundError:
+        return False
+    origin = Path(str(dist.locate_file("lvmio"))).resolve()
+    return Path(lvmio.__file__).resolve().parent == origin
+
+
 def cli_command() -> list[str]:
-    """The console script of this interpreter when it runs this lvmio, else ``-m lvmio``."""
+    """The installed console script when lvmio comes from a wheel, else ``python -m lvmio``.
+
+    An installed lvmio must have a working console script: a missing or wrong one fails here
+    instead of being replaced by ``python -m lvmio``.
+    """
     scripts = Path(sysconfig.get_path("scripts"))
     for name in ("lvmio.exe", "lvmio"):
         script = scripts / name
@@ -32,6 +47,8 @@ def cli_command() -> list[str]:
             )
             if probe.stdout.strip() == f"lvmio {lvmio.__version__}":
                 return [str(script)]
+    if installed_from_a_wheel():
+        raise AssertionError(f"lvmio is installed but its console script in {scripts} is broken")
     return [sys.executable, "-m", "lvmio"]
 
 

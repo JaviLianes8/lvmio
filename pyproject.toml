@@ -29,9 +29,6 @@ classifiers = [
 ]
 dependencies = []
 
-[project.optional-dependencies]
-dev = ["ruff", "mypy", "pytest", "build", "twine", "lvm-read", "numpy"]
-
 [project.scripts]
 lvmio = "lvmio._cli:main"
 

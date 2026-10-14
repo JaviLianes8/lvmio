@@ -50,6 +50,7 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 - Separator and `X_Columns` names are accepted in any case and written as LabVIEW spells
   them (`separator="tab"` writes `Tab`).
 - `read_lvm` and `write_lvm` take any path-like object.
+- The `dev` extra is gone: development tools are listed in `requirements-dev.txt`.
 - `Channel`, `Segment`, `LvmFile` and `LvmError` report the module `lvmio`.
 - Error messages give the line number and quote at most 40 characters.
 - The command line reads standard input as bytes, catches every reading error with one line

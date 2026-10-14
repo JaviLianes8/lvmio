@@ -89,3 +89,11 @@ def test_unknown_channel_exits_one(cli: list[str]) -> None:
     result = run(cli, "dump", str(FIXTURES / "short.lvm"), "--channel", "Nope")
     assert result.returncode == 1
     assert "no such channel" in result.stderr.lower()
+
+
+def test_an_installed_wheel_is_driven_through_its_console_script(cli: list[str]) -> None:
+    from _clirun import installed_from_a_wheel
+
+    if not installed_from_a_wheel():
+        pytest.skip("lvmio runs from a source tree here; the wheel run checks its script")
+    assert Path(cli[0]).stem == "lvmio"

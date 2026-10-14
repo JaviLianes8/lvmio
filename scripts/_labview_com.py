@@ -107,6 +107,26 @@ def worker(lv: LabVIEW, path: Path, passes: list[dict[str, Any]], x_columns: int
         _check(vi.GetControlValue("error out"))
 
 
+def relay(lv: LabVIEW, source: Path, target: Path) -> None:
+    """LabVIEW reads the first data set of ``source`` and writes it to ``target``."""
+    reader = lv.vi(READ)
+    reader.SetControlValue("Filename", str(source))
+    reader.SetControlValue("Reset", True)
+    reader.Run(False)
+    _check(reader.GetControlValue("error out"))
+    vi = lv.vi(WORKER)
+    vi.SetControlValue("Signals", reader.GetControlValue("Signals"))
+    vi.SetControlValue("File Path in", str(target))
+    vi.SetControlValue("Static File Path in", str(target))
+    vi.SetControlValue("x_columns", 1)
+    vi.SetControlValue("overwrite_mode", 2)
+    vi.SetControlValue("Comment", "")
+    vi.SetControlValue("Reset", True)
+    vi.SetControlValue("Simulate Non-First Call", False)
+    vi.Run(False)
+    _check(vi.GetControlValue("error out"))
+
+
 def read(lv: LabVIEW, path: Path, limit: int = 6) -> list[dict[str, Any]]:
     """What LabVIEW's reader returns, one call per data set, until it reports EOF."""
     vi, conv = lv.vi(READ), lv.vi(FROM_DDT)

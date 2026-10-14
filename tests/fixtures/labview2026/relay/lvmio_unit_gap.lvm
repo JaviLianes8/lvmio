@@ -1,0 +1,28 @@
+LabVIEW Measurement	
+Writer_Version	2
+Reader_Version	2
+Separator	Tab
+Decimal_Separator	,
+Multi_Headings	Yes
+X_Columns	One
+Time_Pref	Relative
+Operator	Havie
+Date	1904/01/01
+Time	01:00:00,
+***End_of_Header***	
+	
+Notes	X values guaranteed valid only for C0			
+Channels	3			
+Samples	3	3	3	
+Date	1904/01/01	1904/01/01	1904/01/01	
+Time	01:00:00,	01:00:00,	01:00:00,	
+Y_Unit_Label	A	V		
+X_Dimension	Time	Time	Time	
+X0	0,0000000000000000E+0	5,0000000000000000E-1	0,0000000000000000E+0	
+Delta_X	1,000000	0,250000	1,000000	
+***End_of_Header***				
+X_Value	C0	Amp	V	Comment
+0,000000	1,000000	0,125000	5,000000
+1,000000	2,000000	4,000000E-5	6,000000
+2,000000	NaN	-7,000000	NaN
+

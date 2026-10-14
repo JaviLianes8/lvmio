@@ -45,6 +45,13 @@ def write_inputs(folder: Path) -> dict[str, str]:
             LvmFile([Segment([amps], comment="caf" + chr(0xE9) + " " + chr(0x20AC))]),
             {},
         ),
+        "lvmio_unit_gap.lvm": (
+            LvmFile(
+                [Segment([Channel("C0", [1.0, 2.0]), amps, Channel("V", [5.0, 6.0], unit="V")])]
+            ),
+            {},
+        ),
+        "lvmio_units.lvm": (LvmFile([Segment([volts, amps])]), {}),
         "lvmio_ulp.lvm": (
             LvmFile([Segment([Channel("U", ULP_CELLS)])]),
             {},

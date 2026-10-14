@@ -79,7 +79,9 @@ def parse_segment(cursor: Lines, decimal: str) -> Segment:
     cursor.advance()
     rows: list[list[str]] = []
     numbers: list[int] = []
-    while cursor.more() and not is_blank(cursor.current(), cursor.delim):
+    # A row whose cells are all empty is a row of missing samples, as LabVIEW reads it;
+    # only a line without a separator ends the segment.
+    while cursor.more() and (cursor.delim in cursor.current() or cursor.current().strip()):
         if first_token(cursor.current(), cursor.delim) in _STOP:
             break
         rows.append(cursor.current().split(cursor.delim))

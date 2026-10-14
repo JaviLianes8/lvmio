@@ -20,7 +20,8 @@ from typing import Any
 
 from _cases import COMMENTS, exponent_ties, near_ties, numbers, ties, x0_offsets
 from _hand_inputs import write_hand_inputs
-from _labview_com import LabVIEW, express, read, worker
+from _hand_layouts import write_layouts
+from _labview_com import LabVIEW, express, read, relay, worker
 from _lvmio_inputs import write_inputs
 
 NEWLINE = chr(10)
@@ -132,8 +133,15 @@ def main(argv: list[str]) -> int:
     for stale in (OUT / "read").glob("*.lvm"):
         stale.unlink()
     made.update(write_hand_inputs(OUT / "read"))
+    made.update(write_layouts(OUT / "read"))
     made.update(write_inputs(OUT / "read"))
 
+    (OUT / "relay").mkdir(exist_ok=True)
+    for stale in (OUT / "relay").glob("*.lvm"):
+        stale.unlink()
+    for name in ("lvmio_unit_gap", "lvmio_units", "blank_delta_x", "text_delta_x"):
+        relayed = target(f"relay/{name}.lvm", f"LabVIEW read read/{name}.lvm and wrote it")
+        relay(lv, OUT / "read" / f"{name}.lvm", relayed)
     readback: dict[str, Any] = {}
     sources = sorted((OUT / "read").glob("*.lvm"))
     for source in [*sorted(OUT.glob("*.lvm")), *sources]:

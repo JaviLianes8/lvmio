@@ -127,8 +127,9 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
 - The column line decides the layout: an `X_Value` column is never a channel, and a last
   `Comment` column is the comment column. Header cells are matched to channels by column
   position, so `No`, `One` and `Multi` files give the same channels.
-- An empty cell is a missing sample: NaN. Every channel of a segment has one value per data
-  row. The `Samples` and `Channels` counts in the segment header are not used: the column
+- An empty cell is a missing sample: NaN, and a row whose cells are all empty is a row of
+  NaN; only a line without a separator ends a segment. Every channel of a segment has one
+  value per data row. The `Samples` and `Channels` counts in the segment header are not used: the column
   line and the data rows decide (LabVIEW's reader follows `Samples` instead; see the
   differences below). A row with fewer cells than the last channel's column is refused, as
   LabVIEW refuses it.
@@ -164,6 +165,9 @@ such cells with an `LvmError` instead of returning part of them:
 | `NaN1`, `nan(ind)` | NaN | refuses |
 | a form feed before or after the number (`\x0c1`, `\x0c1\x0c`) | 1 | refuses |
 | a blank line between data rows | goes on reading rows | refuses: a blank line ends a segment |
+| a sign followed by spaces (`- 1`, `+ 2`, `- Inf`, `1e+ 5`) | -1, 2, -Inf, 100000 | refuses |
+| a blank or spaces-only line inside the file header or a segment header, or before the column line | skips it | refuses: a header must reach its end marker before a blank line |
+| a `Delta_X` cell that is blank or not a number | an increment of 0 (blank: lvmio uses 1) | refuses text; 1 for a blank cell |
 
 LabVIEW refuses these (error 100) and lvmio reads them:
 
@@ -173,6 +177,9 @@ LabVIEW refuses these (error 100) and lvmio reads them:
 | a cell holding only spaces or tabs | NaN, like an empty cell |
 | a segment header without a `Samples` line | every data row |
 | a `Channels` count above the number of channel columns | the channel columns |
+| a segment header without an `X0` or a `Delta_X` line | defaults of 0 and 1 |
+| a key with a space before or after it (`X0 `) | the key without the spaces |
+| a UTF-8 byte order mark at the start of the file | the file |
 | a column line without `X_Value` (as lvmio 0.2 wrote `X_Columns` `No` files) | the columns as channels |
 | a cell starting with a period in a file that declares a decimal comma (`+.5e+3`) | 500 |
 
@@ -186,6 +193,9 @@ Both read a value, but not the same one:
 | a `Samples` count above the data rows (5 for 2 rows) | the rows, then NaN and zeros up to the count | the rows |
 | a `Samples` count below the data rows (1 for 2 rows) | that many rows | every row |
 | a blank `Samples` count | no samples | every row |
+| a `Channels ` key with a trailing space | no channels | every channel |
+| a row of empty cells between data rows | NaN, then zeros for the rows after it | NaN for that row, then the rows as written |
+| units with an empty cell before others (`""`, `A`, `V`) | the units shifted left past the empty cell (`A`, `V`, `""`) | each unit on its own channel |
 
 The first row is what LabVIEW's writer produces when it is set to a period on a comma
 locale (`period_decimal.lvm`): LabVIEW's reader then truncates its own values, while lvmio
@@ -194,7 +204,11 @@ is LabVIEW's own decimal conversion: `read/lvmio_ulp.lvm` holds six such cells, 
 `0.011227` comes back from LabVIEW as 0.011227000000000001; no cell written with 17
 digits was seen to differ. LabVIEW's own writer always writes a `Samples` count equal to
 the rows of each channel, so the `Samples` rows only matter for files from other writers
-(`read/samples_*.lvm`).
+(`read/samples_*.lvm`). The increments and units LabVIEW's reader takes are seen by having
+it write back what it read (`relay/*.lvm`): a blank or text `Delta_X` comes back as
+`0,000000`, and units after an empty unit cell move one channel to the left. LabVIEW's own
+writer writes a unit cell for every channel once any channel has a unit, so its files are
+not affected, and it may write a `Notes` line before `Channels`, which lvmio reads past.
 
 LabVIEW's reader, driven through its ActiveX server, returned the first data set of a file on
 every call, so only first data sets were compared with it; later segments are compared with

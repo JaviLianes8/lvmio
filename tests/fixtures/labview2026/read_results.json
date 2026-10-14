@@ -10668,6 +10668,74 @@
    "comment": ""
   }
  ],
+ "read/blank_before_column_line.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     3.0,
+     4.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/blank_delta_x.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     3.0,
+     4.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/blank_in_file_header.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     3.0,
+     4.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/blank_in_segment_header.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     3.0,
+     4.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "read/blank_line_in_rows.lvm": [
   {
    "error": 0,
@@ -10678,6 +10746,22 @@
      "NaN"
     ]
    ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/byte_order_mark.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
+   "comment": ""
+  }
+ ],
+ "read/channels_key_with_space.lvm": [
+  {
+   "error": 0,
+   "channels": [],
    "eof": true,
    "comment": ""
   }
@@ -10748,6 +10832,47 @@
    ],
    "eof": true,
    "comment": ""
+  }
+ ],
+ "read/empty_last_row.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     "NaN"
+    ],
+    [
+     3.0,
+     4.0,
+     "NaN"
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/empty_middle_row.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     "NaN",
+     0.0
+    ],
+    [
+     3.0,
+     "NaN",
+     0.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
   }
  ],
  "read/lvmio_comma.lvm": [
@@ -10949,6 +11074,53 @@
    "comment": ""
   }
  ],
+ "read/lvmio_unit_gap.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     "NaN"
+    ],
+    [
+     0.125,
+     4e-05,
+     -7.0
+    ],
+    [
+     5.0,
+     6.0,
+     "NaN"
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/lvmio_units.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.5,
+     -2.25,
+     1e-09,
+     1e+300,
+     "NaN"
+    ],
+    [
+     0.125,
+     4e-05,
+     -7.0,
+     "NaN",
+     "NaN"
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "read/lvmio_utf8_comment.lvm": [
   {
    "error": 0,
@@ -10961,6 +11133,22 @@
    ],
    "eof": true,
    "comment": "caf\u00c3\u00a9 \u00e2\u201a\u00ac"
+  }
+ ],
+ "read/no_delta_x_line.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
+   "comment": ""
+  }
+ ],
+ "read/no_x0_line.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
+   "comment": ""
   }
  ],
  "read/no_x_empty_cells.lvm": [
@@ -11061,6 +11249,23 @@
    "comment": ""
   }
  ],
+ "read/spaces_line_in_file_header.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     3.0,
+     4.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "read/tab_one_x.lvm": [
   {
    "error": 0,
@@ -11074,6 +11279,23 @@
      -2.0,
      0.004,
      1000.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/text_delta_x.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     3.0,
+     4.0
     ]
    ],
    "eof": true,
@@ -11562,6 +11784,58 @@
    "comment": ""
   }
  ],
+ "read/token_39.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     -1.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/token_40.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/token_41.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     "-Inf"
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/token_42.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     100000.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "read/two_segments.lvm": [
   {
    "error": 0,
@@ -11580,6 +11854,14 @@
   },
   {
    "repeats_first": true
+  }
+ ],
+ "read/x0_key_with_space.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
+   "comment": ""
   }
  ]
 }

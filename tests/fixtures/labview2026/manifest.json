@@ -4,17 +4,17 @@
  "files": {
   "appended_runs.lvm": {
    "size": 1088,
-   "sha256": "2e18abbc9b4d80388111f150e4c8190ebf7bd6a803a8d4a18890f1c7067806f1",
+   "sha256": "ee331023718bce5d94531c2389b54c9bc863a2e930aa68453f7b52e137e7a96f",
    "how": "express worker VI, a second session appending to the first file"
   },
   "comment_cp1252.lvm": {
    "size": 624,
-   "sha256": "32a298f932c08224e2bcfd4e00e0eab24db3baf4a9c079366112ddcbdd2f3123",
+   "sha256": "0924db6074aeac17bae23703b968e0afc214b5b134e564a737527fdd0ed9e49b",
    "how": "express worker VI, a comment outside ASCII"
   },
   "comments.lvm": {
    "size": 2932,
-   "sha256": "e9757963f1c465445bf5b1124c6b727456821325c8197ab2c3584a24050d016d",
+   "sha256": "0c7971356ab045401763905f953dc4e71e4619eb478053fcd5d923946cc61062",
    "how": "express worker VI, one data set per comment"
   },
   "comments_input.json": {
@@ -24,22 +24,22 @@
   },
   "delta_x_1e-7.lvm": {
    "size": 60440,
-   "sha256": "d3b22374cc7b726abb50a3623a49c6cd0ba8fc77d8fd02cd99bce12807f76d71",
+   "sha256": "fe7fddc50cc287f75361fbb4e2ae940e3de6e10b8220e06b3b601e2f0fe61f06",
    "how": "express worker VI, one channel with an X increment of 1e-07"
   },
   "delta_x_2048hz.lvm": {
    "size": 57440,
-   "sha256": "2cf4dcf8d7281c47d852b56742617b38c43c423e92af44e11f9980684b30c138",
+   "sha256": "24762c2f2e7de803b5696302d54c771839ce90fa08813eacb9a7eda663156cce",
    "how": "express worker VI, one channel with an X increment of 0.00048828125"
   },
   "delta_x_quarter.lvm": {
    "size": 63000,
-   "sha256": "3ad9b2186303cc7213032cbd3a6c2062576a8cbd1582c56bf89a5e200d06331e",
+   "sha256": "f61a6de8b7580aee070cef1f5945057c751a09d1264be9ad620e86f91dc88bba",
    "how": "express worker VI, one channel with an X increment of 0.25"
   },
   "exponent_ties.lvm": {
    "size": 3203,
-   "sha256": "9ccda392e2abdecd4bb48d1d11cf08b9709c677467c878bddab69b8317e32df9",
+   "sha256": "c088af776926ae4f9770c21de927a5c10a077c87c011fe4572ef0161ebecc3c7",
    "how": "express worker VI, exponent ties"
   },
   "exponent_ties_input.json": {
@@ -49,12 +49,12 @@
   },
   "express_default.lvm": {
    "size": 588,
-   "sha256": "71f6035b9ededa76acd32b74c4147083a24259366b075c08015377fbc1e410f2",
+   "sha256": "9ee8bf9aecfd1abd100518977e9a145b72bc03d04ee6e553b4d9df07fecc9faf",
    "how": "Write To Measurement File express VI instance, default configuration"
   },
   "near_ties.lvm": {
-   "size": 7251,
-   "sha256": "b2802791643a46ae1bf38d3b301f43ab9a66f95d183ef4a50ee87f70a0f2b3d6",
+   "size": 7236,
+   "sha256": "39722affde82e6717426429a7094e0e47724054dd6ea75058af232877e03b174",
    "how": "express worker VI, near ties"
   },
   "near_ties_input.json": {
@@ -63,8 +63,8 @@
    "how": "the channels given to LabVIEW for near_ties.lvm"
   },
   "numbers.lvm": {
-   "size": 7415,
-   "sha256": "e91ec22020f91ee5962c6eb5c6d4901fb538881833cbd106e06118514c0b4a7f",
+   "size": 7425,
+   "sha256": "1515d889e99fc2ee1e2268e5cff5c5a315b2873a506283fd33f69ce6e7b3cd27",
    "how": "express worker VI, seeded values over the double range"
   },
   "numbers_input.json": {
@@ -74,13 +74,43 @@
   },
   "period_decimal.lvm": {
    "size": 613,
-   "sha256": "9262956952d39d269473c85ad703ff201bd282537ef39c9c418b3843363a67f8",
+   "sha256": "749082b305a1f1c5127f9ab08ffa01b08cfc6cf62e7fdf9093c49a6177d81469",
    "how": "express worker VI, period chosen as decimal separator on a comma locale"
+  },
+  "read/blank_before_column_line.lvm": {
+   "size": 420,
+   "sha256": "b4fbfd634d764331496cebf7be66da39736f1a12bcc63eaa44b4073c7a050e57",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
+  },
+  "read/blank_delta_x.lvm": {
+   "size": 416,
+   "sha256": "a6beb316aab6a37631389fbfb158f6486e44ce89b03f4084fcdabf627aa7b582",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
+  },
+  "read/blank_in_file_header.lvm": {
+   "size": 420,
+   "sha256": "95b8b380fc06630f23818541a7bb2d295301da81fe9c4de1ee5590c7ffd4281e",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
+  },
+  "read/blank_in_segment_header.lvm": {
+   "size": 420,
+   "sha256": "6266f44bfe674dad4ff292cd8dabeeb6291afb6437c49bdad83eb687464e3ecf",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
   },
   "read/blank_line_in_rows.lvm": {
    "size": 380,
    "sha256": "755b9bb159e60b9f29eac8e2d3e7eccf9ba0b08bcf13804eb7eee76937b619d8",
    "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/byte_order_mark.lvm": {
+   "size": 421,
+   "sha256": "e2751675a0f33642c1c3f155d3ac6f25d05c0701cbcd49ba8d1c6fdf5bcfedc7",
+   "how": "hand-written input for LabVIEW's reader, UTF-8 BOM first"
+  },
+  "read/channels_key_with_space.lvm": {
+   "size": 419,
+   "sha256": "16c9d4090e1e17b32d04a4a023ba5b89b6276998f4a9180b4241a7665400d961",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
   },
   "read/channels_more_than_columns.lvm": {
    "size": 378,
@@ -106,6 +136,16 @@
    "size": 443,
    "sha256": "85e34acf61a24de2e149dd7ea570b2e7d061e3c0b1cb7edc6cd669ec3bbd6db8",
    "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/empty_last_row.lvm": {
+   "size": 419,
+   "sha256": "5da597fd9cf501fc1df9d0024f11675ceb94c65cb49eda19ae18291b91c8efde",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
+  },
+  "read/empty_middle_row.lvm": {
+   "size": 419,
+   "sha256": "e3e8b0923ac5ef1ca23c76dc09fb306418699cdcf7e7a00a7de81bcb1053b89d",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
   },
   "read/lvmio_comma.lvm": {
    "size": 557,
@@ -157,10 +197,30 @@
    "sha256": "3ab10799d5e8dc9fa7fde67015a7d2316de1a5291d8fde694af677f87d6247ab",
    "how": "written by lvmio (this checkout) for LabVIEW's reader"
   },
+  "read/lvmio_unit_gap.lvm": {
+   "size": 557,
+   "sha256": "f49ad0e0bb5e237172b5ebc2981615eb7302acffbee71cae1ca9538e802e0145",
+   "how": "written by lvmio (this checkout) for LabVIEW's reader"
+  },
+  "read/lvmio_units.lvm": {
+   "size": 555,
+   "sha256": "1749ec5ec42834906c71a3fbee901a2cdb6cd60ae81a2d41187c05ee0e509470",
+   "how": "written by lvmio (this checkout) for LabVIEW's reader"
+  },
   "read/lvmio_utf8_comment.lvm": {
    "size": 445,
    "sha256": "7e65a9cc654ab7510a408418ae55b4f6aa636c1d9a42be14be039f37b4c51457",
    "how": "written by lvmio (this checkout) for LabVIEW's reader"
+  },
+  "read/no_delta_x_line.lvm": {
+   "size": 405,
+   "sha256": "8a9631cf1e7ff331b4bf493a2cde0e63b66fb95c9bad961f0dc3878fe470f95e",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
+  },
+  "read/no_x0_line.lvm": {
+   "size": 410,
+   "sha256": "76657af1470bb3e00a66e4db937e232568f99a12d35852cc79da051df4ee37d1",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
   },
   "read/no_x_empty_cells.lvm": {
    "size": 460,
@@ -202,10 +262,20 @@
    "sha256": "e59ae40e98446069a1d3d19713820270fcf57dac1e14fc80a789794b4db8a182",
    "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
+  "read/spaces_line_in_file_header.lvm": {
+   "size": 423,
+   "sha256": "e094fc4e2ac5b3c55043741ec390b44da2eeb95e667dbe6ac7203ae26c63d196",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
+  },
   "read/tab_one_x.lvm": {
    "size": 462,
    "sha256": "eaeb167e900d7d254255969234075bf491b6c6a6968dcd5413698ccc796ca8ee",
    "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/text_delta_x.lvm": {
+   "size": 422,
+   "sha256": "256c2bce30776e22903a4d9ce5bf41769017786e3b1175acfafa81cb0ca54e2d",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
   },
   "read/token_00.lvm": {
    "size": 378,
@@ -402,29 +472,74 @@
    "sha256": "e9ad516300c20bb4222438157ab71bf0ec3f02744c52c9baeb1a34531a188bc5",
    "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
+  "read/token_39.lvm": {
+   "size": 378,
+   "sha256": "31a430089ab4b42a36128b8e86d4c1a97c83c7dc66a22761c55bdcd32980a6ff",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_40.lvm": {
+   "size": 378,
+   "sha256": "c45baf96b30f153ac60953c2a8f83d6c9d45d7144753ffac01a8037810d26ca1",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_41.lvm": {
+   "size": 380,
+   "sha256": "3804fb4e1e8e27d8d34d7506afc0c7a00fe1403eaf6688f203cfbf4fc7053801",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_42.lvm": {
+   "size": 380,
+   "sha256": "7a19fbf1de551135946f1afb9eb57a10b2332d9016412e60712f2235cb165000",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
   "read/two_segments.lvm": {
    "size": 603,
    "sha256": "9d3b3dd17d701f3621d46c27f86b5705142b44d62b6081bdcfc3732bdcf82d0a",
    "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
+  "read/x0_key_with_space.lvm": {
+   "size": 419,
+   "sha256": "045a6cb51f70479ca3016e8869176e45b5782232a88de3978b253d4c443871ae",
+   "how": "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
+  },
   "read_results.json": {
-   "size": 141173,
-   "sha256": "13f361a04ffa3d082f2a4018c3233727836d4e3403c916608fc338413915081f",
+   "size": 144608,
+   "sha256": "7e6b724252405984e941576c7cb855eb0d4fb2804a8805e2221da3205aa74ebe",
    "how": "what LabVIEW's Read From Measurement File returns for each .lvm here"
+  },
+  "relay/blank_delta_x.lvm": {
+   "size": 511,
+   "sha256": "633ceef4178f026215dbc0bf728d76d3fd9b8aaa8af9acd675d7eb6b54f18b35",
+   "how": "LabVIEW read read/blank_delta_x.lvm and wrote it"
+  },
+  "relay/lvmio_unit_gap.lvm": {
+   "size": 694,
+   "sha256": "240aec8c6d7ce43a858a19483c8bd6ffd18efb5a9fbd0506734f93be95d9aa4e",
+   "how": "LabVIEW read read/lvmio_unit_gap.lvm and wrote it"
+  },
+  "relay/lvmio_units.lvm": {
+   "size": 617,
+   "sha256": "750900e928e904ba392884a3a021eb0201178fec0b3713c98295e8c57631cee2",
+   "how": "LabVIEW read read/lvmio_units.lvm and wrote it"
+  },
+  "relay/text_delta_x.lvm": {
+   "size": 511,
+   "sha256": "633ceef4178f026215dbc0bf728d76d3fd9b8aaa8af9acd675d7eb6b54f18b35",
+   "how": "LabVIEW read read/text_delta_x.lvm and wrote it"
   },
   "segments.lvm": {
    "size": 1302,
-   "sha256": "ec0022b294be66099e1ce4ca42438fa094e9569caf4ceb86cd952eac157c7492",
+   "sha256": "7f96656537a9e4175b7f5dd72f83ea63f29b5fb22b8458cd77d52680954b9c4c",
    "how": "express worker VI, three appends in one session"
   },
   "specials.lvm": {
    "size": 599,
-   "sha256": "f9cafdbda1d201dab50934ed901b2689c88a01c50e6f2e4f2c6adc61beea2c6b",
+   "sha256": "239e92ae7eb1b0c0d03fc5ec5f349b8796cacc0de38ba5b5b206366dcbf40f2a",
    "how": "express worker VI, NaN, infinities and signed zero"
   },
   "ties.lvm": {
    "size": 6602,
-   "sha256": "ca9308f4ef85ca400cd1dd9de42f048c0955b47e5fd611d7133c57979d0a5dbc",
+   "sha256": "c8d529baefb072e604b1ed0eb42b58ce6898bc8073c4a09c3a05bedbdecd05ca",
    "how": "express worker VI, exact rounding ties and notation boundaries"
   },
   "ties_input.json": {
@@ -434,22 +549,22 @@
   },
   "x0_offsets.lvm": {
    "size": 14384,
-   "sha256": "5addf885148d1079c9a3461fc303b77fb106f8335decb3339bd1f24b6f0175da",
+   "sha256": "8724d27cf0a3142518f6588673e88e0aeef4d1d9d6ff4ef735a1e71c44dea9f2",
    "how": "express worker VI, 60 waveforms whose start sample sets a non-zero X0"
   },
   "x_columns_multi.lvm": {
-   "size": 658,
-   "sha256": "745e525fa718c7689ee98c780ebf31e43c6ab7e0fce348f01da3dd52fd4853f3",
+   "size": 652,
+   "sha256": "a2bcca41a187399e65463229f8a8f4dc39a06e618cffc7e4ea96c9fdc3eab318",
    "how": "express worker VI, X columns code 2"
   },
   "x_columns_no.lvm": {
    "size": 588,
-   "sha256": "70ff95f2df16b8ae248b985dd18139e5bb590a31affe62aef639ee3548a4a1c8",
+   "sha256": "767cd6472fab49e30ec5bb5dd136349c9c8a9a98a2c006c6ee2d70ca439db89b",
    "how": "express worker VI, X columns code 0"
   },
   "x_columns_one.lvm": {
    "size": 613,
-   "sha256": "8d9e07704a63e8dba6f186bc7eedab2d3b90809176abb75bd03648c0739450d8",
+   "sha256": "741d6a27144042946012f304298ed46f3e990744eb3c98c5aa70771ea44c369d",
    "how": "express worker VI, X columns code 1"
   }
  }

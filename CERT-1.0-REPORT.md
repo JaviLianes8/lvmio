@@ -159,3 +159,29 @@ writer refuses and LabVIEW never produced).
 - PyPI 0.2.1 installed, then upgraded in place to the 1.0.0 wheel: `1e-9` written as
   `0.000000` then `1.000000E-9`, infinity `inf` then `Inf`, `format_lvm` absent then present,
   console script reports `lvmio 1.0.0`.
+
+## Independent QA lenses (item 19), rounds so far
+
+Every lens was an independent reviewer that read the certification rules and CERT-1.0.md
+first, worked in its own clone, ran things rather than reading, and reported back
+privately. Findings were fixed, pinned by tests where they concern behaviour, and checked
+again by a new reviewer with the same lens.
+
+| Lens | Round | Head | Verdict | Findings and outcome |
+| --- | --- | --- | --- | --- |
+| a. API and docs | 1 | dcceacf | FAIL | NumPy arrays and generators refused by the writer, redirected CLI output on non-cp1252 names, exit 2 undocumented, header line numbers, private module names, docstring and CHANGELOG gaps; fixed in 6b464e7 |
+| a | 2 | a6942f0 | FAIL | generator data consumed by a first write, description blanks lost, CHANGELOG omissions, hints narrower than the docs, two inaccurate sentences; fixed in 1dac43c |
+| b. Correctness and ground truth | 1 | 27c680c | FAIL | rounding of exact ties, comment escapes, undocumented reader differences; fixed in 21bb068 and 27c680c |
+| b | 2 | ac8c4dc | FAIL | exponent ties at decimal exponents 11, 16, 17, near ties, the 1e-4 rewrite boundary, UTF-8 in LabVIEW; fixed in 554d3cc |
+| b | 3 | 554d3cc | FAIL | Delta_X rounding and X cells, Delta_X floor unpinned, fixed-notation near ties; fixed in e99fb62 |
+| b | 4 | e99fb62 | FAIL | LabVIEW's reader one ulp off on some cells, period cell in a comma file, wording; fixed in 5e65e0d |
+| b | 5 | 5e65e0d | FAIL | X0 spelling, Samples and Channels counts, form feeds, a t0 sentence; fixed in bf121fe |
+| b | 6 | bf121fe | FAIL | blank lines in headers, rows of empty cells, segment-header keys, spaces after a sign, BOM, unit shift; fixed in d11a62e and 3e58e77 |
+| b | 7 | 3e58e77 | FAIL | one-header mode, unit V for files without units, per-channel dates, Description and Notes; fixed in 9968457 |
+| b | 8 | 9968457 | FAIL | later-write comments and X origins in one-header files, Date/Time lines, X dimensions, X0 as a timestamp; fixed in 1dac43c |
+| c. Adversarial and robustness | 1 | 6b464e7 | FAIL | quadratic short rows, whitespace asymmetry, hostile decimal separator, Decimal overflow, sets as samples, lying subclasses; fixed in 21bb068 and 27c680c |
+| c | 2 | e10090d | FAIL | headers without an end marker, closed stdout, dropped segment dates, long encoding names; fixed in 07fd565 |
+| c | 3 | 07fd565 | FAIL | file header blank-line rule, encoding name echo, `undefined` codec; fixed in a6942f0 |
+| c | 4 | 3e58e77 | PASS | 60k mutated texts, 20k mutated byte files, 60k writer and 60k reader grammar files, 120k comment round trips, 1,200 CLI runs, scaling ratios 2.4 to 4.6; optional items fixed in 6d97d31 |
+| d. Packaging and real e2e | 1 | 27c680c | PASS | six interpreters green from the wheel, upgrade from 0.2.1 matches the CHANGELOG; a broken console script was not caught and the dev extra was public; fixed in ac8c4dc |
+| e. Contract strength (blind mutations) | 1 | 27c680c | FAIL, then PASS with its contracts | 146 mutations, 114 killed, 3 equivalent, 29 needed contracts (tests/test_contract_more.py, e10090d), each confirmed by the reviewer to kill its mutant |

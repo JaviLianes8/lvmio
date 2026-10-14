@@ -86,26 +86,29 @@ the byte `0xE9` for `é`.
 
 `format_lvm` returns the text; `write_lvm` encodes it (UTF-8 unless `encoding` is given)
 and writes it. Both lay a file out as above, so a file read with lvmio and written back is
-the same file. That holds for every capture except these: `period_decimal.lvm`, where
-LabVIEW mixed periods into a file that declares a comma (lvmio writes the declared separator
-throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repeat;
-`ties.lvm`, where LabVIEW wrote 9999999.9999995 as `10000000,000000`, which reads back as
-1e7 and is then written `1,000000E+7`; and `near_ties.lvm`, where 9.99999996e-5 is written
-`1,000000E-4`, reads back as 1e-4 and is then written `0,000100`; `delta_x_2048hz.lvm`,
-whose increment does not fit the `Delta_X` format, so lvmio rewrites its X column from
-`Delta_X`; and `delta_x_1e-7.lvm`, whose increment fits but where 14 X cells are near ties
-(see X values above); `x0_offsets.lvm`, where two `X0` values are spelled one unit
-apart and X cells are rebuilt from a rounded `Delta_X`; and the "one header only" files,
-which lvmio reads as one segment with every row (rewritten with the full `Samples` count)
-or refuses. The samples are unchanged in all of
-them. The same holds for
-lvmio's own output of such values: rounding to seven digits can move a value across a
-notation boundary, so a second write can spell it differently.
+the same file. That holds for every capture except these, where the samples read the same
+but the text written back differs:
+
+- `period_decimal.lvm`: LabVIEW mixed periods into a file that declares a comma; lvmio
+  writes the declared separator throughout.
+- `appended_runs.lvm`: lvmio does not repeat the repeated file header.
+- `ties.lvm` and `near_ties.lvm`: 9999999.9999995 is written `10000000,000000` and reads
+  back as 1e7, then written `1,000000E+7`; 9.99999996e-5 is written `1,000000E-4`, then
+  `0,000100`. Rounding to seven digits can move a value across a notation boundary, in
+  lvmio's own output too.
+- `delta_x_2048hz.lvm`, `delta_x_1e-7.lvm` and `x0_offsets.lvm`: X cells are rebuilt from
+  `Delta_X` (see X values above), and two `X0` values are spelled one unit apart.
+- `one_header_same.lvm`: written back as two segments with their own headers (see Reading).
+
+`one_header_fewer.lvm` and `one_header_more.lvm` are refused (see the differences).
 Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment
 is escaped too (`\2C`), so the comment stays one cell.
 
 Samples may be given as any iterable of real numbers: a list, a tuple, a `range`, a NumPy
-array or a generator. They are stored as Python floats.
+array or a generator. `Channel` turns its `data` into a list when it is created (its type is
+`list[float]`), and the writer stores every sample as a Python float. `Date` and `Time` are
+written as given; LabVIEW expects its own form (`2026/10/14`, `10:00:00,5` with the file's
+decimal separator) and reads other text differently.
 
 `Multi_Headings` is written as `Yes` when `LvmFile.multi_headings` is true or the file has
 more than one segment. `precision` sets the decimals of the samples, of the X values and of
@@ -123,12 +126,14 @@ The writer refuses, before writing anything:
 | --- | --- |
 | `TypeError` | data that is not an `LvmFile`, `Segment`, list of `Channel` or mapping of `str` to an iterable of numbers; a sample, `x0` or `delta_x` that is not a real number (`int`, `float`, `Fraction`, `Decimal` and NumPy numbers are; `bool`, `str` and `complex` are not); a text field that is not `str`; `precision` that is not an `int` |
 | `TypeError` (continued) | unordered samples (a `set` or a mapping) and `memoryview` samples, refused like `bytes` |
-| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an empty `x_dimension`; a comment on a segment with no samples (it has no row to go in), or a segment date or time on a segment with no channels (there is no cell for it); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
+| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an `x0` that is not finite; a `description` starting or ending with whitespace; a comment on a segment with no samples (it has no row to go in), or a segment date or time on a segment with no channels (there is no cell for it); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
 | `LookupError` | `write_lvm` with an unknown encoding name |
 
 Text fields are copied to plain `str` and `precision` to a plain `int` before they are
 checked, so a subclass cannot change what is checked or written. Exceptions raised by the
-caller's own objects (a `__float__` or `__iter__` that fails) pass through unchanged.
+caller's own objects pass through unchanged (a failing `__iter__`, or a `__float__` raising
+anything but `ValueError` or `ArithmeticError`, which are reported as "cannot be held in a
+double").
 
 ## Reading
 
@@ -150,14 +155,18 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   exponent, or `NaN`, `Inf` or `Infinity` in any case. Spaces and tabs around it are
   ignored. In a file declaring a decimal comma both the comma and the period are read as the
   decimal point.
-- `X0` and `Delta_X` default to 0 and 1, `X_Dimension` to `Time`, a unit to empty.
+- `X0` and `Delta_X` default to 0 and 1 when their line is missing, `X_Dimension` to
+  `Time` when its line is missing (an empty cell stays empty), a unit to empty.
+- Rows after the first that carry a comment, or whose X value goes back, start a new segment
+  with the same channels, the comment of that row and an `X0` from that row's X cell: that
+  is how LabVIEW's "one header only" mode appends each later write, and how files with a
+  comment on every write read without losing a comment or an X origin.
 - `Channel.date` and `Channel.time` are each channel's own `Date` and `Time` cells;
   `Segment.date` and `Segment.time` are the first channel's. `Segment.notes` is the
   `Notes` line and `LvmFile.description` the `Description` line, decoded like a comment.
   The writer writes them back where LabVIEW puts them.
 - A non-empty cell after the last column of the column line (after the Comment column when
-  there is one) is refused, so no data is dropped silently; comments on rows after the first
-  are not kept.
+  there is one) is refused, so no data is dropped silently.
 - A repeated file header between segments is skipped.
 - `Segment.comment` is the comment cell of the first data row, with `\\` and `\XX`
   decoded; any other backslash is kept as written.
@@ -201,7 +210,7 @@ LabVIEW refuses these (error 100) and lvmio reads them:
 | a cell holding only spaces or tabs | NaN, like an empty cell |
 | a segment header without a `Samples` line | every data row |
 | a `Channels` count above the number of channel columns | the channel columns |
-| a `Samples` count above the data rows with several channels in `X_Columns` `No` or `Multi` | the rows |
+| a segment header without a `Date` or a `Time` line | every data row |
 | a segment header without an `X0` or a `Delta_X` line | defaults of 0 and 1 |
 | a key with a space before or after it (`X0 `) | the key without the spaces |
 | a UTF-8 byte order mark at the start of the file | the file |
@@ -215,8 +224,10 @@ Both read a value, but not the same one:
 | `2.500000` in a file that declares a decimal comma | 2 | 2.5 |
 | a comment holding `\zz` or ending with `\4` | NUL in place of the code, and drops the rest | the text as written |
 | some cells, about one in a few thousand at precisions below 17 (`0.011227`, `-8.633024E-6`) | the double one unit in the last place away | the correctly rounded double, as Python's `float` |
-| a `Samples` count above the data rows (5 for 2 rows), with one channel or with `X_Columns` `One` | the rows, then NaN and zeros up to the count | the rows |
-| a "one header only" file with later writes appended (`one_header_same.lvm`) | the rows of the first write (the `Samples` count) | every row |
+| a `Samples` count above the data rows (5 for 2 rows), in any layout | the rows, then NaN and zeros up to the count | the rows |
+| a "one header only" file with later writes appended (`one_header_same.lvm`) | the rows of the first write (the `Samples` count) | every write, each as a segment |
+| an `X_Dimension` other than `Time` or `Frequency` (`Other`) | an empty dimension (`relay/lvmio_dimensions.lvm`) | the text as written |
+| an `X0` that is not a multiple of 2^-64 s, or at or beyond 2^63 s | the nearest LabVIEW timestamp (1.23e-9 as 1.2299999999640723e-9, 1e-20 as 0, 1e19 wraps negative; `relay/lvmio_x0.lvm`) | the number as written |
 | a file without a `Y_Unit_Label` line | the unit `V` for every channel | an empty unit |
 | a `Samples` count below the data rows (1 for 2 rows) | that many rows | every row |
 | a blank `Samples` count | no samples | every row |
@@ -300,7 +311,16 @@ the objects are not hashable. They compare by value.
 - A file or segment header without `***End_of_Header***` raises `LvmError`; 0.2 returned
   fewer segments.
 - `LvmFile.multi_headings` is now a field read from the file (it was computed from the
-  number of segments). `Segment` has a new `comment` field.
+  number of segments). New fields: `Segment.comment`, `Segment.notes`,
+  `LvmFile.description`, `Channel.date` and `Channel.time`. `Channel` stores its `data` as
+  a list.
+- `precision` must be an `int` from 0 to 17 (0.2 took any number of decimals); X values
+  and `Delta_X` keep at least 6 decimals whatever the precision.
+- Mapping keys must be `str` (0.2 turned `1` into the channel name `'1'`).
+- X cells must be empty or numbers (0.2 ignored them); a blank `X0` or `Delta_X` cell
+  means the default (0.2 raised `LvmError`). Rows with a comment after the first row, or a
+  falling X value, start a new segment.
+- `--segment` takes only an optional minus sign and digits (0.2 took `+0`).
 - New: `format_lvm`, the `x_columns` and `encoding` arguments, `encoding` for `read_lvm`,
   `python -m lvmio` and `--encoding` on the command line.
 - The writer checks its input (see the table above) instead of writing a file that reads

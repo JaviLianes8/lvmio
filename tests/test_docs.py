@@ -25,6 +25,7 @@ MODULES = [
     "lvmio._read",
     "lvmio._render",
     "lvmio._segment",
+    "lvmio._split",
     "lvmio._write",
 ]
 DOCS = [p for p in (ROOT / "README.md", ROOT / "GUIDE.md") if p.exists()]

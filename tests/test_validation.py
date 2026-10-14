@@ -42,7 +42,7 @@ def _file(**changes: Any) -> LvmFile:
         ({"a\nb": [1.0]}, ValueError),
         ({" a": [1.0]}, ValueError),
         (LvmFile([Segment([Channel("a", [1.0], unit="V\r")])]), ValueError),
-        (LvmFile([Segment([Channel("a", [1.0], x_dimension="")])]), ValueError),
+        (LvmFile([Segment([Channel("a", [1.0], x0=float("nan"))])]), ValueError),
         (LvmFile([Segment([], comment="two\nlines")]), ValueError),
         (_file(operator="a\tb"), ValueError),
         (_file(separator="Semicolon"), ValueError),
@@ -90,10 +90,10 @@ def test_numbers_of_other_real_types_are_accepted() -> None:
 
     from lvmio import parse_lvm
 
-    text = format_lvm({"a": [Fraction(1, 2), 3], "b": [Decimal("0.5"), 3]})  # type: ignore[list-item]
+    text = format_lvm({"a": [Fraction(1, 2), 3], "b": [Decimal("0.5"), 3]})
     assert [c.data for c in parse_lvm(text).segments[0]] == [[0.5, 3.0], [0.5, 3.0]]
     with pytest.raises(ValueError, match="cannot be held in a double"):
-        format_lvm({"a": [Decimal("sNaN")]})  # type: ignore[list-item]
+        format_lvm({"a": [Decimal("sNaN")]})
     with pytest.raises(ValueError, match="cannot be held in a double"):
         format_lvm({"a": [10**400]})
 

@@ -34,6 +34,7 @@ def _header_fields(lvm: LvmFile) -> dict[str, object]:
         "operator": lvm.operator,
         "date": lvm.date,
         "time": lvm.time,
+        "description": lvm.description,
         "segments": len(lvm),
     }
 

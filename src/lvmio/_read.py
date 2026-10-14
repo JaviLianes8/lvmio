@@ -103,7 +103,7 @@ def parse_lvm(text: str) -> LvmFile:
                     f"line {cursor.number()}: a data row after a blank line"
                     " (a blank line ends a segment)"
                 )
-            segments.append(parse_segment(cursor, decimal))
+            segments.extend(parse_segment(cursor, decimal))
     return LvmFile(
         segments=segments,
         writer_version=header.get("Writer_Version", "2"),

@@ -42,8 +42,12 @@ def test_numeric_data_matches_lvm_read(name: str) -> None:
     assert segment.names, "expected at least one channel"
     for channel in segment.channels:
         column = oracle_data[:, oracle_names.index(channel.name)].tolist()
-        assert len(channel.data) == len(column)
-        for mine, theirs in zip(channel.data, column, strict=True):
+        # Later data sets (rows with a comment) are further segments in lvmio.
+        mine_all = [
+            v for seg in ours.segments if seg.names == segment.names for v in seg[channel.name].data
+        ]
+        assert len(mine_all) == len(column)
+        for mine, theirs in zip(mine_all, column, strict=True):
             assert _same(float(mine), float(theirs))
 
 

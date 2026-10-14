@@ -151,7 +151,15 @@ def main(argv: list[str]) -> int:
     (OUT / "relay").mkdir(exist_ok=True)
     for stale in (OUT / "relay").glob("*.lvm"):
         stale.unlink()
-    names = ("lvmio_unit_gap", "lvmio_units", "blank_delta_x", "text_delta_x", "lvmio_dates")
+    names = (
+        "lvmio_unit_gap",
+        "lvmio_units",
+        "blank_delta_x",
+        "text_delta_x",
+        "lvmio_dates",
+        "lvmio_dimensions",
+        "lvmio_x0",
+    )
     for name in names:
         relayed = target(f"relay/{name}.lvm", f"LabVIEW read read/{name}.lvm and wrote it")
         relay(lv, OUT / "read" / f"{name}.lvm", relayed)

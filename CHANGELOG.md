@@ -57,12 +57,22 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 - Separator and `X_Columns` names are accepted in any case and written as LabVIEW spells
   them (`separator="tab"` writes `Tab`).
 - `read_lvm` and `write_lvm` take any path-like object.
+- `precision` must be an `int` from 0 to 17 (0.2 took any number of decimals and floats),
+  and X values and `Delta_X` keep at least 6 decimals whatever the precision.
+- Mapping keys must be `str` (0.2 turned other keys into names), and `x0` must be finite.
+- X cells must be empty or numbers (0.2 ignored them); a blank `X0` or `Delta_X` cell means
+  its default (0.2 raised `LvmError`); an empty `X_Dimension` cell stays empty.
+- Rows after the first that carry a comment, or whose X value goes back, start a new
+  segment, as LabVIEW's "one header only" mode appends later writes.
+- `Channel` stores its `data` as a list, whatever iterable it is given.
+- `--segment` takes an optional minus sign and digits only (0.2 accepted `+0`).
 - The `dev` extra is gone: development tools are listed in `requirements-dev.txt`.
 - `Channel`, `Segment`, `LvmFile` and `LvmError` report the module `lvmio`.
 - Error messages give the line number and quote at most 40 characters.
 - The command line reads standard input as bytes, catches every reading error with one line
   on standard error, and exits quietly when its output pipe closes. A malformed
-  `--segment` value is refused without echoing it. Output to a file or a
+  `--segment` value is refused, quoting at most 20 characters of it. `lvmio header` shows
+  the description. Output to a file or a
   pipe is UTF-8. JSON output writes infinities as `"Inf"` and `"-Inf"`, CSV as `Inf` and
   `-Inf`.
 

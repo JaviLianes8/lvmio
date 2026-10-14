@@ -6,6 +6,7 @@ import os
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import replace
 from operator import index as as_index
+from typing import SupportsFloat
 
 from ._check import as_file, canonical, check_file
 from ._model import Channel, LvmFile, Segment
@@ -15,7 +16,7 @@ from ._render import render
 
 
 def format_lvm(
-    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[float]],
+    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[SupportsFloat]],
     *,
     operator: str | None = None,
     date: str | None = None,
@@ -63,7 +64,7 @@ def format_lvm(
 
 def write_lvm(
     path: str | os.PathLike[str],
-    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[float]],
+    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[SupportsFloat]],
     *,
     operator: str | None = None,
     date: str | None = None,

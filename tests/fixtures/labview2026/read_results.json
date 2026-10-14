@@ -10839,7 +10839,7 @@
   {
    "error": 100,
    "channels": [],
-   "eof": true,
+   "eof": false,
    "comment": ""
   }
  ],
@@ -11030,6 +11030,31 @@
      -7.0,
      "NaN",
      "NaN"
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/lvmio_dimensions.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
     ]
    ],
    "eof": true,
@@ -11237,6 +11262,47 @@
    "comment": "caf\u00c3\u00a9 \u00e2\u201a\u00ac"
   }
  ],
+ "read/lvmio_x0.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
+    ],
+    [
+     1.0,
+     2.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/no_date_time_lines.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
+   "comment": ""
+  }
+ ],
  "read/no_delta_x_line.lvm": [
   {
    "error": 100,
@@ -11329,9 +11395,24 @@
  ],
  "read/samples_more_multi_two_channels.lvm": [
   {
-   "error": 100,
-   "channels": [],
-   "eof": false,
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     "NaN",
+     0.0,
+     0.0
+    ],
+    [
+     3.0,
+     4.0,
+     "NaN",
+     0.0,
+     0.0
+    ]
+   ],
+   "eof": true,
    "comment": ""
   }
  ],

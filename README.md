@@ -69,8 +69,9 @@ or `"Multi"`), `precision` (decimals per sample, 6 by default as in LabVIEW) and
   will read, write with `encoding="cp1252"`: LabVIEW reads files in its code page.
 
 Where LabVIEW reads part of a cell (`2.5V` as 2.5), lvmio refuses the cell; where both
-read a value they agree, apart from cases the guide lists (LabVIEW's reader rounding a
-few cells one unit in the last place off, and periods its own writer puts in a comma file).
+read a value they mostly agree, and the guide lists every case where they do not (for
+example LabVIEW's reader gives a file without units the unit `V` and rounds a few cells one
+unit in the last place off).
 The
 [guide](https://github.com/JaviLianes8/lvmio/blob/main/GUIDE.md) lists every difference.
 

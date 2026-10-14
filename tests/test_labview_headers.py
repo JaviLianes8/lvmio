@@ -18,14 +18,14 @@ def _raw(name: str) -> str:
     return (HERE / name).read_bytes().decode("cp1252")
 
 
-def test_one_header_mode_lvmio_reads_every_row_labview_the_samples_count() -> None:
+def test_one_header_mode_later_writes_become_segments_with_their_comment_and_x0() -> None:
     lvm = read_lvm(HERE / "one_header_same.lvm")
-    assert lvm.multi_headings is False and len(lvm) == 1
-    assert [c.data for c in lvm.segments[0]] == [
-        [1.0, 2.5, -3.25, 5.0, 6.0, 7.0],
-        [4.0, 5.0, 6.0, 8.0, 9.0, 10.0],
-    ]
-    assert lvm.segments[0].comment == "c1"
+    assert lvm.multi_headings is False and len(lvm) == 2
+    first, later = lvm.segments
+    assert [c.data for c in first] == [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
+    assert [c.data for c in later] == [[5.0, 6.0, 7.0], [8.0, 9.0, 10.0]]
+    assert (first.comment, later.comment) == ("c1", "c2")
+    assert later.channels[0].x0 == 0.0 and later.channels[0].time_axis() == [0.0, 1.0, 2.0]
     assert "Samples" + TAB + "3" + TAB + "3" + TAB in _raw("one_header_same.lvm")
     assert RESULTS["one_header_same.lvm"][0]["channels"] == [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
 
@@ -83,8 +83,11 @@ def test_labview_reads_a_file_without_units_as_volts() -> None:
     assert line.split(TAB)[1:3] == ["V", "V"]
 
 
-def test_samples_above_the_rows_with_one_channel_is_padded_in_every_layout() -> None:
+def test_samples_above_the_rows_is_padded_in_every_layout() -> None:
     for name in ("samples_more_than_rows_no_x", "samples_more_than_rows_multi"):
         assert RESULTS[f"read/{name}.lvm"][0]["channels"] == [[1.0, 2.0, "NaN", 0.0, 0.0]]
         assert read_lvm(HERE / "read" / f"{name}.lvm").segments[0].channels[0].data == [1.0, 2.0]
-    assert RESULTS["read/samples_more_multi_two_channels.lvm"][0]["error"] == 100
+    two = RESULTS["read/samples_more_multi_two_channels.lvm"][0]["channels"]
+    assert two == [[1.0, 2.0, "NaN", 0.0, 0.0], [3.0, 4.0, "NaN", 0.0, 0.0]]
+    assert RESULTS["read/no_date_time_lines.lvm"][0]["error"] == 100
+    assert read_lvm(HERE / "read" / "no_date_time_lines.lvm").segments[0].names == ["A", "B"]

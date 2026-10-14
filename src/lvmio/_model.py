@@ -28,6 +28,12 @@ class Channel:
     date: str = ""
     time: str = ""
 
+    def __post_init__(self) -> None:
+        # Keep the samples as a list, so a generator or an array is read once and compared
+        # element by element.
+        if not isinstance(self.data, list):
+            object.__setattr__(self, "data", list(self.data))
+
     def __len__(self) -> int:
         """The number of samples in the channel."""
         return len(self.data)
@@ -66,12 +72,20 @@ class Segment:
 
     @property
     def samples(self) -> list[int]:
-        """The sample count of each channel, in order."""
+        """The sample count of each channel, in order.
+
+        >>> Segment([Channel("V", [1.0, 2.0]), Channel("I", [3.0])]).samples
+        [2, 1]
+        """
         return [len(c.data) for c in self.channels]
 
     @property
     def names(self) -> list[str]:
-        """The channel names, in order."""
+        """The channel names, in order.
+
+        >>> Segment([Channel("V", [1.0]), Channel("I", [2.0])]).names
+        ['V', 'I']
+        """
         return [c.name for c in self.channels]
 
     def get(self, name: str) -> Channel | None:

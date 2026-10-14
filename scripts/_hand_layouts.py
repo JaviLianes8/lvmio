@@ -41,6 +41,9 @@ def layouts() -> dict[str, list[str]]:
         "empty_last_row.lvm": _edited(lambda ls: _three_rows(ls, -1), "No"),
         "empty_middle_row.lvm": _edited(lambda ls: _three_rows(ls, -2), "No"),
         "no_x0_line.lvm": _edited(lambda ls: ls.pop(X0)),
+        "no_date_time_lines.lvm": _edited(
+            lambda ls: ls.__delitem__(slice(CHANNELS + 2, CHANNELS + 4))
+        ),
         "no_delta_x_line.lvm": _edited(lambda ls: ls.pop(DELTA_X)),
         "blank_delta_x.lvm": _edited(lambda ls: ls.__setitem__(DELTA_X, "Delta_X" + TAB + TAB)),
         "text_delta_x.lvm": _edited(
@@ -59,6 +62,8 @@ def _multi_two_channels() -> list[str]:
     cells = [
         ["Channels", "2", "", "", ""],
         ["Samples", "5", "", "5", ""],
+        ["Date", "2026/10/14", "", "2026/10/14", ""],
+        ["Time", "10:00:00", "", "10:00:00", ""],
         ["X_Dimension", "Time", "", "Time", ""],
         ["X0", "0", "", "0", ""],
         ["Delta_X", "1", "", "1", ""],

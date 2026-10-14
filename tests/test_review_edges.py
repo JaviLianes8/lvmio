@@ -50,8 +50,8 @@ def test_only_a_period_or_a_comma_is_a_decimal_separator() -> None:
 def test_a_finite_decimal_too_large_for_a_double_is_refused() -> None:
     for value in (Decimal("1e400"), Decimal("-1e400")):
         with pytest.raises(ValueError, match="too large"):
-            format_lvm({"V": [value]})  # type: ignore[list-item]
-    assert "Inf" in format_lvm({"V": [Decimal("Infinity")]})  # type: ignore[list-item]
+            format_lvm({"V": [value]})
+    assert "Inf" in format_lvm({"V": [Decimal("Infinity")]})
 
 
 @pytest.mark.parametrize("values", [{3.0, 1.0}, {1.5: "x"}, frozenset({1.0})])

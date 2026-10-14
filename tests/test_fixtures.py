@@ -37,10 +37,12 @@ def test_comma_separated_file() -> None:
 
 def test_comments_on_some_rows_do_not_corrupt_channels() -> None:
     lvm = read_lvm(FIXTURES / "comments_on_some_rows.lvm")
-    channel = lvm.segments[0]["Load (Cell A)"]
-    assert len(channel) == 10
-    assert channel.data[2] == pytest.approx(0.894180)
-    assert not any(math.isnan(v) for v in channel.data)
+    # A comment on a later row starts the next data set, as LabVIEW writes one per write.
+    data = [v for segment in lvm for v in segment["Load (Cell A)"].data]
+    assert len(data) == 10
+    assert data[2] == pytest.approx(0.894180)
+    assert not any(math.isnan(v) for v in data)
+    assert all(segment.comment for segment in lvm.segments[1:])
 
 
 def test_with_empty_fields_yields_nan_channels() -> None:

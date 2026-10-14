@@ -74,7 +74,7 @@ def check_file(lvm: LvmFile) -> LvmFile:
         operator=text["operator"],
         date=text["date"],
         time=text["time"],
-        description=_exact(lvm.description, "description"),
+        description=_description(lvm.description),
     )
 
 
@@ -92,14 +92,15 @@ def _segment(seg: Segment, delim: str) -> Segment:
         if not name or name.lower() in _RESERVED:
             raise ValueError(f"channel name {shorten(name)} is reserved or empty")
         x_dimension = _field(channel.x_dimension, "x_dimension", delim)
-        if not x_dimension:
-            raise ValueError("x_dimension cannot be empty")
+        x0 = _number(channel.x0, "x0")
+        if not math.isfinite(x0):
+            raise ValueError(f"x0 must be finite, not {x0}")
         channels.append(
             Channel(
                 name=name,
                 data=_samples(channel.data, name),
                 unit=_field(channel.unit, "unit", delim),
-                x0=_number(channel.x0, "x0"),
+                x0=x0,
                 delta_x=_number(channel.delta_x, "delta_x"),
                 x_dimension=x_dimension,
                 date=_field(channel.date, "channel date", delim),
@@ -133,6 +134,14 @@ def _number(value: object, what: str) -> float:
     if math.isinf(result) and isinstance(value, Decimal) and value.is_finite():
         raise ValueError(f"{what} cannot be held in a double: too large")
     return result
+
+
+def _description(value: object) -> str:
+    """Any text, escaped when written; blanks at either end would be lost on reading."""
+    text = _exact(value, "description")
+    if text != text.strip():
+        raise ValueError(f"description cannot start or end with blanks: {shorten(text)}")
+    return text
 
 
 def _exact(value: object, name: str) -> str:

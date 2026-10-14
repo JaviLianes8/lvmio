@@ -86,7 +86,7 @@ def _load(path: str, encoding: str | None) -> LvmFile:
 
 
 def _index(text: str) -> int:
-    """A segment index; long or malformed text is refused without echoing it."""
+    """A segment index; malformed text is refused, quoting at most 20 characters of it."""
     if len(text) > 18 or not re.fullmatch(r"-?[0-9]+", text):
         raise argparse.ArgumentTypeError(f"not a segment number: {shorten(text, 20)}")
     return int(text)
@@ -95,7 +95,8 @@ def _index(text: str) -> int:
 def _utf8_when_redirected() -> None:
     """Redirected output is UTF-8, so every channel name can be written on any system."""
     stream = sys.stdout
-    if stream is not None and hasattr(stream, "reconfigure") and not stream.isatty():
+    encoding = str(getattr(stream, "encoding", "") or "").lower().replace("-", "")
+    if stream is not None and hasattr(stream, "reconfigure") and encoding != "utf8":
         stream.reconfigure(encoding="utf-8", errors="backslashreplace")
 
 

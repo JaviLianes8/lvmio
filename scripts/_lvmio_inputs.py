@@ -52,6 +52,32 @@ def write_inputs(folder: Path) -> dict[str, str]:
             {},
         ),
         "lvmio_units.lvm": (LvmFile([Segment([volts, amps])]), {}),
+        "lvmio_dimensions.lvm": (
+            LvmFile(
+                [
+                    Segment(
+                        [
+                            Channel(f"D{i}", [1.0, 2.0], x_dimension=d)
+                            for i, d in enumerate(["Time", "Frequency", "Other", "frequency"])
+                        ]
+                    )
+                ]
+            ),
+            {},
+        ),
+        "lvmio_x0.lvm": (
+            LvmFile(
+                [
+                    Segment(
+                        [
+                            Channel(f"X{i}", [1.0, 2.0], x0=x)
+                            for i, x in enumerate([1.23e-9, 2.5e-7, 1e-20, 0.125, 1e19, -3.5])
+                        ]
+                    )
+                ]
+            ),
+            {},
+        ),
         "lvmio_dates.lvm": (
             LvmFile(
                 [

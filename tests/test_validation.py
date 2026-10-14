@@ -88,9 +88,9 @@ def test_numbers_of_other_real_types_are_accepted() -> None:
     from decimal import Decimal  # not a numbers.Real: refused
     from fractions import Fraction
 
-    assert "0.500000" in format_lvm({"a": [Fraction(1, 2), 3]})
+    assert "0.500000" in format_lvm({"a": [Fraction(1, 2), 3]})  # type: ignore[list-item]
     with pytest.raises(TypeError):
-        format_lvm({"a": [Decimal("0.5")]})
+        format_lvm({"a": [Decimal("0.5")]})  # type: ignore[list-item]
 
 
 def test_text_that_cannot_be_encoded_is_refused_before_writing(tmp_path: Path) -> None:

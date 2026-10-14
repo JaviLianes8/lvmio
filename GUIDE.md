@@ -54,11 +54,15 @@ upper-case hexadecimal digits (a tab is `\09`, CR LF is `\0D\0A`); everything el
 DEL included, is written as it is. Its reader decodes the same codes.
 
 X values: LabVIEW computes the X column from the waveform's true increment but writes
-`Delta_X` with 6 decimals, so for an increment that does not fit 6 decimals (1/2048 s is
+`Delta_X` in the sample number format (6 decimals, or a 6-decimal mantissa in exponent
+notation such as `2,083333E-5`), so for an increment that does not fit (1/2048 s is
 written `0,000488`) the X cells and `Delta_X` disagree in the file. lvmio, like LabVIEW's
 own reader, takes the increment from `Delta_X`; it writes X cells as `x0 + i * delta_x`,
-which can also differ from LabVIEW by one unit in the last decimal at near ties (14 of 3000
-rows for an increment of 1e-7, `delta_x_1e-7.lvm`).
+which can also differ from LabVIEW by one unit in the last decimal for X values within
+about 1e-16 (relative) of a halfway point, with or without an `X0` offset (14 of 3000 rows
+for an increment of 1e-7 in `delta_x_1e-7.lvm`). LabVIEW's reader starts the waveform at
+the segment's `Date` and `Time` plus `X0`; `Channel.time_axis()` is relative to `X0` only,
+and a file with an empty `Date` and `Time` reads in LabVIEW as starting in 1904.
 
 When a second LabVIEW session appends to an existing file it writes the whole file header
 again before its segment.
@@ -75,9 +79,10 @@ LabVIEW mixed periods into a file that declares a comma (lvmio writes the declar
 throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repeat;
 `ties.lvm`, where LabVIEW wrote 9999999.9999995 as `10000000,000000`, which reads back as
 1e7 and is then written `1,000000E+7`; and `near_ties.lvm`, where 9.99999996e-5 is written
-`1,000000E-4`, reads back as 1e-4 and is then written `0,000100`; and the files with an X
-increment that does not fit 6 decimals (`delta_x_2048hz.lvm`, `delta_x_1e-7.lvm`), whose X
-column lvmio rewrites from `Delta_X` as described above (the samples are unchanged). The same holds for
+`1,000000E-4`, reads back as 1e-4 and is then written `0,000100`; `delta_x_2048hz.lvm`,
+whose increment does not fit the `Delta_X` format, so lvmio rewrites its X column from
+`Delta_X`; and `delta_x_1e-7.lvm`, whose increment fits but where 14 X cells are near ties
+(see X values above). The samples are unchanged in all of them. The same holds for
 lvmio's own output of such values: rounding to seven digits can move a value across a
 notation boundary, so a second write can spell it differently.
 Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment
@@ -135,7 +140,8 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
 
 Every file in `tests/fixtures/labview2026` was also given to LabVIEW's Read From
 Measurement File, and `read_results.json` holds what it returned. Wherever both read a
-value it is the same value. The places where only one of them reads a value:
+value it is the same value, apart from the cases in the last table below. The places where
+only one of them reads a value:
 
 LabVIEW reads the longest number at the start of a cell and ignores the rest; lvmio refuses
 such cells with an `LvmError` instead of returning part of them:
@@ -158,6 +164,7 @@ LabVIEW refuses these (error 100) and lvmio reads them:
 | `-nan`, `+NaN` | NaN |
 | a cell holding only spaces | NaN, like an empty cell |
 | a column line without `X_Value` (as lvmio 0.2 wrote `X_Columns` `No` files) | the columns as channels |
+| a cell starting with a period in a file that declares a decimal comma (`+.5e+3`) | 500 |
 
 Both read a value, but not the same one:
 
@@ -165,10 +172,14 @@ Both read a value, but not the same one:
 | --- | --- | --- |
 | `2.500000` in a file that declares a decimal comma | 2 | 2.5 |
 | a comment holding `\zz` or ending with `\4` | NUL in place of the code, and drops the rest | the text as written |
+| some cells, about one in a few thousand at 6 digits (`0.011227`, `-8.633024E-6`) | the double one unit in the last place away | the correctly rounded double, as Python's `float` |
 
 The first row is what LabVIEW's writer produces when it is set to a period on a comma
 locale (`period_decimal.lvm`): LabVIEW's reader then truncates its own values, while lvmio
-reads the values that were written. LabVIEW's writer never produces the second.
+reads the values that were written. LabVIEW's writer never produces the second. The third
+is LabVIEW's own decimal conversion: `read/lvmio_ulp.lvm` holds six such cells, and
+`0.011227` comes back from LabVIEW as 0.011227000000000001; no cell written with 17
+digits was seen to differ.
 
 LabVIEW's reader, driven through its ActiveX server, returned the first data set of a file on
 every call, so only first data sets were compared with it; later segments are compared with

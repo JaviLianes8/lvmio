@@ -10908,6 +10908,23 @@
    "repeats_first": true
   }
  ],
+ "read/lvmio_ulp.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     0.011227000000000001,
+     -519.7820380000001,
+     4037235.2448629998,
+     -8.633023999999999e-06,
+     7.801665999999999e+104,
+     -1.0339999999999999e+241
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "read/lvmio_utf8_comment.lvm": [
   {
    "error": 0,
@@ -10951,6 +10968,14 @@
    "error": 100,
    "channels": [],
    "eof": false,
+   "comment": ""
+  }
+ ],
+ "read/period_cell_in_comma_file.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": true,
    "comment": ""
   }
  ],

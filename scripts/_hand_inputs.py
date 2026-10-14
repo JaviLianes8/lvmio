@@ -85,6 +85,8 @@ def write_hand_inputs(folder: Path) -> dict[str, str]:
         "blank_line_in_rows.lvm": _head() + _seg(["A"], [""], "1", [["0", "1"], [], ["2", "5"]]),
         "comment_cells.lvm": _head()
         + _seg(["A"], [""], "1", [["0", "1", "com", "99", "100"], ["1", "2"]]),
+        "period_cell_in_comma_file.lvm": _head(dec=",")
+        + _seg(["A"], [""], "1", [["0", "1,5"], ["1", "+.5e+3"]]),
         "comment_escapes.lvm": _head()
         + _seg(["A"], [""], "1", [["0", "1", "a\\41b\\09c\\5Cd\\zz\\4"], ["1", "2"]]),
     }

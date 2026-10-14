@@ -47,11 +47,19 @@ LABVIEW_READS_LVMIO_REFUSES = {
     "read/blank_line_in_rows.lvm",
 }
 # LabVIEW refuses these (error 100); lvmio reads them. GUIDE.md lists them.
-LVMIO_READS_LABVIEW_REFUSES = {"-nan", "+NaN", "   ", "read/no_x_value_column.lvm"}
-# LabVIEW's reader truncates its own writer's periods in a file declaring a comma.
-READ_DIFFERENTLY = {"period_decimal.lvm"}
-# 9999999.9999995 is written by LabVIEW as 10000000,000000, which reads back as 1e7 and is
-# then written as 1,000000E+7: the one place a LabVIEW file does not survive a rewrite.
+LVMIO_READS_LABVIEW_REFUSES = {
+    "-nan",
+    "+NaN",
+    "   ",
+    "read/no_x_value_column.lvm",
+    "read/period_cell_in_comma_file.lvm",
+}
+# Both read a value but not the same one: LabVIEW truncates its own writer's periods in a
+# file declaring a comma, and reads some cells one unit in the last place away
+# (test_labview_numbers.py pins those).
+READ_DIFFERENTLY = {"period_decimal.lvm", "read/lvmio_ulp.lvm"}
+# LabVIEW files that change on a rewrite, each for a reason GUIDE.md gives: seven-digit
+# rounding across a notation boundary, and X cells rebuilt from Delta_X.
 REWRITE_BOUNDARY = {"ties.lvm", "near_ties.lvm", "delta_x_2048hz.lvm", "delta_x_1e-7.lvm"}
 
 

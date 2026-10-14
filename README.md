@@ -6,7 +6,8 @@ Typed reader and writer for LabVIEW Measurement (`.lvm`) files, standard library
 reads those files into frozen dataclasses and writes files in the same layout, byte for
 byte: the files LabVIEW 2026 wrote in the test captures come back unchanged after a read
 and a write (the guide explains the few exceptions), and LabVIEW's own reader reads
-lvmio's files with the values that were written.
+lvmio's files with the values that were written (to the last bit, except for about one
+cell in a few thousand that LabVIEW's reader rounds one unit off).
 
 ## Install
 
@@ -67,9 +68,10 @@ or `"Multi"`), `precision` (decimals per sample, 6 by default as in LabVIEW) and
   Windows system; `read_lvm` tries UTF-8 first and then Windows-1252. For a file LabVIEW
   will read, write with `encoding="cp1252"`: LabVIEW reads files in its code page.
 
-Wherever lvmio and LabVIEW's reader both read a value from the test files, it is the same
-value, with one exception that LabVIEW's own writer causes; where LabVIEW reads part of a
-cell (`2.5V` as 2.5), lvmio refuses the cell. The
+Where LabVIEW reads part of a cell (`2.5V` as 2.5), lvmio refuses the cell; where both
+read a value they agree, apart from cases the guide lists (LabVIEW's reader rounding a
+few cells one unit in the last place off, and periods its own writer puts in a comma file).
+The
 [guide](https://github.com/JaviLianes8/lvmio/blob/main/GUIDE.md) lists every difference.
 
 ## Command line

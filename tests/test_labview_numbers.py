@@ -90,3 +90,15 @@ def test_near_ties_differ_from_labview_only_in_the_last_digit() -> None:
         assert step == Decimal(1).scaleb(exp_ours - 6) or step == Decimal(1).scaleb(exp_ours - 7)
         exact = Decimal(abs(value)).scaleb(-math.floor(math.log10(abs(value)))) * 10**6
         assert abs(exact % 1 - Decimal("0.5")) < Decimal("1e-8")
+
+
+def test_labview_reads_some_cells_one_unit_in_the_last_place_away() -> None:
+    from lvmio import read_lvm
+
+    results = json.loads((HERE / "read_results.json").read_text(encoding="utf-8"))
+    theirs = results["read/lvmio_ulp.lvm"][0]["channels"][0]
+    ours = read_lvm(HERE / "read" / "lvmio_ulp.lvm").segments[0].channels[0].data
+    assert len(ours) == len(theirs) == 6
+    for mine, labview in zip(ours, theirs, strict=True):
+        assert labview != mine
+        assert abs(labview - mine) == math.ulp(mine)

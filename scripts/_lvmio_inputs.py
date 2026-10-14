@@ -10,6 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from lvmio import Channel, LvmFile, Segment, write_lvm
 
+# Cells LabVIEW's reader turns into a double one unit in the last place away from the
+# correctly rounded value of the text.
+ULP_CELLS = [0.011227, -519.782038, 4037235.244863, -8.633024e-6, 7.801666e104, -1.034e241]
+
 
 def write_inputs(folder: Path) -> dict[str, str]:
     """Write every case into ``folder`` and return file name to description."""
@@ -39,6 +43,10 @@ def write_inputs(folder: Path) -> dict[str, str]:
         "lvmio_precision.lvm": (LvmFile([Segment([volts, amps])]), {"precision": 9}),
         "lvmio_utf8_comment.lvm": (
             LvmFile([Segment([amps], comment="caf" + chr(0xE9) + " " + chr(0x20AC))]),
+            {},
+        ),
+        "lvmio_ulp.lvm": (
+            LvmFile([Segment([Channel("U", ULP_CELLS)])]),
             {},
         ),
         "lvmio_escaped_comment.lvm": (

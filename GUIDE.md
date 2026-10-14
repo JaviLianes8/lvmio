@@ -98,7 +98,8 @@ but the text written back differs:
   lvmio's own output too.
 - `delta_x_2048hz.lvm`, `delta_x_1e-7.lvm` and `x0_offsets.lvm`: X cells are rebuilt from
   `Delta_X` (see X values above), and two `X0` values are spelled one unit apart.
-- `one_header_same.lvm`: written back as two segments with their own headers (see Reading).
+- `one_header_same.lvm`, `one_header_gap.lvm`, `one_header_step.lvm`: written back as
+  separate segments with their own headers (see Reading).
 
 `one_header_fewer.lvm` and `one_header_more.lvm` are refused (see the differences).
 Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment
@@ -157,10 +158,17 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   decimal point.
 - `X0` and `Delta_X` default to 0 and 1 when their line is missing, `X_Dimension` to
   `Time` when its line is missing (an empty cell stays empty), a unit to empty.
-- Rows after the first that carry a comment, or whose X value goes back, start a new segment
-  with the same channels, the comment of that row and an `X0` from that row's X cell: that
-  is how LabVIEW's "one header only" mode appends each later write, and how files with a
-  comment on every write read without losing a comment or an X origin.
+- A row after the first starts a new segment when it carries a comment, or when its X cell
+  is not the previous X cell plus the increment (allowing for the digits the cells are
+  printed with): the X restarts, jumps or changes step. The new segment has the same
+  channels, the comment of that row, an `X0` from that row's X cell and, when its own X cells
+  step differently, that increment. This is how LabVIEW's "one header only" mode appends
+  each later write (`one_header_same.lvm`, `one_header_gap.lvm`, `one_header_step.lvm`),
+  and how files with a comment on every write read without losing a comment or an X
+  origin. A later write whose first row happens to continue the previous X stays one row
+  longer in the earlier segment (every sample keeps its X value), and in `X_Columns` `No`,
+  where there are no X cells, only comments start a segment. A negative increment is an
+  ordinary step (`negative_dx.lvm`).
 - `Channel.date` and `Channel.time` are each channel's own `Date` and `Time` cells;
   `Segment.date` and `Segment.time` are the first channel's. `Segment.notes` is the
   `Notes` line and `LvmFile.description` the `Description` line, decoded like a comment.

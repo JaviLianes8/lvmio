@@ -10,7 +10,7 @@ from ._comment import unescape_comment
 from ._errors import LvmError
 from ._model import Channel, Segment
 from ._number import parse_number
-from ._split import starts
+from ._split import own_step, starts
 
 END = "***End_of_Header***"
 _STOP = ("Channels", "LabVIEW Measurement")
@@ -142,7 +142,9 @@ def _build(
     first = positions[0] if positions else shift
     x_column = 0 if shift else None
     segments = []
-    bounds = [*starts(rows, numbers, x_column, comment_at, decimal), len(rows)]
+    step_text = header("Delta_X", first) if positions else None
+    step = 1.0 if step_text is None else parse_number(step_text, decimal, where["Delta_X"])
+    bounds = [*starts(rows, numbers, x_column, comment_at, decimal, step), len(rows)]
     for lo, hi in pairwise(bounds):
         channels: list[Channel] = []
         for column in positions:
@@ -157,6 +159,7 @@ def _build(
                 own = column - 1 if columns[column - 1] == "X_Value" and column > 1 else x_column
                 cell = rows[lo][own].strip(" \t") if own is not None else ""
                 x0 = parse_number(cell, decimal, numbers[lo]) if cell else x0 + lo * dx
+                dx = own_step(rows[lo:hi], 0, own, decimal, numbers[lo:hi], dx)
             channels.append(
                 Channel(
                     name=columns[column],

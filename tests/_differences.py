@@ -71,6 +71,7 @@ READ_DIFFERENTLY = {
     "read/samples_more_than_rows_multi.lvm",
     "one_header_same.lvm",
     "read/samples_more_multi_two_channels.lvm",
+    "one_header_step.lvm",
 }
 # LabVIEW files that change on a rewrite, each for a reason GUIDE.md gives: seven-digit
 # rounding across a notation boundary, and X cells rebuilt from Delta_X.
@@ -83,4 +84,6 @@ REWRITE_BOUNDARY = {
     "one_header_same.lvm",
     "one_header_fewer.lvm",
     "one_header_more.lvm",
+    "one_header_gap.lvm",
+    "one_header_step.lvm",
 }

@@ -62,8 +62,9 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 - Mapping keys must be `str` (0.2 turned other keys into names), and `x0` must be finite.
 - X cells must be empty or numbers (0.2 ignored them); a blank `X0` or `Delta_X` cell means
   its default (0.2 raised `LvmError`); an empty `X_Dimension` cell stays empty.
-- Rows after the first that carry a comment, or whose X value goes back, start a new
-  segment, as LabVIEW's "one header only" mode appends later writes.
+- Rows after the first that carry a comment, or whose X value does not follow the previous
+  one by the increment, start a new segment, as LabVIEW's "one header only" mode appends
+  later writes; the segment keeps that row's comment, X origin and increment.
 - `Channel` stores its `data` as a list, whatever iterable it is given.
 - `--segment` takes an optional minus sign and digits only (0.2 accepted `+0`).
 - The `dev` extra is gone: development tools are listed in `requirements-dev.txt`.

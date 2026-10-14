@@ -91,3 +91,25 @@ def test_samples_above_the_rows_is_padded_in_every_layout() -> None:
     assert two == [[1.0, 2.0, "NaN", 0.0, 0.0], [3.0, 4.0, "NaN", 0.0, 0.0]]
     assert RESULTS["read/no_date_time_lines.lvm"][0]["error"] == 100
     assert read_lvm(HERE / "read" / "no_date_time_lines.lvm").segments[0].names == ["A", "B"]
+
+
+def test_a_later_write_that_jumps_or_changes_step_keeps_its_x_axis() -> None:
+    gap = read_lvm(HERE / "one_header_gap.lvm")
+    assert [(s.channels[0].x0, s.channels[0].data) for s in gap] == [
+        (0.0, [1.0, 2.0, 3.0]),
+        (6.0, [7.0, 8.0, 9.0]),
+    ]
+    step = read_lvm(HERE / "one_header_step.lvm")
+    # The later write's first row continues the X of the first write, so it stays there.
+    assert [c.time_axis() for s in step for c in s] == [[0.0, 1.0, 2.0, 3.0], [3.5, 4.0]]
+    assert [v for s in step for v in s.channels[0].data] == [1.0, 2.0, 3.0, 7.0, 8.0, 9.0]
+    for name in ("one_header_gap.lvm", "one_header_step.lvm"):
+        assert RESULTS[name][0]["channels"] == [[1.0, 2.0, 3.0]]
+
+
+def test_a_negative_increment_is_one_segment_and_round_trips() -> None:
+    lvm = read_lvm(HERE / "negative_dx.lvm")
+    assert len(lvm) == 1 and lvm.segments[0].channels[0].delta_x == -1.0
+    assert format_lvm(lvm) == _raw("negative_dx.lvm")
+    ours = LvmFile([Segment([Channel("V", [1.0, 2.0, 3.0], delta_x=-1e-7)])])
+    assert len(parse_lvm(format_lvm(ours))) == 1

@@ -9716,6 +9716,20 @@
    "comment": ""
   }
  ],
+ "negative_dx.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     3.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "numbers.lvm": [
   {
    "error": 0,
@@ -10155,6 +10169,23 @@
    "repeats_first": true
   }
  ],
+ "one_header_gap.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     3.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
+  }
+ ],
  "one_header_more.lvm": [
   {
    "error": 0,
@@ -10194,6 +10225,23 @@
    ],
    "eof": false,
    "comment": "c1"
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "one_header_step.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     3.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
   },
   {
    "repeats_first": true

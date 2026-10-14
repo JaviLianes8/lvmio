@@ -83,6 +83,12 @@ TOKENS = [
     "1e+ 5",
 ]
 
+# Later writes in "one header only" mode whose X jumps forward or changes step.
+ONE_HEADER_LATER = {
+    "gap": {"rows": [[0.0] * 6 + [7.0, 8.0, 9.0]], "dt": 1.0, "start": 6, "headings": 1},
+    "step": {"rows": [[0.0] * 6 + [7.0, 8.0, 9.0]], "dt": 0.5, "start": 6, "headings": 1},
+}
+
 
 def x0_offsets(seed: int = 8208, count: int = 60) -> list[dict[str, object]]:
     """Waveforms whose start sample moves X0 to a non-zero time, one segment each."""

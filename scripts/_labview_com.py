@@ -13,6 +13,13 @@ TO_DDT = r"express signal manip\ConverttoDDTBlocks.llb\2D Dbl to DDT.vi"
 FROM_DDT = r"express signal manip\ConvertfromDDTBlocks.llb\DDT to 2D Dbl.vi"
 WRITE = r"express output\ExFileWriteBlock.llb\Ex_Inst_Write LabVIEW Measurement File.vi"
 WORKER = r"express output\ExFileWriteBlock.llb\ex_subFileWrite.vi"
+ONE_TO_DDT = r"express signal manip\ConverttoDDTBlocks.llb\1D Dbl 1 Channel to DDT.vi"
+DDT_TO_WAVE = r"express signal manip\ConvertfromDDTBlocks.llb\DDT to Waveform.vi"
+WAVE_TO_DDT = r"express signal manip\ConverttoDDTBlocks.llb\Waveform to DDT.vi"
+SCALE_DT = (
+    r"C:\Program Files\National Instruments\LabVIEW 2026\vi.lib\Waveform\WDTOps.llb"
+    "\\WDT Scale Delta t DBL.vi"
+)
 READ = r"express input\ExFileReadBlock.llb\Ex_Inst_Read LabVIEW Measurement File.vi"
 
 
@@ -32,6 +39,24 @@ class LabVIEW:
         conv.Run(False)
         return conv.GetControlValue("Dynamic Data Type")
 
+    def waveform(self, samples: list[float], dt: float) -> Any:
+        """One channel with the given X increment, through vi.lib's Scale Delta t VI."""
+        to_ddt = self.vi(ONE_TO_DDT)
+        to_ddt.SetControlValue("Array", samples)
+        to_ddt.Run(False)
+        to_wave = self.vi(DDT_TO_WAVE)
+        to_wave.SetControlValue("Dynamic Data Type", to_ddt.GetControlValue("Dynamic Data Type"))
+        to_wave.Run(False)
+        scale = self.app.GetVIReference(SCALE_DT, "", False, 0)
+        scale._FlagAsMethod("GetControlValue", "SetControlValue", "Run")
+        scale.SetControlValue("waveform in", to_wave.GetControlValue("Waveform"))
+        scale.SetControlValue("scale factor", dt)
+        scale.Run(False)
+        back = self.vi(WAVE_TO_DDT)
+        back.SetControlValue("Waveform", scale.GetControlValue("waveform out"))
+        back.Run(False)
+        return back.GetControlValue("Dynamic Data Type")
+
 
 def express(lv: LabVIEW, path: Path, rows: list[list[float]], comment: str = "") -> None:
     vi = lv.vi(WRITE)
@@ -46,7 +71,10 @@ def worker(lv: LabVIEW, path: Path, passes: list[dict[str, Any]], x_columns: int
     """Run the express VI's worker once per pass in one session, appending segments."""
     vi = lv.vi(WORKER)
     for index, step in enumerate(passes):
-        vi.SetControlValue("Signals", lv.signals(step["rows"]))
+        if "dt" in step:
+            vi.SetControlValue("Signals", lv.waveform(step["rows"][0], step["dt"]))
+        else:
+            vi.SetControlValue("Signals", lv.signals(step["rows"]))
         vi.SetControlValue("File Path in", str(path))
         vi.SetControlValue("Static File Path in", str(path))
         vi.SetControlValue("x_columns", x_columns)

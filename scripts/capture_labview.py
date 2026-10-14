@@ -111,6 +111,10 @@ def main(argv: list[str]) -> int:
     target("ties_input.json", "the channels given to LabVIEW for ties.lvm").write_text(
         json.dumps(exact_ties, indent=1) + "\n", encoding="utf-8"
     )
+    for label, dt in (("quarter", 0.25), ("2048hz", 1 / 2048), ("1e-7", 1e-7)):
+        samples = [float(i % 7) for i in range(3000)]
+        how = f"express worker VI, one channel with an X increment of {dt!r}"
+        worker(lv, target(f"delta_x_{label}.lvm", how), [{"rows": [samples], "dt": dt}], 1)
     for name, values in (("exponent_ties", exponent_ties()), ("near_ties", near_ties())):
         how = f"express worker VI, {name.replace('_', ' ')}"
         worker(lv, target(f"{name}.lvm", how), [{"rows": values}], 1)

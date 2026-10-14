@@ -40,11 +40,11 @@ and `-Inf`. `X0` has 16 decimals in exponent notation (`0,0000000000000000E+0`).
 
 lvmio follows this rule. It matches every value LabVIEW wrote in `numbers.lvm` (400 seeded
 values from subnormals to the largest double), `ties.lvm` (404 exact ties and boundary
-neighbours) and `exponent_ties.lvm` (156 exact ties). It differs from LabVIEW in the last
-digit for doubles that lie within about 1e-17 (relative) of a halfway point without being
-one: LabVIEW does not round those from their exact value, and no rule reproduced it. In
-`near_ties.lvm`, 400 doubles chosen to be the nearest to halfway points, 20 are written one
-unit apart in the seventh digit (`9.9999995e-239` is `9,999999E-239` from LabVIEW and
+neighbours) and `exponent_ties.lvm` (156 exact ties). It differs from LabVIEW by one unit
+in the last written digit, in fixed or exponent notation, for doubles that lie within about
+1e-17 (relative) of a halfway point without being one: LabVIEW does not round those from
+their exact value, and no rule reproduced it. In `near_ties.lvm`, 400 doubles chosen to be
+the nearest to halfway points, 20 are written one unit apart (`9.9999995e-239` is `9,999999E-239` from LabVIEW and
 `1,000000E-238` from lvmio). Measured values are practically never that close to a halfway
 point.
 
@@ -52,6 +52,13 @@ Comments: the comment of a data set goes in the Comment cell of its first row. L
 escapes a backslash as two backslashes and a character below 0x20 as a backslash and two
 upper-case hexadecimal digits (a tab is `\09`, CR LF is `\0D\0A`); everything else,
 DEL included, is written as it is. Its reader decodes the same codes.
+
+X values: LabVIEW computes the X column from the waveform's true increment but writes
+`Delta_X` with 6 decimals, so for an increment that does not fit 6 decimals (1/2048 s is
+written `0,000488`) the X cells and `Delta_X` disagree in the file. lvmio, like LabVIEW's
+own reader, takes the increment from `Delta_X`; it writes X cells as `x0 + i * delta_x`,
+which can also differ from LabVIEW by one unit in the last decimal at near ties (14 of 3000
+rows for an increment of 1e-7, `delta_x_1e-7.lvm`).
 
 When a second LabVIEW session appends to an existing file it writes the whole file header
 again before its segment.
@@ -68,7 +75,9 @@ LabVIEW mixed periods into a file that declares a comma (lvmio writes the declar
 throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repeat;
 `ties.lvm`, where LabVIEW wrote 9999999.9999995 as `10000000,000000`, which reads back as
 1e7 and is then written `1,000000E+7`; and `near_ties.lvm`, where 9.99999996e-5 is written
-`1,000000E-4`, reads back as 1e-4 and is then written `0,000100`. The same holds for
+`1,000000E-4`, reads back as 1e-4 and is then written `0,000100`; and the files with an X
+increment that does not fit 6 decimals (`delta_x_2048hz.lvm`, `delta_x_1e-7.lvm`), whose X
+column lvmio rewrites from `Delta_X` as described above (the samples are unchanged). The same holds for
 lvmio's own output of such values: rounding to seven digits can move a value across a
 notation boundary, so a second write can spell it differently.
 Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment

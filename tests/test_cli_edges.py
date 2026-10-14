@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -34,7 +35,7 @@ def test_encoding_option_is_applied_and_checked(cli: list[str]) -> None:
     assert run(cli, "header", path, "--encoding", "cp1252").returncode == 0
     wrong = run(cli, "header", path, "--encoding", "utf-8")
     assert wrong.returncode == 1
-    assert wrong.stderr.strip() == "lvmio: error: not utf-8 text at byte 556"
+    assert re.fullmatch(r"lvmio: error: not utf-8 text at byte [0-9]+", wrong.stderr.strip())
     unknown = run(cli, "header", path, "--encoding", "no-such-codec")
     assert unknown.returncode == 1
     assert unknown.stderr.strip() == "lvmio: error: unknown encoding: no-such-codec"

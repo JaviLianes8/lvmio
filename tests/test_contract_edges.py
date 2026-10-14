@@ -48,7 +48,7 @@ def test_get_returns_the_first_of_two_channels_with_one_name() -> None:
 
 def test_a_byte_order_mark_is_ignored(tmp_path: Path) -> None:
     text = format_lvm({"a": [1.0]})
-    assert parse_lvm("﻿" + text).segments[0]["a"].data == [1.0]
+    assert parse_lvm("\ufeff" + text).segments[0]["a"].data == [1.0]
     path = tmp_path / "bom.lvm"
     path.write_bytes(b"\xef\xbb\xbf" + text.encode("utf-8"))
     assert read_lvm(path).segments[0]["a"].data == [1.0]
@@ -70,15 +70,15 @@ def test_a_huge_unknown_channel_name_is_not_echoed(cli: list[str]) -> None:
 
 
 def test_standard_input_utf8_is_not_read_in_the_locale_encoding(cli: list[str]) -> None:
-    data = format_lvm({"a": [1.0]}, operator="José").encode("utf-8")
+    data = format_lvm({"a": [1.0]}, operator="Jos\u00e9").encode("utf-8")
     result = run_bytes(cli, "header", "-", "--json", stdin=data)
     assert result.returncode == 0
-    assert json.loads(result.stdout)["operator"] == "José"
+    assert json.loads(result.stdout)["operator"] == "Jos\u00e9"
 
 
 def test_a_closed_output_pipe_exits_zero_and_silently(cli: list[str], tmp_path: Path) -> None:
     big = tmp_path / "big.lvm"
-    big.write_text(format_lvm({"a": [1.5] * 200_000, "b": [2.5] * 200_000}), encoding="ascii")
+    big.write_bytes(format_lvm({"a": [1.5] * 200_000, "b": [2.5] * 200_000}).encode("ascii"))
     with subprocess.Popen(
         [*cli, "dump", str(big)],
         stdout=subprocess.PIPE,

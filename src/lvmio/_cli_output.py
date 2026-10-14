@@ -50,7 +50,9 @@ def _print_header(lvm: LvmFile, as_json: bool) -> None:
 
 def _print_channels(lvm: LvmFile) -> None:
     for index, segment in enumerate(lvm):
-        print(f"segment {index}: {len(segment)} channels, {len(_rows(segment))} samples")
+        print(
+            f"segment {index}: {len(segment)} channels, {max(segment.samples, default=0)} samples"
+        )
         for channel in segment:
             unit = f" [{channel.unit}]" if channel.unit else ""
             print(f"  {channel.name}{unit}: {len(channel)} samples")
@@ -75,11 +77,6 @@ def _selected(segment: Segment, name: str | None) -> list[Channel]:
     if name is None:
         return list(segment.channels)
     return [segment[name]]
-
-
-def _rows(segment: Segment) -> list[list[float]]:
-    count = max((len(c.data) for c in segment.channels), default=0)
-    return [[_at(c.data, i) for c in segment.channels] for i in range(count)]
 
 
 def _at(data: list[float], index: int) -> float:

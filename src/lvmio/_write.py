@@ -52,8 +52,9 @@ def format_lvm(
     )
     if isinstance(precision, bool) or not isinstance(precision, int):
         raise TypeError(f"precision must be an int, not {type(precision).__name__}")
+    precision = int.__index__(precision)
     if not 0 <= precision <= 17:
-        raise ValueError(f"precision must be between 0 and 17, not {precision}")
+        raise ValueError("precision must be between 0 and 17")
     lvm = check_file(canonical(lvm))
     return "\r\n".join(render(lvm, precision)) + "\r\n"
 

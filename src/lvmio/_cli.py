@@ -68,7 +68,7 @@ def _build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("channels", parents=[common], help="list the channels per segment")
     dump = subparsers.add_parser("dump", parents=[common], help="dump data as CSV or JSON")
     dump.add_argument("--channel", help="dump only this channel (default: all)")
-    dump.add_argument("--segment", type=int, default=0, help="segment index (default: 0)")
+    dump.add_argument("--segment", type=_index, default=0, help="segment index (default: 0)")
     dump.add_argument(
         "--format", choices=("csv", "json"), default="csv", help="output format (default: csv)"
     )
@@ -84,11 +84,18 @@ def _load(path: str, encoding: str | None) -> LvmFile:
     return read_lvm(path, encoding=encoding)
 
 
+def _index(text: str) -> int:
+    """A segment index; long or malformed text is refused without echoing it."""
+    if len(text) > 18 or not text.lstrip("-").isdigit() or not text.isascii():
+        raise argparse.ArgumentTypeError(f"not a segment number: {shorten(text, 20)}")
+    return int(text)
+
+
 def _utf8_when_redirected() -> None:
     """Redirected output is UTF-8, so every channel name can be written on any system."""
     stream = sys.stdout
     if stream is not None and hasattr(stream, "reconfigure") and not stream.isatty():
-        stream.reconfigure(encoding="utf-8")
+        stream.reconfigure(encoding="utf-8", errors="backslashreplace")
 
 
 def _silence_stdout() -> None:

@@ -60,13 +60,16 @@ or `"Multi"`), `precision` (decimals per sample, 6 by default as in LabVIEW) and
 - Tab and comma separators, the decimal comma, several segments with their comments, and a
   file header repeated in the middle of a file (LabVIEW writes one when a later session
   appends to the file).
-- LabVIEW's number format (`2.500000`, `1.000000E-9`, `NaN`, `Inf`, `-Inf`); empty cells
-  read as NaN.
+- LabVIEW's number format, including how it rounds exact ties (`2.500000`,
+  `1.000000E-9`, `NaN`, `Inf`, `-Inf`); empty cells read as NaN.
+- Comments with LabVIEW's escapes (`\09` for a tab, `\\` for a backslash).
 - Text in UTF-8 or in Windows-1252, the code page LabVIEW writes on a Western-European
   Windows system; `read_lvm` tries UTF-8 first and then Windows-1252.
 
-Where lvmio and LabVIEW's reader do not read a cell the same way, lvmio refuses it rather
-than return a different number: the cases are listed in the [guide](https://github.com/JaviLianes8/lvmio/blob/main/GUIDE.md).
+Wherever lvmio and LabVIEW's reader both read a value from the test files, it is the same
+value, with one exception that LabVIEW's own writer causes; where LabVIEW reads part of a
+cell (`2.5V` as 2.5), lvmio refuses the cell. The
+[guide](https://github.com/JaviLianes8/lvmio/blob/main/GUIDE.md) lists every difference.
 
 ## Command line
 

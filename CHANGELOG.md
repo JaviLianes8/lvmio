@@ -23,8 +23,16 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 
 ### Changed
 
-- Samples are written in LabVIEW's number format (fixed notation from 1e-4 to 1e7, exponent
-  notation otherwise, `NaN`, `Inf`, `-Inf`); `X0` keeps 17 significant digits.
+- Samples are written in LabVIEW's number format: fixed notation when the decimal exponent
+  is from -4 to 6, exponent notation otherwise, exact ties rounded as LabVIEW rounds them,
+  `NaN`, `Inf`, `-Inf`; `X0` keeps 17 significant digits.
+- Comments are written and read with LabVIEW's escapes (`\XX` for control characters,
+  `\\` for a backslash), so they may hold any character; a comment is one cell.
+- Rows with fewer cells than the column line, a data row after a blank line, and a
+  `Decimal_Separator` other than `.` or `,` raise `LvmError`.
+- The writer refuses names and header fields starting or ending with any whitespace,
+  unordered samples (sets, mappings), finite numbers too large for a double, and a comment
+  on a segment with no samples.
 - The file layout matches LabVIEW's writer: `X_Value` always heads the column line, header
   lines are padded the same way, `Y_Unit_Label` is left out when no channel has a unit, and
   a line with the separator follows the file header.
@@ -45,7 +53,8 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 - `Channel`, `Segment`, `LvmFile` and `LvmError` report the module `lvmio`.
 - Error messages give the line number and quote at most 40 characters.
 - The command line reads standard input as bytes, catches every reading error with one line
-  on standard error, and exits quietly when its output pipe closes. Output to a file or a
+  on standard error, and exits quietly when its output pipe closes. A malformed
+  `--segment` value is refused without echoing it. Output to a file or a
   pipe is UTF-8. JSON output writes infinities as `"Inf"` and `"-Inf"`, CSV as `Inf` and
   `-Inf`.
 

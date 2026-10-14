@@ -26,12 +26,22 @@ in `Multi` files each channel's cell is followed by an empty one, so the cells l
 the X column of each channel. The `Channels` line is padded with empty cells to the same
 width. The comment of a data set goes in the Comment column of its first row.
 
-Numbers: a sample is written with 6 decimals in fixed notation when it is zero or its
-magnitude is from 1e-4 up to (not including) 1e7, and in exponent notation otherwise, with
-6 decimals in the mantissa and an exponent without padding (`1,500000E-7`, `1,000000E+300`).
-NaN is `NaN`, the infinities `Inf` and `-Inf`. `X0` has 16 decimals in exponent notation
-(`0,0000000000000000E+0`). These rules match every one of 400 seeded values, from
-subnormals to the largest double, that LabVIEW wrote in `numbers.lvm`.
+Numbers: the notation follows `e = floor(log10(|x|))` computed in double precision. When
+the value is zero or `e` is from -4 to 6 the sample is written in fixed notation with 6
+decimals, rounding the exact binary value with ties toward zero (`0.0234375` is written
+`0,023437`). Otherwise it is written in exponent notation with 6 decimals in the mantissa,
+rounding with ties away from zero, and an exponent without padding (`10000005` is written
+`1,000001E+7`, `1.5e-7` is `1,500000E-7`). Because `e` is computed in double, the largest
+double below 1e7 is written `1,000000E+7` and the largest below 1e-4 is `0,000100`. NaN is
+`NaN`, the infinities `Inf` and `-Inf`. `X0` has 16 decimals in exponent notation
+(`0,0000000000000000E+0`). The rule matches all 804 values LabVIEW wrote in `numbers.lvm`
+(400 seeded values from subnormals to the largest double) and `ties.lvm` (404 exact ties
+and boundary neighbours).
+
+Comments: the comment of a data set goes in the Comment cell of its first row. LabVIEW
+escapes a backslash as two backslashes and a character below 0x20 as a backslash and two
+upper-case hexadecimal digits (a tab is `\09`, CR LF is `\0D\0A`); everything else,
+DEL included, is written as it is. Its reader decodes the same codes.
 
 When a second LabVIEW session appends to an existing file it writes the whole file header
 again before its segment.
@@ -43,9 +53,13 @@ the byte `0xE9` for `é`.
 
 `format_lvm` returns the text; `write_lvm` encodes it (UTF-8 unless `encoding` is given)
 and writes it. Both lay a file out as above, so a file read with lvmio and written back is
-the same file. That holds for every capture except two: `period_decimal.lvm`, where LabVIEW
-mixed periods into a file that declares a comma (lvmio writes the declared separator
-throughout), and `appended_runs.lvm`, whose repeated file header lvmio does not repeat.
+the same file. That holds for every capture except three: `period_decimal.lvm`, where
+LabVIEW mixed periods into a file that declares a comma (lvmio writes the declared separator
+throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repeat; and
+`ties.lvm`, where LabVIEW wrote 9999999.9999995 as `10000000,000000`, which reads back as
+1e7 and is then written `1,000000E+7` (the same holds for lvmio's own output of that value).
+Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment
+is escaped too (`\2C`), so the comment stays one cell.
 
 Samples may be given as any iterable of real numbers: a list, a tuple, a `range`, a NumPy
 array or a generator. They are stored as Python floats.
@@ -60,8 +74,13 @@ The writer refuses, before writing anything:
 | Error | When |
 | --- | --- |
 | `TypeError` | data that is not an `LvmFile`, `Segment`, list of `Channel` or mapping of `str` to an iterable of numbers; a sample, `x0` or `delta_x` that is not a real number (`int`, `float`, `Fraction`, `Decimal` and NumPy numbers are; `bool`, `str` and `complex` are not); a text field that is not `str`; `precision` that is not an `int` |
-| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with blanks; an empty channel name or one called `X_Value` or `Comment`; an empty `x_dimension`; a comment with a line break; `precision` outside 0 to 17; a number too large for a double (`10**400`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
+| `TypeError` (continued) | unordered samples (a `set` or a mapping) |
+| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an empty `x_dimension`; a comment on a segment with no samples (it has no row to go in); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
 | `LookupError` | `write_lvm` with an unknown encoding name |
+
+Text fields are copied to plain `str` and `precision` to a plain `int` before they are
+checked, so a subclass cannot change what is checked or written. Exceptions raised by the
+caller's own objects (a `__float__` or `__iter__` that fails) pass through unchanged.
 
 ## Reading
 
@@ -71,35 +90,62 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
 - The column line decides the layout: an `X_Value` column is never a channel, and a last
   `Comment` column is the comment column. Header cells are matched to channels by column
   position, so `No`, `One` and `Multi` files give the same channels.
-- An empty cell, or a row shorter than the column line, is a missing sample: NaN. Every
-  channel of a segment has one value per data row, as in LabVIEW's reader.
+- An empty cell is a missing sample: NaN. Every channel of a segment has one value per data
+  row, as in LabVIEW's reader. A row with fewer cells than the last channel's column is
+  refused, as LabVIEW refuses it.
 - A number is an optional sign, digits with an optional decimal point, and an optional
   exponent, or `NaN`, `Inf` or `Infinity` in any case. Spaces and tabs around it are
   ignored. In a file declaring a decimal comma both the comma and the period are read as the
   decimal point.
 - `X0` and `Delta_X` default to 0 and 1, `X_Dimension` to `Time`, a unit to empty.
 - A repeated file header between segments is skipped.
-- `Segment.comment` is the comment cell of the first data row.
+- `Segment.comment` is the comment cell of the first data row, with `\\` and `\XX`
+  decoded; any other backslash is kept as written.
+- `Decimal_Separator` must be `.` or `,`.
 - `LvmFile.multi_headings` is the file's `Multi_Headings` field.
 
 ### Where lvmio and LabVIEW's reader differ
 
-LabVIEW's Read From Measurement File reads the longest number at the start of a cell and
-ignores the rest. lvmio refuses such cells with an `LvmError` instead of returning part of
-them:
+Every file in `tests/fixtures/labview2026` was also given to LabVIEW's Read From
+Measurement File, and `read_results.json` holds what it returned. Wherever both read a
+value it is the same value. The places where only one of them reads a value:
 
-| Cell | LabVIEW reads | lvmio |
+LabVIEW reads the longest number at the start of a cell and ignores the rest; lvmio refuses
+such cells with an `LvmError` instead of returning part of them:
+
+| Input | LabVIEW reads | lvmio |
 | --- | --- | --- |
 | `1_0` | 1 | refuses (Python's `float` would read 10) |
-| `0x10` | 0 | refuses |
-| `1,5` in a file declaring a period | 1 | refuses |
-| `2.5V` | 2.5 | refuses |
-| `2.500000` in a file declaring a comma | 2 | 2.5 |
+| `0x10`, `0b1` | 0 | refuses |
+| `1,5` in a file declaring a period, `1 2`, `1.#INF`, `1d5` | 1 | refuses |
+| `2.5V`, `1.5e` | 2.5, 1.5 | refuses |
+| `1E5.5`, `1e5e5` | 100000 | refuses |
+| `Inf5`, `Infinite`, `infinityx` | Inf | refuses |
+| `NaN1`, `nan(ind)` | NaN | refuses |
+| a blank line between data rows | goes on reading rows | refuses: a blank line ends a segment |
 
-The last row is what LabVIEW's writer produces when it is set to a period on a comma
+LabVIEW refuses these (error 100) and lvmio reads them:
+
+| Input | lvmio reads |
+| --- | --- |
+| `-nan`, `+NaN` | NaN |
+| a cell holding only spaces | NaN, like an empty cell |
+| a column line without `X_Value` (as lvmio 0.2 wrote `X_Columns` `No` files) | the columns as channels |
+
+Both read a value, but not the same one:
+
+| Input | LabVIEW reads | lvmio |
+| --- | --- | --- |
+| `2.500000` in a file that declares a decimal comma | 2 | 2.5 |
+| a comment holding `\zz` or ending with `\4` | NUL in place of the code, and drops the rest | the text as written |
+
+The first row is what LabVIEW's writer produces when it is set to a period on a comma
 locale (`period_decimal.lvm`): LabVIEW's reader then truncates its own values, while lvmio
-reads the values that were written. Wherever both read a number, it is the same number; the
-tests check every capture for this.
+reads the values that were written. LabVIEW's writer never produces the second.
+
+LabVIEW's reader, driven through its ActiveX server, returned the first data set of a file on
+every call, so only first data sets were compared with it; later segments are compared with
+the values LabVIEW was given when it wrote them.
 
 ### Reading errors
 
@@ -108,6 +154,8 @@ tests check every capture for this.
 - the first line is not `LabVIEW Measurement`;
 - the file header or a segment header has no `***End_of_Header***` line;
 - a segment header is not followed by a column line;
+- a data row follows a blank line, or a row has fewer cells than the column line needs;
+- `Decimal_Separator` is not `.` or `,`;
 - a cell is not a number as defined above (the message gives the line number);
 - the bytes are not valid in the encoding (or in neither UTF-8 nor Windows-1252).
 
@@ -144,6 +192,9 @@ the objects are not hashable. They compare by value.
 - `X_Columns` `Multi` is read and written (0.2 read the extra X columns as channels).
 - A repeated file header no longer turns into an empty segment.
 - Cells such as `1_0`, `0x10` or Unicode digits raise `LvmError`; 0.2 read `1_0` as 10.
+- Rows shorter than the column line raise `LvmError`; 0.2 padded them with NaN.
+- Comments are decoded and written with LabVIEW's escapes, and a comment is one cell.
+- Samples are written with LabVIEW's rounding of exact ties.
 - `read_lvm` reads Windows-1252 files; 0.2 raised `UnicodeDecodeError`.
 - A file or segment header without `***End_of_Header***` raises `LvmError`; 0.2 returned
   fewer segments.

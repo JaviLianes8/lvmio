@@ -88,7 +88,7 @@ def _at(data: list[float], index: int) -> float:
 
 def _dump_csv(channels: list[Channel], with_time: bool) -> None:
     out = io.StringIO()
-    writer = csv.writer(out)
+    writer = csv.writer(out, lineterminator="\n")
     header = (["X_Value"] if with_time else []) + [c.name for c in channels]
     writer.writerow(header)
     axis = channels[0].time_axis() if channels and with_time else []

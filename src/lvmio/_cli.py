@@ -97,8 +97,6 @@ def _message(exc: BaseException) -> str:
         return f"no such channel: {shorten(str(name))}"
     if isinstance(exc, FileNotFoundError):
         return f"no such file: {shorten(str(exc.filename))}"
-    if isinstance(exc, LookupError) and not isinstance(exc, IndexError):
-        return f"unknown encoding: {shorten(str(exc.args[0]) if exc.args else '')}"
     if isinstance(exc, OSError) and exc.strerror:
         return f"{exc.strerror}: {shorten(str(exc.filename))}"
     text = str(exc)

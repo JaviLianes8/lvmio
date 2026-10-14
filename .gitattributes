@@ -1,5 +1,2 @@
-* text=auto eol=lf
-
-# Golden LabVIEW fixtures are kept byte for byte, so their hashes keep matching the
-# upstream samples. No end of line conversion is applied to them.
-tests/fixtures/*.lvm -text
+# LabVIEW captures are kept byte for byte (CRLF line endings, hashed in manifest.json).
+tests/fixtures/labview2026/** -text

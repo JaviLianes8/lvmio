@@ -29,6 +29,8 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
   `NaN`, `Inf`, `-Inf`; `X0` keeps 17 significant digits.
 - Comments are written and read with LabVIEW's escapes (`\XX` for control characters,
   `\\` for a backslash), so they may hold any character; a comment is one cell.
+- A row whose cells are all empty is read as a row of NaN, as LabVIEW reads it; only a
+  line without a separator ends a segment.
 - Rows with fewer cells than the column line, a data row after a blank line, a header
   block whose end marker does not come before a blank line, and a `Decimal_Separator`
   other than `.` or `,` (or a comma in a comma-separated file) raise `LvmError`.

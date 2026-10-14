@@ -148,8 +148,11 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
 
 Every file in `tests/fixtures/labview2026` was also given to LabVIEW's Read From
 Measurement File, and `read_results.json` holds what it returned. Wherever both read a
-value it is the same value, apart from the cases in the last table below. The places where
-only one of them reads a value:
+value it is the same value, apart from the cases in the last table below. The tables list
+every difference found. Files written by LabVIEW's writer or by lvmio stay clear of most
+of them; text that neither writer produces (hand-edited or from other programs) can meet
+further differences in how the two readers treat malformed lines. The places where only
+one of them reads a value:
 
 LabVIEW reads the longest number at the start of a cell and ignores the rest; lvmio refuses
 such cells with an `LvmError` instead of returning part of them:

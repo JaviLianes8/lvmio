@@ -149,10 +149,11 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
 - An empty cell is a missing sample: NaN, and a line of separators is a row of NaN (also
   one placed between two segments, which adds a row to the segment before it); only a blank
   line, without a separator and with nothing but spaces, ends a segment. An X cell must be
-  empty or a number, so a stray header line between data rows is refused. Every channel of a segment has one
-  value per data row. The `Samples` and `Channels` counts in the segment header are not used: the column
-  line and the data rows decide (LabVIEW's reader follows `Samples` instead; see the
-  differences below). A row with fewer cells than the last channel's column is refused, as
+  empty or a number, so a stray header line between data rows is refused. A channel has one
+  value per data row, except that it stops at its `Samples` count when only empty cells
+  follow (the padding of a shorter channel), as LabVIEW reads it. Otherwise the `Samples`
+  and `Channels` counts are not used: the column line and the data rows decide (LabVIEW's
+  reader follows `Samples` in every case; see the differences below). A row with fewer cells than the last channel's column is refused, as
   LabVIEW refuses it.
 - A number is an optional sign, digits with an optional decimal point, and an optional
   exponent, or `NaN`, `Inf` or `Infinity` in any case. Spaces and tabs around it are

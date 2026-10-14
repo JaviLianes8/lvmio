@@ -96,6 +96,8 @@ def worker(lv: LabVIEW, path: Path, passes: list[dict[str, Any]], x_columns: int
         vi.SetControlValue("x_columns", x_columns)
         vi.SetControlValue("overwrite_mode", 2)
         vi.SetControlValue("Comment", step.get("comment", ""))
+        vi.SetControlValue("column headings", step.get("headings", 0))
+        vi.SetControlValue("Description", step.get("description", ""))
         later = bool(step.get("later_session", False))
         vi.SetControlValue("Reset", index == 0 and not later)
         vi.SetControlValue("Simulate Non-First Call", later)

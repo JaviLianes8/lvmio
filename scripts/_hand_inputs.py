@@ -51,9 +51,11 @@ def _seg(
     return out + [d.join(r) for r in rows] + [""]
 
 
-def _counts(samples: str | None, channels: str = "1") -> list[str]:
+def _counts(samples: str | None, channels: str = "1", xcol: str = "One") -> list[str]:
     """A one-channel segment of two rows whose Samples or Channels count says otherwise."""
-    lines = _head() + _seg(["A"], [""], "1", [["0", "1"], ["1", "2"]])
+    columns = ["X_Value", "A", "Comment"] if xcol != "Multi" else None
+    rows = [["0", "1"], ["1", "2"]] if xcol != "No" else [["", "1"], ["", "2"]]
+    lines = _head(xcol=xcol) + _seg(["A"], [""], "1", rows, columns=columns)
     lines[13] = "Channels" + chr(9) + channels + chr(9)
     if samples is None:
         del lines[14]
@@ -98,6 +100,8 @@ def write_hand_inputs(folder: Path) -> dict[str, str]:
         + _seg(["A"], [""], "1", [["0", "1", "com", "99", "100"], ["1", "2"]]),
         "samples_more_than_rows.lvm": _counts("5"),
         "samples_fewer_than_rows.lvm": _counts("1"),
+        "samples_more_than_rows_no_x.lvm": _counts("5", xcol="No"),
+        "samples_more_than_rows_multi.lvm": _counts("5", xcol="Multi"),
         "samples_blank.lvm": _counts(""),
         "samples_missing.lvm": _counts(None),
         "channels_more_than_columns.lvm": _counts("2", channels="3"),

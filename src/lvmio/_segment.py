@@ -114,9 +114,12 @@ def _build(
     fields, where = header_block
     positions, comment_at = _layout(columns)
     need = max(positions, default=-1) + 1
+    limit = need if comment_at is None else comment_at + 1
     for row, number in zip(rows, numbers, strict=True):
         if len(row) < need:
             raise LvmError(f"line {number}: the row has {len(row)} cells, the column line {need}")
+        if any(cell.strip() for cell in row[limit:]):
+            raise LvmError(f"line {number}: a cell after the last column of the column line")
     shift = 1 if columns[0] == "X_Value" else 0
 
     def header(key: str, column: int) -> str | None:
@@ -136,13 +139,17 @@ def _build(
                 x0=0.0 if x0 is None else parse_number(x0, decimal, where["X0"]),
                 delta_x=1.0 if dx is None else parse_number(dx, decimal, where["Delta_X"]),
                 x_dimension=header("X_Dimension", column) or "Time",
+                date=header("Date", column) or "",
+                time=header("Time", column) or "",
             )
         )
     first = positions[0] if positions else shift
     comment = ""
     if comment_at is not None and rows and len(rows[0]) > comment_at:
         comment = unescape_comment(rows[0][comment_at])
-    return Segment(channels, header("Date", first) or "", header("Time", first) or "", comment)
+    notes = next((cell for cell in fields.get("Notes", []) if cell), "")
+    date, time = header("Date", first) or "", header("Time", first) or ""
+    return Segment(channels, date=date, time=time, comment=comment, notes=notes)
 
 
 def _cell(row: list[str], column: int, decimal: str, line: int) -> float:

@@ -23,6 +23,11 @@ def render(lvm: LvmFile, precision: int) -> list[str]:
         f"X_Columns{delim}{lvm.x_columns}",
         f"Time_Pref{delim}{lvm.time_pref}",
         f"Operator{delim}{lvm.operator}",
+        *(
+            [f"Description{delim}{escape_comment(lvm.description, delim)}"]
+            if lvm.description
+            else []
+        ),
         f"Date{delim}{lvm.date}",
         f"Time{delim}{lvm.time}",
         END + delim,
@@ -46,11 +51,12 @@ def _segment(seg: Segment, lvm: LvmFile, delim: str, precision: int) -> list[str
         cells += [""] * (width - len(cells))
         return delim.join([label, *cells])
 
-    lines = [
+    lines = [row("Notes", [seg.notes])] if seg.notes else []
+    lines += [
         delim.join(["Channels", str(len(chans)), *[""] * (width - 1)]),
         row("Samples", [str(len(c.data)) for c in chans]),
-        row("Date", [seg.date] * len(chans)),
-        row("Time", [seg.time] * len(chans)),
+        row("Date", [c.date or seg.date for c in chans]),
+        row("Time", [c.time or seg.time for c in chans]),
     ]
     if any(c.unit for c in chans):
         lines.append(row("Y_Unit_Label", [c.unit for c in chans]))

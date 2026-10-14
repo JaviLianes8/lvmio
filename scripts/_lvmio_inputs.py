@@ -52,6 +52,23 @@ def write_inputs(folder: Path) -> dict[str, str]:
             {},
         ),
         "lvmio_units.lvm": (LvmFile([Segment([volts, amps])]), {}),
+        "lvmio_dates.lvm": (
+            LvmFile(
+                [
+                    Segment(
+                        [
+                            Channel(
+                                "A", [1.0, 2.0], unit="V", date="2026/10/14", time="10:00:00,5"
+                            ),
+                            Channel(
+                                "B", [3.0, 4.0], unit="V", date="2026/10/15", time="11:30:00,25"
+                            ),
+                        ]
+                    )
+                ]
+            ),
+            {},
+        ),
         "lvmio_ulp.lvm": (
             LvmFile([Segment([Channel("U", ULP_CELLS)])]),
             {},

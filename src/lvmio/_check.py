@@ -74,6 +74,7 @@ def check_file(lvm: LvmFile) -> LvmFile:
         operator=text["operator"],
         date=text["date"],
         time=text["time"],
+        description=_exact(lvm.description, "description"),
     )
 
 
@@ -101,13 +102,16 @@ def _segment(seg: Segment, delim: str) -> Segment:
                 x0=_number(channel.x0, "x0"),
                 delta_x=_number(channel.delta_x, "delta_x"),
                 x_dimension=x_dimension,
+                date=_field(channel.date, "channel date", delim),
+                time=_field(channel.time, "channel time", delim),
             )
         )
     if comment and not any(c.data for c in channels):
         raise ValueError("a comment needs at least one data row to be written in")
     if (date or time) and not channels:
         raise ValueError("a segment date or time needs at least one channel to be written in")
-    return Segment(channels, date=date, time=time, comment=comment)
+    notes = _field(seg.notes, "notes", delim)
+    return Segment(channels, date=date, time=time, comment=comment, notes=notes)
 
 
 def _samples(values: object, name: str) -> list[float]:

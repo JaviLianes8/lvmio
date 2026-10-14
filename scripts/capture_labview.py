@@ -116,6 +116,18 @@ def main(argv: list[str]) -> int:
         samples = [float(i % 7) for i in range(3000)]
         how = f"express worker VI, one channel with an X increment of {dt!r}"
         worker(lv, target(f"delta_x_{label}.lvm", how), [{"rows": [samples], "dt": dt}], 1)
+    first = {"rows": BASIC, "comment": "c1", "headings": 1}
+    for label, rows in (
+        ("same", [[5.0, 6.0, 7.0], [8.0, 9.0, 10.0]]),
+        ("fewer", [[5.0, 6.0]]),
+        ("more", [[5.0, 6.0], [7.0, 8.0], [9.0, 10.0]]),
+    ):
+        how = f"express worker VI, one header only, a later write with {label} channels"
+        later = {"rows": rows, "comment": "c2", "headings": 1}
+        worker(lv, target(f"one_header_{label}.lvm", how), [first, later], 1)
+    text = "line one" + chr(13) + chr(10) + "line two" + chr(9) + "x, y" + chr(92) + "z"
+    how = "express worker VI, a file description with a line break, a tab and a backslash"
+    worker(lv, target("description.lvm", how), [{"rows": BASIC, "description": text}], 1)
     how = "express worker VI, 60 waveforms whose start sample sets a non-zero X0"
     worker(lv, target("x0_offsets.lvm", how), x0_offsets(), 1)
     for name, values in (("exponent_ties", exponent_ties()), ("near_ties", near_ties())):
@@ -139,9 +151,12 @@ def main(argv: list[str]) -> int:
     (OUT / "relay").mkdir(exist_ok=True)
     for stale in (OUT / "relay").glob("*.lvm"):
         stale.unlink()
-    for name in ("lvmio_unit_gap", "lvmio_units", "blank_delta_x", "text_delta_x"):
+    names = ("lvmio_unit_gap", "lvmio_units", "blank_delta_x", "text_delta_x", "lvmio_dates")
+    for name in names:
         relayed = target(f"relay/{name}.lvm", f"LabVIEW read read/{name}.lvm and wrote it")
         relay(lv, OUT / "read" / f"{name}.lvm", relayed)
+    relayed = target("relay/express_default.lvm", "LabVIEW read express_default.lvm and wrote it")
+    relay(lv, OUT / "express_default.lvm", relayed)
     readback: dict[str, Any] = {}
     sources = sorted((OUT / "read").glob("*.lvm"))
     for source in [*sorted(OUT.glob("*.lvm")), *sources]:

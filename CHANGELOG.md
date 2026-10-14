@@ -18,7 +18,9 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 - `x_columns` argument for the writer; `X_Columns` `Multi` is read and written.
 - `encoding` argument for `read_lvm` and `write_lvm`; `read_lvm` reads Windows-1252 files,
   which LabVIEW writes on Western-European Windows systems.
-- `Segment.comment`, the comment of a data set.
+- `Segment.comment`, the comment of a data set; `Segment.notes`, its `Notes` line;
+  `LvmFile.description`, the file's `Description` line; `Channel.date` and `Channel.time`,
+  each channel's own start date and time. All are written back where LabVIEW puts them.
 - `python -m lvmio`, and `--encoding` on every command.
 
 ### Changed
@@ -30,7 +32,8 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 - Comments are written and read with LabVIEW's escapes (`\XX` for control characters,
   `\\` for a backslash), so they may hold any character; a comment is one cell.
 - A row whose cells are all empty is read as a row of NaN, as LabVIEW reads it; only a
-  line without a separator ends a segment.
+  line without a separator ends a segment. A non-empty cell after the last column raises
+  `LvmError` instead of being dropped.
 - Rows with fewer cells than the column line, a data row after a blank line, a header
   block whose end marker does not come before a blank line, and a `Decimal_Separator`
   other than `.` or `,` (or a comma in a comma-separated file) raise `LvmError`.

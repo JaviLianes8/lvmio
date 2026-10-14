@@ -10,6 +10,10 @@ from dataclasses import dataclass, field
 class Channel:
     """One measured signal: its name, samples and X axis parameters.
 
+    ``date`` and ``time`` are the channel's own cells of the segment's ``Date`` and
+    ``Time`` lines; the writer uses the segment's values for a channel that leaves them
+    empty.
+
     >>> ch = Channel("Voltage", [1.0, 2.0, 3.0], unit="V", x0=0.5, delta_x=0.25)
     >>> len(ch), list(ch), ch.time_axis()
     (3, [1.0, 2.0, 3.0], [0.5, 0.75, 1.0])
@@ -21,6 +25,8 @@ class Channel:
     x0: float = 0.0
     delta_x: float = 1.0
     x_dimension: str = "Time"
+    date: str = ""
+    time: str = ""
 
     def __len__(self) -> int:
         """The number of samples in the channel."""
@@ -44,7 +50,8 @@ class Segment:
     """A block of channels sharing one header, as LabVIEW writes per data set.
 
     ``comment`` is the text in the Comment column of the first data row, which is
-    where LabVIEW puts the comment of each data set.
+    where LabVIEW puts the comment of each data set. ``notes`` is the segment header's
+    ``Notes`` line, which LabVIEW writes when the channels' X values differ.
 
     >>> seg = Segment([Channel("V", [1.0]), Channel("I", [2.0])], comment="run 1")
     >>> seg.names, seg.samples, seg["I"].data, "V" in seg, seg.get("X")
@@ -55,6 +62,7 @@ class Segment:
     date: str = ""
     time: str = ""
     comment: str = ""
+    notes: str = ""
 
     @property
     def samples(self) -> list[int]:
@@ -102,7 +110,8 @@ class LvmFile:
     """A whole .lvm file: the file header fields and one or more segments.
 
     ``multi_headings`` is the file's ``Multi_Headings`` field; the writer sets it to
-    ``Yes`` whenever the file has more than one segment.
+    ``Yes`` whenever the file has more than one segment. ``description`` is the file
+    header's ``Description`` line (LabVIEW's File Description), escaped like a comment.
 
     >>> lvm = LvmFile([Segment([Channel("V", [1.0])])], operator="lab")
     >>> len(lvm), lvm.operator, lvm.x_columns, [len(s) for s in lvm]
@@ -120,6 +129,7 @@ class LvmFile:
     date: str = ""
     time: str = ""
     multi_headings: bool = False
+    description: str = ""
 
     def __len__(self) -> int:
         """The number of data segments in the file."""

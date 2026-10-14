@@ -8,13 +8,13 @@ X_Columns	One
 Time_Pref	Relative
 Operator	Havie
 Date	2026/10/14
-Time	19:26:17,6057109832763671875
+Time	19:50:27,129924774169921875
 ***End_of_Header***	
 	
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,6057109832763671875	
+Time	19:50:27,129924774169921875	
 X_Dimension	Time	
 X0	4,2839999999999998E+2	
 Delta_X	0,300000	
@@ -26,7 +26,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,65294647216796875	
+Time	19:50:27,3429479598999023437	
 X_Dimension	Time	
 X0	3,8085937500000000E+0	
 Delta_X	0,000977	
@@ -38,7 +38,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,7052302360534667969	
+Time	19:50:27,5852689743041992188	
 X_Dimension	Time	
 X0	2,1874999999999998E-3	
 Delta_X	1,041667E-5	
@@ -50,7 +50,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,7522559165954589844	
+Time	19:50:27,7878327369689941406	
 X_Dimension	Time	
 X0	3,4114285714285711E+2	
 Delta_X	0,142857	
@@ -62,7 +62,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,7970409393310546875	
+Time	19:50:28,0077009201049804688	
 X_Dimension	Time	
 X0	3,5620000000000003E+0	
 Delta_X	0,001000	
@@ -74,7 +74,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,8435711860656738281	
+Time	19:50:28,1585097312927246094	
 X_Dimension	Time	
 X0	8,3160000000000002E+2	
 Delta_X	0,300000	
@@ -86,7 +86,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,8882670402526855469	
+Time	19:50:28,26753997802734375	
 X_Dimension	Time	
 X0	4,1957142857142855E+2	
 Delta_X	0,142857	
@@ -98,7 +98,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,9382719993591308594	
+Time	19:50:28,5178022384643554688	
 X_Dimension	Time	
 X0	5,9433333333333326E+2	
 Delta_X	0,333333	
@@ -110,7 +110,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:17,9814496040344238281	
+Time	19:50:29,0142688751220703125	
 X_Dimension	Time	
 X0	9,2669999999999993E+2	
 Delta_X	0,300000	
@@ -122,7 +122,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,0251078605651855469	
+Time	19:50:29,344036102294921875	
 X_Dimension	Time	
 X0	2,6269999999999999E+2	
 Delta_X	0,100000	
@@ -134,7 +134,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,0687046051025390625	
+Time	19:50:29,5138750076293945313	
 X_Dimension	Time	
 X0	4,0442857142857139E+2	
 Delta_X	0,142857	
@@ -146,7 +146,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,1112222671508789062	
+Time	19:50:29,6197137832641601562	
 X_Dimension	Time	
 X0	1,4482421875000000E+0	
 Delta_X	0,000977	
@@ -158,7 +158,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,1550879478454589844	
+Time	19:50:29,6923151016235351562	
 X_Dimension	Time	
 X0	3,7350000000000000E+2	
 Delta_X	0,100000	
@@ -170,7 +170,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,2032446861267089844	
+Time	19:50:29,8177695274353027344	
 X_Dimension	Time	
 X0	2,4666666666666664E+1	
 Delta_X	0,333333	
@@ -182,7 +182,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,2437887191772460938	
+Time	19:50:29,859928131103515625	
 X_Dimension	Time	
 X0	3,0712890625000000E+0	
 Delta_X	0,000977	
@@ -194,7 +194,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,2872233390808105469	
+Time	19:50:29,9371118545532226563	
 X_Dimension	Time	
 X0	3,3240000000000003E+0	
 Delta_X	0,001000	
@@ -206,7 +206,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,3312945365905761719	
+Time	19:50:30,0453367233276367188	
 X_Dimension	Time	
 X0	2,9540000000000003E+2	
 Delta_X	0,100000	
@@ -218,7 +218,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,3788785934448242187	
+Time	19:50:30,1435022354125976562	
 X_Dimension	Time	
 X0	1,1133333333333333E+3	
 Delta_X	0,333333	
@@ -230,7 +230,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,42327117919921875	
+Time	19:50:30,3216037750244140625	
 X_Dimension	Time	
 X0	4,8145833333333332E-2	
 Delta_X	1,041667E-5	
@@ -242,7 +242,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,468921661376953125	
+Time	19:50:30,5171070098876953125	
 X_Dimension	Time	
 X0	1,0550999999999999E+3	
 Delta_X	0,300000	
@@ -254,7 +254,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,5226464271545410156	
+Time	19:50:30,8171529769897460937	
 X_Dimension	Time	
 X0	3,7685714285714283E+2	
 Delta_X	0,142857	
@@ -266,7 +266,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,5727758407592773438	
+Time	19:50:31,0043926239013671875	
 X_Dimension	Time	
 X0	4,5916666666666668E-2	
 Delta_X	1,041667E-5	
@@ -278,7 +278,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,6223902702331542969	
+Time	19:50:31,2474102973937988281	
 X_Dimension	Time	
 X0	2,5034013605442176E-2	
 Delta_X	2,267574E-5	
@@ -290,7 +290,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,6709504127502441406	
+Time	19:50:31,4892354011535644532	
 X_Dimension	Time	
 X0	3,6785714285714283E+2	
 Delta_X	0,142857	
@@ -302,7 +302,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,7152438163757324219	
+Time	19:50:31,61080169677734375	
 X_Dimension	Time	
 X0	4,0666666666666663E+2	
 Delta_X	0,333333	
@@ -314,7 +314,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,75653839111328125	
+Time	19:50:31,862712860107421875	
 X_Dimension	Time	
 X0	2,2499999999999998E-3	
 Delta_X	1,041667E-5	
@@ -326,7 +326,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,7995686531066894531	
+Time	19:50:31,9914135932922363282	
 X_Dimension	Time	
 X0	6,5475000000000005E-2	
 Delta_X	2,500000E-5	
@@ -338,7 +338,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,8430271148681640625	
+Time	19:50:32,2411103248596191406	
 X_Dimension	Time	
 X0	3,6458333333333330E-4	
 Delta_X	1,041667E-5	
@@ -350,7 +350,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,8876070976257324219	
+Time	19:50:32,3993735313415527344	
 X_Dimension	Time	
 X0	3,6914062500000000E+0	
 Delta_X	0,000977	
@@ -362,7 +362,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,9286112785339355469	
+Time	19:50:32,5981745719909667969	
 X_Dimension	Time	
 X0	5,3200000000000000E+2	
 Delta_X	0,142857	
@@ -374,7 +374,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:18,9729294776916503907	
+Time	19:50:32,7175946235656738281	
 X_Dimension	Time	
 X0	2,7400000000000000E+2	
 Delta_X	0,142857	
@@ -386,7 +386,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,014461517333984375	
+Time	19:50:32,9422287940979003907	
 X_Dimension	Time	
 X0	1,8640000000000001E+0	
 Delta_X	0,001000	
@@ -398,7 +398,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,0580320358276367188	
+Time	19:50:33,0063257217407226563	
 X_Dimension	Time	
 X0	2,3825000000000002E-2	
 Delta_X	2,500000E-5	
@@ -410,7 +410,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,0989880561828613281	
+Time	19:50:33,1958942413330078125	
 X_Dimension	Time	
 X0	3,3559999999999999E+0	
 Delta_X	0,001000	
@@ -422,7 +422,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,1370120048522949219	
+Time	19:50:33,3014392852783203125	
 X_Dimension	Time	
 X0	1,1614583333333333E-2	
 Delta_X	1,041667E-5	
@@ -434,7 +434,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,1773095130920410156	
+Time	19:50:33,4840464591979980469	
 X_Dimension	Time	
 X0	3,2517006802721092E-2	
 Delta_X	2,267574E-5	
@@ -446,7 +446,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,2162613868713378906	
+Time	19:50:33,7947077751159667969	
 X_Dimension	Time	
 X0	4,1833333333333331E+2	
 Delta_X	0,333333	
@@ -458,7 +458,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,2567887306213378906	
+Time	19:50:34,0104041099548339844	
 X_Dimension	Time	
 X0	2,7820000000000000E+0	
 Delta_X	0,001000	
@@ -470,7 +470,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,2954201698303222656	
+Time	19:50:34,17948150634765625	
 X_Dimension	Time	
 X0	9,9895833333333330E-3	
 Delta_X	1,041667E-5	
@@ -482,7 +482,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,3361001014709472656	
+Time	19:50:34,32012176513671875	
 X_Dimension	Time	
 X0	1,2975000000000000E-2	
 Delta_X	2,500000E-5	
@@ -494,7 +494,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,3789706230163574219	
+Time	19:50:34,4310197830200195313	
 X_Dimension	Time	
 X0	3,2110000000000002E+2	
 Delta_X	0,100000	
@@ -506,7 +506,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,4230031967163085938	
+Time	19:50:34,6533169746398925781	
 X_Dimension	Time	
 X0	2,1540000000000001E+2	
 Delta_X	0,100000	
@@ -518,7 +518,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,46753692626953125	
+Time	19:50:34,9126400947570800781	
 X_Dimension	Time	
 X0	1,3364583333333332E-2	
 Delta_X	1,041667E-5	
@@ -530,7 +530,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,5162200927734375	
+Time	19:50:35,325740814208984375	
 X_Dimension	Time	
 X0	1,3913999999999999E+3	
 Delta_X	0,300000	
@@ -542,7 +542,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,5747671127319335938	
+Time	19:50:35,9358272552490234375	
 X_Dimension	Time	
 X0	1,0406249999999999E-2	
 Delta_X	1,041667E-5	
@@ -554,7 +554,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,6437768936157226562	
+Time	19:50:36,7425446510314941406	
 X_Dimension	Time	
 X0	3,6971428571428567E+2	
 Delta_X	0,142857	
@@ -566,7 +566,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,7059369087219238281	
+Time	19:50:37,5769262313842773438	
 X_Dimension	Time	
 X0	3,7083333333333329E-2	
 Delta_X	1,041667E-5	
@@ -578,7 +578,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,7706351280212402344	
+Time	19:50:37,9148287773132324219	
 X_Dimension	Time	
 X0	1,8940000000000001E+2	
 Delta_X	0,100000	
@@ -590,7 +590,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,8242959976196289062	
+Time	19:50:38,1049561500549316406	
 X_Dimension	Time	
 X0	3,0350000000000002E-2	
 Delta_X	2,500000E-5	
@@ -602,7 +602,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,8726305961608886719	
+Time	19:50:38,3395910263061523437	
 X_Dimension	Time	
 X0	5,5475000000000003E-2	
 Delta_X	2,500000E-5	
@@ -614,7 +614,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,9283814430236816407	
+Time	19:50:38,5434031486511230469	
 X_Dimension	Time	
 X0	3,8571428571428567E+2	
 Delta_X	0,142857	
@@ -626,7 +626,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:19,9740138053894042969	
+Time	19:50:38,8401904106140136719	
 X_Dimension	Time	
 X0	3,5963718820861676E-2	
 Delta_X	2,267574E-5	
@@ -638,7 +638,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,0175409317016601563	
+Time	19:50:41,9424304962158203125	
 X_Dimension	Time	
 X0	2,5449999999999999E+0	
 Delta_X	0,001000	
@@ -650,7 +650,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,074222564697265625	
+Time	19:50:44,9710783958435058594	
 X_Dimension	Time	
 X0	3,5740000000000003E+2	
 Delta_X	0,100000	
@@ -662,7 +662,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,1342806816101074219	
+Time	19:50:46,3828616142272949219	
 X_Dimension	Time	
 X0	4,8354166666666663E-2	
 Delta_X	1,041667E-5	
@@ -674,7 +674,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,2677063941955566406	
+Time	19:50:47,1818490028381347656	
 X_Dimension	Time	
 X0	4,2157142857142855E+2	
 Delta_X	0,142857	
@@ -686,7 +686,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,3848543167114257812	
+Time	19:50:48,3193950653076171875	
 X_Dimension	Time	
 X0	4,0300000000000000E+2	
 Delta_X	0,142857	
@@ -698,7 +698,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,445705413818359375	
+Time	19:50:49,5329680442810058594	
 X_Dimension	Time	
 X0	1,3408203125000000E+0	
 Delta_X	0,000977	
@@ -710,7 +710,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,4987263679504394532	
+Time	19:50:51,6376118659973144531	
 X_Dimension	Time	
 X0	4,6509999999999998E+0	
 Delta_X	0,001000	
@@ -722,7 +722,7 @@ X_Value	Untitled	Comment
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	19:26:20,5553374290466308594	
+Time	19:50:52,7434296607971191406	
 X_Dimension	Time	
 X0	4,8880000000000001E+2	
 Delta_X	0,100000	

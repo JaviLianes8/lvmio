@@ -9088,6 +9088,25 @@
    "comment": ""
   }
  ],
+ "description.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.5,
+     -3.25
+    ],
+    [
+     4.0,
+     5.0,
+     6.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "exponent_ties.lvm": [
   {
    "error": 0,
@@ -10114,6 +10133,72 @@
    "comment": ""
   }
  ],
+ "one_header_fewer.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.5,
+     -3.25
+    ],
+    [
+     4.0,
+     5.0,
+     6.0
+    ]
+   ],
+   "eof": false,
+   "comment": "c1"
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "one_header_more.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.5,
+     -3.25
+    ],
+    [
+     4.0,
+     5.0,
+     6.0
+    ]
+   ],
+   "eof": false,
+   "comment": "c1"
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "one_header_same.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.5,
+     -3.25
+    ],
+    [
+     4.0,
+     5.0,
+     6.0
+    ]
+   ],
+   "eof": false,
+   "comment": "c1"
+  },
+  {
+   "repeats_first": true
+  }
+ ],
  "period_decimal.lvm": [
   {
    "error": 0,
@@ -10754,7 +10839,7 @@
   {
    "error": 100,
    "channels": [],
-   "eof": false,
+   "eof": true,
    "comment": ""
   }
  ],
@@ -10905,6 +10990,23 @@
     [
      21.5,
      22.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/lvmio_dates.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0
+    ],
+    [
+     3.0,
+     4.0
     ]
    ],
    "eof": true,
@@ -11225,7 +11327,47 @@
    "comment": ""
   }
  ],
+ "read/samples_more_multi_two_channels.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
+   "comment": ""
+  }
+ ],
  "read/samples_more_than_rows.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     "NaN",
+     0.0,
+     0.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/samples_more_than_rows_multi.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     "NaN",
+     0.0,
+     0.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/samples_more_than_rows_no_x.lvm": [
   {
    "error": 0,
    "channels": [

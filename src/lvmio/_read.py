@@ -6,6 +6,7 @@ import codecs
 import os
 import re
 
+from ._comment import unescape_comment
 from ._errors import LvmError
 from ._model import LvmFile, Segment
 from ._number import parse_number, shorten
@@ -113,6 +114,7 @@ def parse_lvm(text: str) -> LvmFile:
         date=header.get("Date", ""),
         time=header.get("Time", ""),
         multi_headings=header.get("Multi_Headings", "").lower() == "yes",
+        description=unescape_comment(header.get("Description", "")),
     )
 
 

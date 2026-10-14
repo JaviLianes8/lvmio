@@ -37,6 +37,9 @@ LABVIEW_READS_LVMIO_REFUSES = {
     "read/blank_in_segment_header.lvm",
     "read/blank_before_column_line.lvm",
     "read/text_delta_x.lvm",
+    "read/comment_cells.lvm",
+    "one_header_fewer.lvm",
+    "one_header_more.lvm",
 }
 # LabVIEW refuses these (error 100); lvmio reads them. GUIDE.md lists them.
 LVMIO_READS_LABVIEW_REFUSES = {
@@ -51,6 +54,7 @@ LVMIO_READS_LABVIEW_REFUSES = {
     "read/no_delta_x_line.lvm",
     "read/x0_key_with_space.lvm",
     "read/byte_order_mark.lvm",
+    "read/samples_more_multi_two_channels.lvm",
 }
 # Both read a value but not the same one: LabVIEW truncates its own writer's periods in a
 # file declaring a comma, and reads some cells one unit in the last place away
@@ -63,6 +67,9 @@ READ_DIFFERENTLY = {
     "read/samples_blank.lvm",
     "read/channels_key_with_space.lvm",
     "read/empty_middle_row.lvm",
+    "read/samples_more_than_rows_no_x.lvm",
+    "read/samples_more_than_rows_multi.lvm",
+    "one_header_same.lvm",
 }
 # LabVIEW files that change on a rewrite, each for a reason GUIDE.md gives: seven-digit
 # rounding across a notation boundary, and X cells rebuilt from Delta_X.
@@ -72,4 +79,7 @@ REWRITE_BOUNDARY = {
     "delta_x_2048hz.lvm",
     "delta_x_1e-7.lvm",
     "x0_offsets.lvm",
+    "one_header_same.lvm",
+    "one_header_fewer.lvm",
+    "one_header_more.lvm",
 }

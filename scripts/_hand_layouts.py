@@ -53,9 +53,27 @@ def layouts() -> dict[str, list[str]]:
     }
 
 
+def _multi_two_channels() -> list[str]:
+    """X_Columns Multi with two channels whose Samples count is above the two rows."""
+    head = _head(xcol="Multi")
+    cells = [
+        ["Channels", "2", "", "", ""],
+        ["Samples", "5", "", "5", ""],
+        ["X_Dimension", "Time", "", "Time", ""],
+        ["X0", "0", "", "0", ""],
+        ["Delta_X", "1", "", "1", ""],
+        ["***End_of_Header***", "", "", "", ""],
+        ["X_Value", "A", "X_Value", "B", "Comment"],
+        ["0", "1", "0", "3"],
+        ["1", "2", "1", "4"],
+    ]
+    return head + [TAB.join(row) for row in cells] + [""]
+
+
 def write_layouts(folder: Path) -> dict[str, str]:
     made = {}
-    for name, lines in layouts().items():
+    shapes = {**layouts(), "samples_more_multi_two_channels.lvm": _multi_two_channels()}
+    for name, lines in shapes.items():
         (folder / name).write_bytes("\r\n".join(lines).encode("utf-8"))
         made[f"read/{name}"] = "hand-written input for LabVIEW's reader (scripts/_hand_layouts.py)"
     bom = folder / "byte_order_mark.lvm"

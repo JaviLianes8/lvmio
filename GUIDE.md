@@ -70,6 +70,15 @@ only.
 When a second LabVIEW session appends to an existing file it writes the whole file header
 again before its segment.
 
+Other header content LabVIEW writes: a file description (the File Description option) as a
+`Description` line after `Operator`, escaped like a comment; a `Notes` line before
+`Channels` when the channels' X values differ; and a `Date` and `Time` cell for each
+channel, which can differ between channels. With "one header only" LabVIEW writes
+`Multi_Headings No` and a single segment header, and later writes append bare rows to that
+segment without updating its `Samples` count (`one_header_*.lvm`); a later write with
+another number of channels gives rows of another width. With "no headers" it writes bare
+rows, which neither reader takes for a measurement file.
+
 Text is written in the system code page (Windows-1252 here): a comment `café` is stored as
 the byte `0xE9` for `é`.
 
@@ -85,8 +94,10 @@ throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repe
 `1,000000E-4`, reads back as 1e-4 and is then written `0,000100`; `delta_x_2048hz.lvm`,
 whose increment does not fit the `Delta_X` format, so lvmio rewrites its X column from
 `Delta_X`; and `delta_x_1e-7.lvm`, whose increment fits but where 14 X cells are near ties
-(see X values above); and `x0_offsets.lvm`, where two `X0` values are spelled one unit
-apart and X cells are rebuilt from a rounded `Delta_X`. The samples are unchanged in all of
+(see X values above); `x0_offsets.lvm`, where two `X0` values are spelled one unit
+apart and X cells are rebuilt from a rounded `Delta_X`; and the "one header only" files,
+which lvmio reads as one segment with every row (rewritten with the full `Samples` count)
+or refuses. The samples are unchanged in all of
 them. The same holds for
 lvmio's own output of such values: rounding to seven digits can move a value across a
 notation boundary, so a second write can spell it differently.
@@ -138,6 +149,13 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   ignored. In a file declaring a decimal comma both the comma and the period are read as the
   decimal point.
 - `X0` and `Delta_X` default to 0 and 1, `X_Dimension` to `Time`, a unit to empty.
+- `Channel.date` and `Channel.time` are each channel's own `Date` and `Time` cells;
+  `Segment.date` and `Segment.time` are the first channel's. `Segment.notes` is the
+  `Notes` line and `LvmFile.description` the `Description` line, decoded like a comment.
+  The writer writes them back where LabVIEW puts them.
+- A non-empty cell after the last column of the column line (after the Comment column when
+  there is one) is refused, so no data is dropped silently; comments on rows after the first
+  are not kept.
 - A repeated file header between segments is skipped.
 - `Segment.comment` is the comment cell of the first data row, with `\\` and `\XX`
   decoded; any other backslash is kept as written.
@@ -168,6 +186,7 @@ such cells with an `LvmError` instead of returning part of them:
 | `NaN1`, `nan(ind)` | NaN | refuses |
 | a form feed before or after the number (`\x0c1`, `\x0c1\x0c`) | 1 | refuses |
 | a blank line between data rows | goes on reading rows | refuses: a blank line ends a segment |
+| cells after the Comment column (`com`, `99`, `100`), or rows from a later "one header only" write with more or fewer channels (`one_header_more.lvm`, `one_header_fewer.lvm`) | the first comment cell, or the rows of the first write | refuses the file |
 | a sign followed by spaces (`- 1`, `+ 2`, `- Inf`, `1e+ 5`) | -1, 2, -Inf, 100000 | refuses |
 | a blank or spaces-only line inside the file header or a segment header, or before the column line | skips it | refuses: a header must reach its end marker before a blank line |
 | a `Delta_X` cell that is blank or not a number | an increment of 0 (blank: lvmio uses 1) | refuses text; 1 for a blank cell |
@@ -180,6 +199,7 @@ LabVIEW refuses these (error 100) and lvmio reads them:
 | a cell holding only spaces or tabs | NaN, like an empty cell |
 | a segment header without a `Samples` line | every data row |
 | a `Channels` count above the number of channel columns | the channel columns |
+| a `Samples` count above the data rows with several channels in `X_Columns` `No` or `Multi` | the rows |
 | a segment header without an `X0` or a `Delta_X` line | defaults of 0 and 1 |
 | a key with a space before or after it (`X0 `) | the key without the spaces |
 | a UTF-8 byte order mark at the start of the file | the file |
@@ -193,7 +213,9 @@ Both read a value, but not the same one:
 | `2.500000` in a file that declares a decimal comma | 2 | 2.5 |
 | a comment holding `\zz` or ending with `\4` | NUL in place of the code, and drops the rest | the text as written |
 | some cells, about one in a few thousand at precisions below 17 (`0.011227`, `-8.633024E-6`) | the double one unit in the last place away | the correctly rounded double, as Python's `float` |
-| a `Samples` count above the data rows (5 for 2 rows) | the rows, then NaN and zeros up to the count | the rows |
+| a `Samples` count above the data rows (5 for 2 rows), with one channel or with `X_Columns` `One` | the rows, then NaN and zeros up to the count | the rows |
+| a "one header only" file with later writes appended (`one_header_same.lvm`) | the rows of the first write (the `Samples` count) | every row |
+| a file without a `Y_Unit_Label` line | the unit `V` for every channel | an empty unit |
 | a `Samples` count below the data rows (1 for 2 rows) | that many rows | every row |
 | a blank `Samples` count | no samples | every row |
 | a `Channels ` key with a trailing space | no channels | every channel |
@@ -205,9 +227,13 @@ locale (`period_decimal.lvm`): LabVIEW's reader then truncates its own values, w
 reads the values that were written. LabVIEW's writer never produces the second. The third
 is LabVIEW's own decimal conversion: `read/lvmio_ulp.lvm` holds six such cells, and
 `0.011227` comes back from LabVIEW as 0.011227000000000001; no cell written with 17
-digits was seen to differ. LabVIEW's own writer always writes a `Samples` count equal to
-the rows of each channel, so the `Samples` rows only matter for files from other writers
-(`read/samples_*.lvm`). The increments and units LabVIEW's reader takes are seen by having
+digits was seen to differ. LabVIEW's writer writes a `Samples` count equal to the rows of
+each channel except in its "one header only" mode, where the count covers only the first
+write; the `Samples` rows matter for those files and for files from other writers
+(`read/samples_*.lvm`). LabVIEW's reader takes a file without a `Y_Unit_Label` line, as
+both writers leave it out when no channel has a unit, as having the unit `V`
+(`relay/express_default.lvm`), and an empty `Date` and `Time`, lvmio's default, as
+1904-01-01. The increments and units LabVIEW's reader takes are seen by having
 it write back what it read (`relay/*.lvm`): a blank or text `Delta_X` comes back as
 `0,000000`, and units after an empty unit cell move one channel to the left. LabVIEW's own
 writer writes a unit cell for every channel once any channel has a unit, so its files are

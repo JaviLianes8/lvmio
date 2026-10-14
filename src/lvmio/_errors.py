@@ -13,5 +13,5 @@ class LvmError(ValueError):
     >>> lvmio.parse_lvm("hello")
     Traceback (most recent call last):
     ...
-    lvmio._errors.LvmError: not a LabVIEW Measurement file: line 1 is 'hello'
+    lvmio.LvmError: not a LabVIEW Measurement file: line 1 is 'hello'
     """

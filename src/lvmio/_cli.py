@@ -27,11 +27,13 @@ _EPILOG = """examples:
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``lvmio`` console script; returns the exit status.
 
-    Errors print one short line to standard error and return 1.
+    Errors print one short line to standard error and return 1; invalid arguments make
+    argparse print its usage and exit with status 2. Redirected output is UTF-8.
 
     >>> main(["header", "no-such-file.lvm"])
     1
     """
+    _utf8_when_redirected()
     parser = _build_parser()
     args = parser.parse_args(argv)
     if args.command is None:
@@ -80,6 +82,13 @@ def _load(path: str, encoding: str | None) -> LvmFile:
             raise OSError("no standard input")
         return parse_lvm(decode(sys.stdin.buffer.read(), encoding))
     return read_lvm(path, encoding=encoding)
+
+
+def _utf8_when_redirected() -> None:
+    """Redirected output is UTF-8, so every channel name can be written on any system."""
+    stream = sys.stdout
+    if stream is not None and hasattr(stream, "reconfigure") and not stream.isatty():
+        stream.reconfigure(encoding="utf-8")
 
 
 def _silence_stdout() -> None:

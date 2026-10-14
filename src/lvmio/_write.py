@@ -3,19 +3,17 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import replace
-from typing import TypeAlias
 
 from ._check import as_file, canonical, check_file
 from ._model import Channel, LvmFile, Segment
+from ._number import shorten
 from ._render import render
-
-LvmData: TypeAlias = LvmFile | Segment | Sequence[Channel] | Mapping[str, Sequence[float]]
 
 
 def format_lvm(
-    data: LvmData,
+    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[float]],
     *,
     operator: str | None = None,
     date: str | None = None,
@@ -28,8 +26,9 @@ def format_lvm(
     """Return ``data`` as LabVIEW Measurement text, with CRLF line endings.
 
     ``data`` may be a full ``LvmFile``, a single ``Segment``, a sequence of ``Channel``
-    objects, or a mapping of channel name to samples. Keyword arguments override the
-    matching file header fields: ``separator`` is ``"Tab"`` or ``"Comma"``,
+    objects, or a mapping of channel name to samples. Samples may be any iterable of real
+    numbers (a list, a NumPy array, a generator); ``bool`` and text are refused. Keyword
+    arguments override the matching file header fields: ``separator`` is ``"Tab"`` or ``"Comma"``,
     ``decimal_separator`` is ``"."`` or ``","``, ``x_columns`` is ``"No"``, ``"One"`` or
     ``"Multi"``. Samples use ``precision`` decimals in LabVIEW's number format.
 
@@ -38,7 +37,8 @@ def format_lvm(
     ['0.000000\\t1.500000', '1.000000\\t1.000000E-9']
 
     Raises ``TypeError`` for data of the wrong type and ``ValueError`` for values that
-    cannot be written (a name holding the separator, an unknown separator, ...).
+    cannot be written (a name holding the separator, an unknown separator, ...); the
+    guide lists every case.
     """
     lvm = as_file(data)
     lvm = replace(
@@ -60,7 +60,7 @@ def format_lvm(
 
 def write_lvm(
     path: str | os.PathLike[str],
-    data: LvmData,
+    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[float]],
     *,
     operator: str | None = None,
     date: str | None = None,
@@ -75,7 +75,9 @@ def write_lvm(
 
     Takes the same arguments as ``format_lvm``. ``encoding`` defaults to UTF-8; pass
     ``"cp1252"`` to match what LabVIEW writes on a Western-European Windows system.
-    Nothing is written when the data is refused.
+    Nothing is written when the data is refused. Raises what ``format_lvm`` raises,
+    ``ValueError`` for text the encoding cannot hold, ``LookupError`` for an unknown
+    encoding and ``OSError`` when the file cannot be written.
 
     >>> import lvmio, pathlib, tempfile
     >>> path = pathlib.Path(tempfile.mkdtemp(), "run.lvm")
@@ -96,6 +98,7 @@ def write_lvm(
     try:
         payload = text.encode(encoding)
     except UnicodeEncodeError as exc:
-        raise ValueError(f"text at offset {exc.start} cannot be written as {encoding}") from None
+        character = shorten(text[exc.start : exc.start + 1])
+        raise ValueError(f"the character {character} cannot be written as {encoding}") from None
     with open(os.fspath(path), "wb") as handle:
         handle.write(payload)

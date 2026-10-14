@@ -16,7 +16,9 @@ def read_lvm(path: str | os.PathLike[str], *, encoding: str | None = None) -> Lv
     """Read a LabVIEW Measurement file and return its typed representation.
 
     With no ``encoding`` the file is read as UTF-8 and, when it is not valid UTF-8,
-    as Windows-1252: LabVIEW on Windows writes text in the system code page.
+    as Windows-1252: LabVIEW on Windows writes text in the system code page. Raises
+    ``LvmError`` for text that is not a measurement file (or not in the encoding),
+    ``OSError`` when the file cannot be read and ``LookupError`` for an unknown encoding.
 
     >>> import lvmio, pathlib, tempfile
     >>> folder = tempfile.mkdtemp()
@@ -48,6 +50,9 @@ def decode(data: bytes, encoding: str | None) -> str:
 
 def parse_lvm(text: str) -> LvmFile:
     """Parse LabVIEW Measurement text and return its typed representation.
+
+    Raises ``LvmError`` for text that is not a measurement file and ``TypeError`` for
+    anything but ``str``.
 
     >>> text = "LabVIEW Measurement\\t\\nX_Columns\\tNo\\n***End_of_Header***\\t\\n\\n"
     >>> text += "Channels\\t1\\n***End_of_Header***\\t\\nX_Value\\tV\\tComment\\n\\t1.5\\tok\\n"

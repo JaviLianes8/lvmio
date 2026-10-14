@@ -85,17 +85,44 @@ def test_spellings_are_made_canonical() -> None:
 
 
 def test_numbers_of_other_real_types_are_accepted() -> None:
-    from decimal import Decimal  # not a numbers.Real: refused
+    from decimal import Decimal
     from fractions import Fraction
 
-    assert "0.500000" in format_lvm({"a": [Fraction(1, 2), 3]})  # type: ignore[list-item]
-    with pytest.raises(TypeError):
-        format_lvm({"a": [Decimal("0.5")]})  # type: ignore[list-item]
+    from lvmio import parse_lvm
+
+    text = format_lvm({"a": [Fraction(1, 2), 3], "b": [Decimal("0.5"), 3]})  # type: ignore[list-item]
+    assert [c.data for c in parse_lvm(text).segments[0]] == [[0.5, 3.0], [0.5, 3.0]]
+    with pytest.raises(ValueError, match="cannot be held in a double"):
+        format_lvm({"a": [Decimal("sNaN")]})  # type: ignore[list-item]
+    with pytest.raises(ValueError, match="cannot be held in a double"):
+        format_lvm({"a": [10**400]})
+
+
+def test_any_iterable_of_samples_is_accepted() -> None:
+    from lvmio import parse_lvm
+
+    text = format_lvm({"g": (x / 2 for x in range(3)), "t": (1.0, 2.0, 3.0), "r": range(3)})
+    seg = parse_lvm(text).segments[0]
+    assert [c.data for c in seg] == [[0.0, 0.5, 1.0], [1.0, 2.0, 3.0], [0.0, 1.0, 2.0]]
+    with pytest.raises(TypeError, match="iterable of numbers"):
+        format_lvm({"a": 5})  # type: ignore[dict-item]
+
+
+def test_numpy_arrays_and_scalars_are_accepted() -> None:
+    np = pytest.importorskip("numpy")
+    from lvmio import parse_lvm
+
+    values = np.array([1.5, -2.0, 1e-9])
+    text = format_lvm({"f64": values, "f32": values.astype(np.float32), "i": np.arange(3)})
+    seg = parse_lvm(text).segments[0]
+    assert seg["f64"].data == [1.5, -2.0, 1e-9]
+    assert seg["i"].data == [0.0, 1.0, 2.0]
+    assert format_lvm([Channel("a", values)]) == format_lvm({"a": [1.5, -2.0, 1e-9]})
 
 
 def test_text_that_cannot_be_encoded_is_refused_before_writing(tmp_path: Path) -> None:
     out = tmp_path / "x.lvm"
-    with pytest.raises(ValueError, match="cannot be written as cp1252"):
+    with pytest.raises(ValueError, match="the character '\u4e2d' cannot be written as cp1252"):
         write_lvm(out, {"\u4e2d": [1.0]}, encoding="cp1252")
     assert not out.exists()
 

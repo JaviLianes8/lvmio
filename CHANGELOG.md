@@ -30,16 +30,24 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
   a line with the separator follows the file header.
 - `LvmFile.multi_headings` is a field read from the file instead of a property computed from
   the number of segments. The writer still writes `Yes` for more than one segment.
-- Number cells must be whole numbers: `1_0`, `0x10`, `2.5V` and Unicode digits raise
+- A number cell must be a number in full: `1_0`, `0x10`, `2.5V` and Unicode digits raise
   `LvmError` (0.2 read `1_0` as 10). A period is also read as the decimal point in a file
   declaring a comma, as LabVIEW writes such files.
 - A file header or segment header without `***End_of_Header***` raises `LvmError`.
 - The writer refuses data it cannot write faithfully (`TypeError` or `ValueError`, see the
-  guide) and writes nothing in that case.
+  guide) and writes nothing in that case: `bool` and `str` samples, names holding the
+  separator or a line break, reserved or empty names, unknown separator or `X_Columns`
+  names. Samples may be any iterable of real numbers (lists, NumPy arrays, generators,
+  `Decimal`, `Fraction`).
+- Separator and `X_Columns` names are accepted in any case and written as LabVIEW spells
+  them (`separator="tab"` writes `Tab`).
+- `read_lvm` and `write_lvm` take any path-like object.
+- `Channel`, `Segment`, `LvmFile` and `LvmError` report the module `lvmio`.
 - Error messages give the line number and quote at most 40 characters.
 - The command line reads standard input as bytes, catches every reading error with one line
-  on standard error, and exits quietly when its output pipe closes. JSON output writes
-  infinities as `"Inf"` and `"-Inf"`.
+  on standard error, and exits quietly when its output pipe closes. Output to a file or a
+  pipe is UTF-8. JSON output writes infinities as `"Inf"` and `"-Inf"`, CSV as `Inf` and
+  `-Inf`.
 
 ### Fixed
 

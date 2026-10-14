@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import numbers
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import replace
+from decimal import Decimal
 
 from ._model import Channel, LvmFile, Segment
 from ._number import shorten
@@ -98,15 +99,20 @@ def _segment(seg: Segment, delim: str) -> Segment:
 
 
 def _samples(values: object, name: str) -> list[float]:
-    if isinstance(values, (str, bytes, bytearray)) or not isinstance(values, Sequence):
-        raise TypeError(f"samples of {_text(name)} must be a sequence of numbers")
+    """Any iterable of real numbers: a list, a tuple, a NumPy array, a generator."""
+    if isinstance(values, (str, bytes, bytearray)) or not isinstance(values, Iterable):
+        raise TypeError(f"samples of {_text(name)} must be an iterable of numbers")
     return [_number(v, f"a sample of {_text(name)}") for v in values]
 
 
 def _number(value: object, what: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+    """A real number (``int``, ``float``, ``Fraction``, ``Decimal``, NumPy) as a double."""
+    if isinstance(value, bool) or not isinstance(value, (numbers.Real, Decimal)):
         raise TypeError(f"{what} must be a real number, not {type(value).__name__}")
-    return float(value)
+    try:
+        return float(value)
+    except (ArithmeticError, ValueError) as exc:
+        raise ValueError(f"{what} cannot be held in a double: {type(exc).__name__}") from None
 
 
 def _field(value: object, name: str, delim: str) -> None:

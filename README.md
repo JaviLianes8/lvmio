@@ -35,7 +35,8 @@ Python 3.10 or newer. No runtime dependencies.
 ```
 
 `write_lvm(path, data)` and `read_lvm(path)` do the same with files. `data` can be an
-`LvmFile`, one `Segment`, a list of `Channel` objects or a mapping of name to samples:
+`LvmFile`, one `Segment`, a list of `Channel` objects or a mapping of name to samples
+(any iterable of numbers, NumPy arrays included):
 
 ```pycon
 >>> import pathlib, tempfile
@@ -78,8 +79,8 @@ lvmio header old.lvm --encoding cp1252
 cat run.lvm | lvmio header -
 ```
 
-`python -m lvmio` runs the same command. Errors print one line to standard error and exit
-with status 1.
+`python -m lvmio` runs the same command. Reading errors print one line to standard error
+and exit with status 1; invalid arguments exit with status 2.
 
 ## Why
 

@@ -47,6 +47,9 @@ the same file. That holds for every capture except two: `period_decimal.lvm`, wh
 mixed periods into a file that declares a comma (lvmio writes the declared separator
 throughout), and `appended_runs.lvm`, whose repeated file header lvmio does not repeat.
 
+Samples may be given as any iterable of real numbers: a list, a tuple, a `range`, a NumPy
+array or a generator. They are stored as Python floats.
+
 `Multi_Headings` is written as `Yes` when `LvmFile.multi_headings` is true or the file has
 more than one segment. `precision` sets the decimals of the samples, of the X values and of
 `Delta_X` (6 by default, as LabVIEW). With `precision=17` every value in exponent notation
@@ -56,8 +59,9 @@ The writer refuses, before writing anything:
 
 | Error | When |
 | --- | --- |
-| `TypeError` | data that is not an `LvmFile`, `Segment`, list of `Channel` or mapping of `str` to a sequence of numbers; a sample, `x0` or `delta_x` that is not a real number (`bool`, `str` and `Decimal` included); a text field that is not `str`; `precision` that is not an `int` |
-| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with blanks; an empty channel name or one called `X_Value` or `Comment`; an empty `x_dimension`; a comment with a line break; `precision` outside 0 to 17; text the chosen encoding cannot hold |
+| `TypeError` | data that is not an `LvmFile`, `Segment`, list of `Channel` or mapping of `str` to an iterable of numbers; a sample, `x0` or `delta_x` that is not a real number (`int`, `float`, `Fraction`, `Decimal` and NumPy numbers are; `bool`, `str` and `complex` are not); a text field that is not `str`; `precision` that is not an `int` |
+| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with blanks; an empty channel name or one called `X_Value` or `Comment`; an empty `x_dimension`; a comment with a line break; `precision` outside 0 to 17; a number too large for a double (`10**400`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
+| `LookupError` | `write_lvm` with an unknown encoding name |
 
 ## Reading
 
@@ -117,10 +121,17 @@ for files it cannot open, `LookupError` for an unknown encoding name, and `parse
 | --- | --- |
 | `lvmio header FILE [--json]` | the file header fields and the number of segments |
 | `lvmio channels FILE` | per segment, each channel with its unit and sample count |
-| `lvmio dump FILE [--channel NAME] [--segment N] [--format csv\|json] [--time]` | the samples; CSV leaves missing samples empty; JSON writes them as `null` and infinities as `"Inf"` and `"-Inf"` |
+| `lvmio dump FILE [--channel NAME] [--segment N] [--format csv\|json] [--time]` | the samples; CSV leaves missing samples empty and writes infinities as `Inf` and `-Inf`; JSON writes missing samples as `null` and infinities as `"Inf"` and `"-Inf"` |
 
-Every command takes `--encoding` and `-` for standard input. Exit status 0 on success and 1
-on any error, with one line on standard error.
+Every command takes `--encoding` and `-` for standard input. Output sent to a file or a pipe
+is UTF-8. Exit status 0 on success; 1 on any reading error, with one line on standard
+error; 2 for invalid arguments, with argparse's usage message.
+
+## Objects
+
+`Channel`, `Segment` and `LvmFile` are frozen dataclasses: their fields cannot be
+reassigned, but the lists they hold (samples, channels, segments) are ordinary lists, so
+the objects are not hashable. They compare by value.
 
 ## Upgrading from 0.2
 
@@ -141,6 +152,10 @@ on any error, with one line on standard error.
 - New: `format_lvm`, the `x_columns` and `encoding` arguments, `encoding` for `read_lvm`,
   `python -m lvmio` and `--encoding` on the command line.
 - The writer checks its input (see the table above) instead of writing a file that reads
-  back differently.
+  back differently. It now accepts any iterable of real numbers as samples (0.2 took
+  sequences, and also `str` digits and `Decimal` through `float`): `str` and `bool` samples
+  are refused.
+- Separator and `X_Columns` names are accepted in any case and written as LabVIEW spells
+  them (`separator="tab"` writes `Tab`).
 - The command line no longer writes blank lines between CSV rows on Windows and writes
   valid JSON for infinities.

@@ -91,3 +91,35 @@ def test_a_closed_output_pipe_exits_zero_and_silently(cli: list[str], tmp_path: 
         err = proc.stderr.read()
         code = proc.wait()
     assert (code, err) == (0, b"")
+
+
+def test_public_classes_report_the_public_module() -> None:
+    import lvmio
+
+    for name in ("Channel", "LvmError", "LvmFile", "Segment"):
+        assert getattr(lvmio, name).__module__ == "lvmio"
+
+
+def test_a_bad_header_number_names_its_own_line() -> None:
+    import pytest
+
+    from lvmio import LvmError
+
+    lines = format_lvm({"a": [1.0]}).split("\r\n")
+    for key, number in (("X0", 19), ("Delta_X", 20)):
+        assert lines[number - 1].startswith(key + "\t")
+        broken = [*lines[: number - 1], key + "\tabc", *lines[number:]]
+        with pytest.raises(LvmError, match=f"^line {number}: not a number: 'abc'"):
+            parse_lvm("\r\n".join(broken))
+
+
+def test_redirected_output_is_utf8_and_csv_spells_infinity(cli: list[str], tmp_path: Path) -> None:
+    name = "\u6e29\u5ea6"
+    path = tmp_path / "wide.lvm"
+    path.write_bytes(format_lvm({name: [1.0, math.inf, -math.inf]}).encode("utf-8"))
+    dump = run_bytes(cli, "dump", str(path))
+    assert dump.returncode == 0
+    assert dump.stdout.decode("utf-8").split() == [name, "1.0", "Inf", "-Inf"]
+    listing = run_bytes(cli, "channels", str(path))
+    assert listing.returncode == 0
+    assert name + ": 3 samples" in listing.stdout.decode("utf-8")

@@ -114,7 +114,12 @@ def _dump_json(channels: list[Channel], with_time: bool) -> None:
 
 
 def _fmt(value: float) -> str:
-    return "" if math.isnan(value) else repr(value)
+    """A CSV cell: empty for a missing sample, LabVIEW's spelling for infinities."""
+    if math.isnan(value):
+        return ""
+    if math.isinf(value):
+        return "Inf" if value > 0 else "-Inf"
+    return repr(value)
 
 
 def _jsonable(value: float) -> float | str | None:

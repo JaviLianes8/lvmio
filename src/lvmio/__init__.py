@@ -15,6 +15,11 @@ from ._write import format_lvm, write_lvm
 
 __version__ = "1.0.0"
 
+# The public classes show as lvmio.X in reprs, tracebacks and type hints.
+for _public in (Channel, LvmError, LvmFile, Segment):
+    _public.__module__ = __name__
+del _public
+
 __all__ = [
     "Channel",
     "LvmError",

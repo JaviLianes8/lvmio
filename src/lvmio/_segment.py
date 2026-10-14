@@ -51,10 +51,12 @@ def skip_header(cursor: Lines) -> None:
 def parse_segment(cursor: Lines, decimal: str) -> Segment:
     start = cursor.number()
     fields: dict[str, list[str]] = {}
+    where: dict[str, int] = {}
     while cursor.more() and first_token(cursor.current(), cursor.delim) != END:
         parts = cursor.current().split(cursor.delim)
         if parts[0].strip():
             fields[parts[0].strip()] = [p.strip() for p in parts[1:]]
+            where[parts[0].strip()] = cursor.number()
         cursor.advance()
     if not cursor.more():
         raise LvmError(f"line {start}: segment header has no {END} line")
@@ -71,7 +73,7 @@ def parse_segment(cursor: Lines, decimal: str) -> Segment:
         rows.append(cursor.current().split(cursor.delim))
         numbers.append(cursor.number())
         cursor.advance()
-    return _build(columns, fields, rows, numbers, decimal, cursor.delim)
+    return _build(columns, (fields, where), rows, numbers, decimal, cursor.delim)
 
 
 def _layout(columns: list[str]) -> tuple[list[int], int | None]:
@@ -89,12 +91,13 @@ def _layout(columns: list[str]) -> tuple[list[int], int | None]:
 
 def _build(
     columns: list[str],
-    fields: dict[str, list[str]],
+    header_block: tuple[dict[str, list[str]], dict[str, int]],
     rows: list[list[str]],
     numbers: list[int],
     decimal: str,
     delim: str,
 ) -> Segment:
+    fields, where = header_block
     positions, comment_at = _layout(columns)
     shift = 1 if columns[0] == "X_Value" else 0
 
@@ -103,7 +106,6 @@ def _build(
         cell = column - shift
         return values[cell] if 0 <= cell < len(values) and values[cell] != "" else None
 
-    line = min(numbers, default=0)
     channels: list[Channel] = []
     for column in positions:
         data = [_cell(r, column, decimal, n) for r, n in zip(rows, numbers, strict=True)]
@@ -113,8 +115,8 @@ def _build(
                 name=columns[column],
                 data=data,
                 unit=header("Y_Unit_Label", column) or "",
-                x0=0.0 if x0 is None else parse_number(x0, decimal, line),
-                delta_x=1.0 if dx is None else parse_number(dx, decimal, line),
+                x0=0.0 if x0 is None else parse_number(x0, decimal, where["X0"]),
+                delta_x=1.0 if dx is None else parse_number(dx, decimal, where["Delta_X"]),
                 x_dimension=header("X_Dimension", column) or "Time",
             )
         )

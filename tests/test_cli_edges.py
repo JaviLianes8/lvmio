@@ -84,19 +84,3 @@ def test_segment_out_of_range_and_a_directory(cli: list[str], tmp_path: Path) ->
     assert folder.returncode == 1
     assert folder.stderr.startswith("lvmio: error: ")
     assert "Traceback" not in folder.stderr
-
-
-def test_a_closed_output_pipe_exits_quietly(cli: list[str]) -> None:
-    with subprocess.Popen(
-        [*cli, "dump", str(LABVIEW / "numbers.lvm")],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        env=env(),
-    ) as proc:
-        assert proc.stdout is not None and proc.stderr is not None
-        proc.stdout.read(10)
-        proc.stdout.close()
-        err = proc.stderr.read()
-        code = proc.wait()
-    assert b"Traceback" not in err
-    assert code in (0, 1, 120) or code < 0

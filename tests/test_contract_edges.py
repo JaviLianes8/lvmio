@@ -76,9 +76,11 @@ def test_standard_input_utf8_is_not_read_in_the_locale_encoding(cli: list[str]) 
     assert json.loads(result.stdout)["operator"] == "José"
 
 
-def test_a_closed_output_pipe_exits_zero_and_silently(cli: list[str]) -> None:
+def test_a_closed_output_pipe_exits_zero_and_silently(cli: list[str], tmp_path: Path) -> None:
+    big = tmp_path / "big.lvm"
+    big.write_text(format_lvm({"a": [1.5] * 200_000, "b": [2.5] * 200_000}), encoding="ascii")
     with subprocess.Popen(
-        [*cli, "dump", str(LABVIEW / "numbers.lvm")],
+        [*cli, "dump", str(big)],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=env(),

@@ -130,3 +130,28 @@ def format_and_write(folder: Path, encoding: str, operator: str = "lab") -> None
     from lvmio import write_lvm
 
     write_lvm(folder / "w.lvm", {"V": [1.0]}, operator=operator, encoding=encoding)
+
+
+def test_a_stray_header_line_between_rows_is_refused() -> None:
+    text = HEAD + "Channels\t1\n***End_of_Header***\t\nX_Value\tV\n0\t1\nSamples\t5\n"
+    with pytest.raises(LvmError, match="line 8: not a number: 'Samples'"):
+        parse_lvm(text)
+
+
+def test_messages_stay_short_for_unprintable_text() -> None:
+    with pytest.raises(LvmError) as info:
+        parse_lvm(chr(0xE0001) * 1000)
+    assert len(str(info.value)) < 140
+
+
+@pytest.mark.parametrize(
+    ("encoding", "error"),
+    [(chr(0xD800), LookupError), ("utf" + chr(0) + "8", LookupError), (5, TypeError)],
+)
+def test_odd_encoding_arguments_raise_documented_errors(
+    encoding: object, error: type[Exception], tmp_path: Path
+) -> None:
+    path = tmp_path / "a.lvm"
+    path.write_bytes(format_lvm({"V": [1.0]}).encode("ascii"))
+    with pytest.raises(error):
+        read_lvm(path, encoding=encoding)  # type: ignore[arg-type]

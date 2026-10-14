@@ -127,6 +127,9 @@ def _build(
         cell = column - shift
         return values[cell] if 0 <= cell < len(values) and values[cell] != "" else None
 
+    for column in (i for i, name in enumerate(columns[:need]) if name == "X_Value"):
+        for row, number in zip(rows, numbers, strict=True):
+            _cell(row, column, decimal, number)  # an X cell is empty or a number
     channels: list[Channel] = []
     for column in positions:
         data = [_cell(r, column, decimal, n) for r, n in zip(rows, numbers, strict=True)]

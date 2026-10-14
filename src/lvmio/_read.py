@@ -37,10 +37,12 @@ def read_lvm(path: str | os.PathLike[str], *, encoding: str | None = None) -> Lv
 
 def encoding_name(encoding: str) -> str:
     """The encoding as messages show it; ``LookupError`` with a short message if unknown."""
-    name = encoding if len(encoding) <= 40 else shorten(encoding)
+    if not isinstance(encoding, str):
+        raise TypeError(f"encoding must be str, not {type(encoding).__name__}")
+    name = encoding if len(encoding) <= 40 and encoding.isprintable() else shorten(encoding)
     try:
         codecs.lookup(encoding)
-    except LookupError:
+    except (LookupError, ValueError):
         raise LookupError(f"unknown encoding: {name}") from None
     return name
 

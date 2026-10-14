@@ -138,8 +138,10 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
 - The column line decides the layout: an `X_Value` column is never a channel, and a last
   `Comment` column is the comment column. Header cells are matched to channels by column
   position, so `No`, `One` and `Multi` files give the same channels.
-- An empty cell is a missing sample: NaN, and a row whose cells are all empty is a row of
-  NaN; only a line without a separator ends a segment. Every channel of a segment has one
+- An empty cell is a missing sample: NaN, and a line of separators is a row of NaN (also
+  one placed between two segments, which adds a row to the segment before it); only a blank
+  line, without a separator and with nothing but spaces, ends a segment. An X cell must be
+  empty or a number, so a stray header line between data rows is refused. Every channel of a segment has one
   value per data row. The `Samples` and `Channels` counts in the segment header are not used: the column
   line and the data rows decide (LabVIEW's reader follows `Samples` instead; see the
   differences below). A row with fewer cells than the last channel's column is refused, as
@@ -258,7 +260,8 @@ the values LabVIEW was given when it wrote them.
 
 Messages quote at most 40 characters of the offending text. `read_lvm` raises `OSError`
 for files it cannot open (and `ValueError` for a path holding a NUL character, as Python's
-`open` does), `LookupError` for an unknown encoding name, and `parse_lvm` raises
+`open` does), `LookupError` for an unknown or invalid encoding name (`TypeError` when it is
+not a `str`), and `parse_lvm` raises
 `TypeError` for anything but `str`.
 
 ## Command line

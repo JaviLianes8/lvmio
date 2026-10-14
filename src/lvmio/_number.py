@@ -98,6 +98,7 @@ def shorten(text: str, limit: int = 40) -> str:
     >>> shorten("x" * 50, 5)
     "'xxxxx'... (50 characters)"
     """
-    if len(text) <= limit:
+    if len(text) <= limit and len(repr(text)) <= limit + 22:
         return repr(text)
-    return f"{text[:limit]!r}... ({len(text)} characters)"
+    quoted = repr(text[:limit])[: limit + 20]
+    return f"{quoted}... ({len(text)} characters)"

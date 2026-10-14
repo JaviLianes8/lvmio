@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import random
+from decimal import Decimal
 
 EDGES = [
     0.0,
@@ -109,4 +110,35 @@ def ties(seed: int = 77) -> list[list[float]]:
     bounds += [-b for b in bounds]
     values = fixed + scaled + bounds
     values += [0.0] * (-len(values) % 4)
+    return [values[i::4] for i in range(4)]
+
+
+def exponent_ties(seed: int = 711) -> list[list[float]]:
+    """Exact ties in exponent notation: up to twelve per decimal exponent from 7 to 19.
+
+    A tie needs an odd eight-digit integer times a power of ten held exactly in a double,
+    which stops being possible above 1e19.
+    """
+    rng = random.Random(seed)
+    values: list[float] = []
+    for exponent in range(7, 20):
+        found = tries = 0
+        while found < 12 and tries < 200_000:
+            tries += 1
+            exact = Decimal(rng.randrange(1_000_000, 10_000_000) * 10 + 5).scaleb(exponent - 7)
+            value = float(exact)
+            if Decimal(value) == exact:
+                values.append(value if found % 2 else -value)
+                found += 1
+    values += [0.0] * (-len(values) % 4)
+    return [values[i::4] for i in range(4)]
+
+
+def near_ties(seed: int = 712, count: int = 400) -> list[list[float]]:
+    """The doubles nearest to halfway points, over the whole exponent range."""
+    rng = random.Random(seed)
+    values = [9.9999995e-239, 9.9999995e119, 9.99999996e-5, -9.99999996e-5]
+    while len(values) < count:
+        digits = rng.randrange(1_000_000, 10_000_000) * 10 + 5
+        values.append(float(f"{digits}e{rng.randint(-300, 290)}"))
     return [values[i::4] for i in range(4)]

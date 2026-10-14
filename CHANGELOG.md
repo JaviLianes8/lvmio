@@ -24,7 +24,8 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 ### Changed
 
 - Samples are written in LabVIEW's number format: fixed notation when the decimal exponent
-  is from -4 to 6, exponent notation otherwise, exact ties rounded as LabVIEW rounds them,
+  is from -4 to 6, exponent notation otherwise, exact ties rounded as LabVIEW rounds them
+  (the guide notes the one place lvmio's last digit can differ),
   `NaN`, `Inf`, `-Inf`; `X0` keeps 17 significant digits.
 - Comments are written and read with LabVIEW's escapes (`\XX` for control characters,
   `\\` for a backslash), so they may hold any character; a comment is one cell.

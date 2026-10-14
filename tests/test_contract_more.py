@@ -154,7 +154,8 @@ def test_an_empty_x0_cell_means_the_default() -> None:
 
 
 def test_precision_zero_is_accepted() -> None:
-    assert format_lvm({"V": [2.5]}, precision=0).splitlines()[-2] == "0\t2"
+    # The X column keeps six decimals; the sample is rounded to none, ties toward zero.
+    assert format_lvm({"V": [2.5]}, precision=0).splitlines()[-2] == "0.000000\t2"
 
 
 def test_write_lvm_defaults_to_utf8(tmp_path: Path) -> None:

@@ -5,7 +5,7 @@ Typed reader and writer for LabVIEW Measurement (`.lvm`) files, standard library
 `.lvm` is the text format LabVIEW's Write To Measurement File express VI produces. lvmio
 reads those files into frozen dataclasses and writes files in the same layout, byte for
 byte: the files LabVIEW 2026 wrote in the test captures come back unchanged after a read
-and a write (two exceptions are explained in the guide), and LabVIEW's own reader reads
+and a write (the guide explains the few exceptions), and LabVIEW's own reader reads
 lvmio's files with the values that were written.
 
 ## Install
@@ -64,7 +64,8 @@ or `"Multi"`), `precision` (decimals per sample, 6 by default as in LabVIEW) and
   `1.000000E-9`, `NaN`, `Inf`, `-Inf`); empty cells read as NaN.
 - Comments with LabVIEW's escapes (`\09` for a tab, `\\` for a backslash).
 - Text in UTF-8 or in Windows-1252, the code page LabVIEW writes on a Western-European
-  Windows system; `read_lvm` tries UTF-8 first and then Windows-1252.
+  Windows system; `read_lvm` tries UTF-8 first and then Windows-1252. For a file LabVIEW
+  will read, write with `encoding="cp1252"`: LabVIEW reads files in its code page.
 
 Wherever lvmio and LabVIEW's reader both read a value from the test files, it is the same
 value, with one exception that LabVIEW's own writer causes; where LabVIEW reads part of a

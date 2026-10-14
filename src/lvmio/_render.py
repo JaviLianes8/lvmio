@@ -57,7 +57,7 @@ def _segment(seg: Segment, lvm: LvmFile, delim: str, precision: int) -> list[str
     lines += [
         row("X_Dimension", [c.x_dimension for c in chans]),
         row("X0", [format_x0(c.x0, dec) for c in chans]),
-        row("Delta_X", [format_number(c.delta_x, precision, dec) for c in chans]),
+        row("Delta_X", [format_number(c.delta_x, max(precision, 6), dec) for c in chans]),
         delim.join([END, *[""] * width]),
     ]
     names: list[str] = []
@@ -81,4 +81,4 @@ def _x(channel: Channel, index: int, lvm: LvmFile, precision: int) -> str:
     if lvm.x_columns == "No" or index >= len(channel.data):
         return ""
     value = channel.x0 + index * channel.delta_x
-    return format_number(value, precision, lvm.decimal_separator)
+    return format_number(value, max(precision, 6), lvm.decimal_separator)

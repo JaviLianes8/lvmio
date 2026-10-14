@@ -18,11 +18,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from _cases import COMMENTS, numbers, ties
+from _cases import COMMENTS, exponent_ties, near_ties, numbers, ties
 from _hand_inputs import write_hand_inputs
 from _labview_com import LabVIEW, express, read, worker
 from _lvmio_inputs import write_inputs
 
+NEWLINE = chr(10)
 OUT = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "labview2026"
 BASIC = [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
 
@@ -110,6 +111,13 @@ def main(argv: list[str]) -> int:
     target("ties_input.json", "the channels given to LabVIEW for ties.lvm").write_text(
         json.dumps(exact_ties, indent=1) + "\n", encoding="utf-8"
     )
+    for name, values in (("exponent_ties", exponent_ties()), ("near_ties", near_ties())):
+        how = f"express worker VI, {name.replace('_', ' ')}"
+        worker(lv, target(f"{name}.lvm", how), [{"rows": values}], 1)
+        exact = [[value.hex() for value in channel] for channel in values]
+        target(f"{name}_input.json", f"the channels given to LabVIEW for {name}.lvm").write_text(
+            json.dumps(exact, indent=1) + NEWLINE, encoding="utf-8"
+        )
     passes = [{"rows": [[float(i)]], "comment": text} for i, text in enumerate(COMMENTS)]
     worker(lv, target("comments.lvm", "express worker VI, one data set per comment"), passes, 1)
     target("comments_input.json", "the comments given to LabVIEW for comments.lvm").write_text(

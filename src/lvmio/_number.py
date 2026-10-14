@@ -9,6 +9,10 @@ from decimal import ROUND_HALF_DOWN, ROUND_HALF_UP, Decimal
 from ._errors import LvmError
 
 _NUMBER = re.compile(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?")
+# Decimal exponents at which LabVIEW 2026 rounds an exact tie in exponent notation toward
+# zero; at every other exponent it rounds away from zero (measured for 7 to 19, the only
+# exponents where a double can hold a tie exactly).
+_TIES_TOWARD_ZERO = frozenset({11, 16, 17})
 _SPECIAL = {"nan": math.nan, "inf": math.inf, "infinity": math.inf}
 
 
@@ -17,8 +21,9 @@ def format_number(value: float, decimals: int, decimal: str) -> str:
 
     The notation follows ``floor(log10(|value|))`` computed in double precision: fixed
     from -4 to 6, exponent notation (unpadded exponent) otherwise. Fixed notation rounds
-    the exact binary value with ties toward zero, exponent notation with ties away from
-    zero, as LabVIEW 2026 does. NaN and the infinities are ``NaN``, ``Inf`` and ``-Inf``.
+    the exact binary value with ties toward zero; exponent notation rounds ties away from
+    zero, except at the decimal exponents 11, 16 and 17, as LabVIEW 2026 does. NaN and
+    the infinities are ``NaN``, ``Inf`` and ``-Inf``.
 
     >>> format_number(2.5, 6, ".")
     '2.500000'
@@ -40,9 +45,10 @@ def format_number(value: float, decimals: int, decimal: str) -> str:
     if -4 <= exponent < 7:
         text = f"{Decimal(size).quantize(step, rounding=ROUND_HALF_DOWN):f}"
     else:
-        mantissa = Decimal(size).scaleb(-exponent).quantize(step, rounding=ROUND_HALF_UP)
+        mode = ROUND_HALF_DOWN if exponent in _TIES_TOWARD_ZERO else ROUND_HALF_UP
+        mantissa = Decimal(size).scaleb(-exponent).quantize(step, rounding=mode)
         if mantissa >= 10:
-            mantissa = (mantissa / 10).quantize(step, rounding=ROUND_HALF_UP)
+            mantissa = (mantissa / 10).quantize(step, rounding=mode)
             exponent += 1
         text = f"{mantissa:f}E{exponent:+d}"
     text = sign + text

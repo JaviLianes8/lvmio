@@ -37,6 +37,14 @@ def write_inputs(folder: Path) -> dict[str, str]:
             {"operator": "Jos\u00e9", "encoding": "cp1252"},
         ),
         "lvmio_precision.lvm": (LvmFile([Segment([volts, amps])]), {"precision": 9}),
+        "lvmio_utf8_comment.lvm": (
+            LvmFile([Segment([amps], comment="caf" + chr(0xE9) + " " + chr(0x20AC))]),
+            {},
+        ),
+        "lvmio_escaped_comment.lvm": (
+            LvmFile([Segment([amps], comment="a" + chr(9) + "b" + chr(92) + "c" + chr(10) + "d")]),
+            {"encoding": "cp1252"},
+        ),
     }
     made = {}
     for name, (lvm, options) in cases.items():

@@ -53,7 +53,7 @@ LVMIO_READS_LABVIEW_REFUSES = {"-nan", "+NaN", "   ", "read/no_x_value_column.lv
 READ_DIFFERENTLY = {"period_decimal.lvm"}
 # 9999999.9999995 is written by LabVIEW as 10000000,000000, which reads back as 1e7 and is
 # then written as 1,000000E+7: the one place a LabVIEW file does not survive a rewrite.
-REWRITE_BOUNDARY = {"ties.lvm"}
+REWRITE_BOUNDARY = {"ties.lvm", "near_ties.lvm"}
 
 
 def _value(item: float | str) -> float:
@@ -100,6 +100,12 @@ def test_lvmio_reads_what_labview_reads(name: str) -> None:
     assert len(ours) == len(theirs)
     for mine, labview in zip(ours, theirs, strict=True):
         assert _same(mine, labview)
+    if name == "read/lvmio_utf8_comment.lvm":
+        # LabVIEW decodes the file in its code page, so UTF-8 text comes back garbled.
+        written = "caf" + chr(0xE9) + " " + chr(0x20AC)
+        assert segment.comment == written
+        assert first["comment"] == written.encode("utf-8").decode("cp1252")
+        return
     if name == "read/comment_escapes.lvm":
         # LabVIEW turns the malformed codes \zz and a final \4 into NUL; lvmio keeps them.
         assert first["comment"] == "aAb" + TAB + "c" + BACKSLASH + "d" + chr(0)
@@ -157,7 +163,7 @@ def test_every_x_columns_layout_reads_the_same_channels() -> None:
         assert lvm.segments[0].channels[1].time_axis() == [0.0, 1.0, 2.0]
 
 
-@pytest.mark.parametrize("name", ["numbers", "ties"])
+@pytest.mark.parametrize("name", ["numbers", "ties", "exponent_ties"])
 def test_labview_number_format_on_every_captured_value(name: str) -> None:
     inputs = json.loads((HERE / f"{name}_input.json").read_text(encoding="utf-8"))
     channels = [
@@ -169,7 +175,7 @@ def test_labview_number_format_on_every_captured_value(name: str) -> None:
     start_theirs = theirs.index(next(line for line in theirs if line.startswith("X_Value")))
     rows_ours = [r.split("\t")[1:] for r in ours[start_ours + 1 : -2]]
     rows_theirs = [r.split("\t")[1:] for r in theirs[start_theirs + 1 : -2]]
-    assert len(rows_theirs) >= 100
+    assert len(rows_theirs) * len(inputs) >= 156
     assert rows_ours == rows_theirs
 
 
@@ -226,3 +232,52 @@ def test_comments_round_trip_with_labview_escapes() -> None:
     lvm = read_lvm(HERE / "comments.lvm")
     assert [s.comment for s in lvm] == comments
     assert RESULTS["comments.lvm"][0]["comment"] == comments[0]
+
+
+def test_the_largest_values_below_1e_4_also_change_on_a_rewrite() -> None:
+    raw = (HERE / "near_ties.lvm").read_bytes().decode("ascii")
+    again = format_lvm(parse_lvm(raw))
+    pairs = zip(raw.split(CRLF), again.split(CRLF), strict=True)
+    changed = [(a, b) for a, b in pairs if a != b]
+    assert len(changed) == 1
+    before, after = changed[0]
+    assert before.replace("1,000000E-4", "0,000100") == after
+
+
+def test_exact_exponent_ties_follow_labview_at_every_exponent() -> None:
+    inputs = json.loads((HERE / "exponent_ties_input.json").read_text(encoding="utf-8"))
+    values = [float.fromhex(v) for channel in inputs for v in channel]
+    exponents = {math.floor(math.log10(abs(v))) for v in values if v}
+    assert exponents == set(range(7, 20))
+
+
+def _labview_cells(name: str) -> list[tuple[float, str]]:
+    inputs = json.loads((HERE / f"{name}_input.json").read_text(encoding="utf-8"))
+    channels = [[float.fromhex(v) for v in channel] for channel in inputs]
+    lines = (HERE / f"{name}.lvm").read_bytes().decode("ascii").split(CRLF)
+    start = next(i for i, line in enumerate(lines) if line.startswith("X_Value"))
+    rows = [line.split(TAB)[1:] for line in lines[start + 1 :] if line]
+    return [
+        (channel[r], row[c]) for r, row in enumerate(rows) for c, channel in enumerate(channels)
+    ]
+
+
+def test_near_ties_differ_from_labview_only_in_the_last_digit() -> None:
+    from decimal import Decimal
+
+    from lvmio._number import format_number
+
+    differ = [
+        (x, cell) for x, cell in _labview_cells("near_ties") if format_number(x, 6, ",") != cell
+    ]
+    assert len(differ) == 20
+    for value, cell in differ:
+        ours = format_number(value, 6, ",")
+        mantissa_ours, mantissa_theirs = (
+            Decimal(t.split("E")[0].replace(",", ".")) for t in (ours, cell)
+        )
+        exp_ours, exp_theirs = int(ours.split("E")[1]), int(cell.split("E")[1])
+        step = abs(mantissa_ours.scaleb(exp_ours) - mantissa_theirs.scaleb(exp_theirs))
+        assert step == Decimal(1).scaleb(exp_ours - 6) or step == Decimal(1).scaleb(exp_ours - 7)
+        exact = Decimal(abs(value)).scaleb(-math.floor(math.log10(abs(value)))) * 10**6
+        assert abs(exact % 1 - Decimal("0.5")) < Decimal("1e-8")

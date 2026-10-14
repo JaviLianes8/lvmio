@@ -29,14 +29,24 @@ width. The comment of a data set goes in the Comment column of its first row.
 Numbers: the notation follows `e = floor(log10(|x|))` computed in double precision. When
 the value is zero or `e` is from -4 to 6 the sample is written in fixed notation with 6
 decimals, rounding the exact binary value with ties toward zero (`0.0234375` is written
-`0,023437`). Otherwise it is written in exponent notation with 6 decimals in the mantissa,
-rounding with ties away from zero, and an exponent without padding (`10000005` is written
-`1,000001E+7`, `1.5e-7` is `1,500000E-7`). Because `e` is computed in double, the largest
-double below 1e7 is written `1,000000E+7` and the largest below 1e-4 is `0,000100`. NaN is
-`NaN`, the infinities `Inf` and `-Inf`. `X0` has 16 decimals in exponent notation
-(`0,0000000000000000E+0`). The rule matches all 804 values LabVIEW wrote in `numbers.lvm`
-(400 seeded values from subnormals to the largest double) and `ties.lvm` (404 exact ties
-and boundary neighbours).
+`0,023437`). Otherwise it is written in exponent notation with 6 decimals in the mantissa
+and an exponent without padding (`1.5e-7` is `1,500000E-7`). An exact tie in exponent
+notation goes away from zero (`10000005` is written `1,000001E+7`), except at the decimal
+exponents 11, 16 and 17, where LabVIEW rounds it toward zero (`436280450000` is
+`4,362804E+11`); exact ties exist only for exponents 7 to 19, and `exponent_ties.lvm` holds
+twelve for each. Because `e` is computed in double, the largest double below 1e7 is written
+`1,000000E+7` and the largest below 1e-4 is `0,000100`. NaN is `NaN`, the infinities `Inf`
+and `-Inf`. `X0` has 16 decimals in exponent notation (`0,0000000000000000E+0`).
+
+lvmio follows this rule. It matches every value LabVIEW wrote in `numbers.lvm` (400 seeded
+values from subnormals to the largest double), `ties.lvm` (404 exact ties and boundary
+neighbours) and `exponent_ties.lvm` (156 exact ties). It differs from LabVIEW in the last
+digit for doubles that lie within about 1e-17 (relative) of a halfway point without being
+one: LabVIEW does not round those from their exact value, and no rule reproduced it. In
+`near_ties.lvm`, 400 doubles chosen to be the nearest to halfway points, 20 are written one
+unit apart in the seventh digit (`9.9999995e-239` is `9,999999E-239` from LabVIEW and
+`1,000000E-238` from lvmio). Measured values are practically never that close to a halfway
+point.
 
 Comments: the comment of a data set goes in the Comment cell of its first row. LabVIEW
 escapes a backslash as two backslashes and a character below 0x20 as a backslash and two
@@ -53,11 +63,14 @@ the byte `0xE9` for `é`.
 
 `format_lvm` returns the text; `write_lvm` encodes it (UTF-8 unless `encoding` is given)
 and writes it. Both lay a file out as above, so a file read with lvmio and written back is
-the same file. That holds for every capture except three: `period_decimal.lvm`, where
+the same file. That holds for every capture except these: `period_decimal.lvm`, where
 LabVIEW mixed periods into a file that declares a comma (lvmio writes the declared separator
-throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repeat; and
+throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repeat;
 `ties.lvm`, where LabVIEW wrote 9999999.9999995 as `10000000,000000`, which reads back as
-1e7 and is then written `1,000000E+7` (the same holds for lvmio's own output of that value).
+1e7 and is then written `1,000000E+7`; and `near_ties.lvm`, where 9.99999996e-5 is written
+`1,000000E-4`, reads back as 1e-4 and is then written `0,000100`. The same holds for
+lvmio's own output of such values: rounding to seven digits can move a value across a
+notation boundary, so a second write can spell it differently.
 Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment
 is escaped too (`\2C`), so the comment stays one cell.
 
@@ -66,8 +79,13 @@ array or a generator. They are stored as Python floats.
 
 `Multi_Headings` is written as `Yes` when `LvmFile.multi_headings` is true or the file has
 more than one segment. `precision` sets the decimals of the samples, of the X values and of
-`Delta_X` (6 by default, as LabVIEW). With `precision=17` every value in exponent notation
+`Delta_X` (6 by default, as LabVIEW; X values and `Delta_X` never get fewer than 6, so a
+low precision cannot zero the X axis). With `precision=17` every value in exponent notation
 reads back exactly; values written in fixed notation keep 17 decimals.
+
+LabVIEW reads a file in the Windows code page. Text written in UTF-8 (the default) comes
+back garbled in LabVIEW when it is not ASCII (`café` as `cafÃ©`); pass
+`encoding="cp1252"` (or the code page of the LabVIEW machine) when the file is for LabVIEW.
 
 The writer refuses, before writing anything:
 

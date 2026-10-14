@@ -134,7 +134,7 @@ def format_and_write(folder: Path, encoding: str, operator: str = "lab") -> None
 
 def test_a_stray_header_line_between_rows_is_refused() -> None:
     text = HEAD + "Channels\t1\n***End_of_Header***\t\nX_Value\tV\n0\t1\nSamples\t5\n"
-    with pytest.raises(LvmError, match="line 8: not a number: 'Samples'"):
+    with pytest.raises(LvmError, match="line 9: not a number: 'Samples'"):
         parse_lvm(text)
 
 

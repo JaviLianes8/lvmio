@@ -1,0 +1,133 @@
+"""Parse one data segment: its header block, column line and rows."""
+
+from __future__ import annotations
+
+import math
+
+from ._errors import LvmError
+from ._model import Channel, Segment
+from ._number import parse_number
+
+END = "***End_of_Header***"
+_STOP = ("Channels", "LabVIEW Measurement")
+
+
+class Lines:
+    """A position in the file's lines, with the file's delimiter."""
+
+    def __init__(self, lines: list[str], index: int, delim: str) -> None:
+        self.lines, self.index, self.delim = lines, index, delim
+
+    def more(self) -> bool:
+        return self.index < len(self.lines)
+
+    def current(self) -> str:
+        return self.lines[self.index]
+
+    def advance(self) -> None:
+        self.index += 1
+
+    def number(self) -> int:
+        """The 1-based line number of the current line, for messages."""
+        return self.index + 1
+
+
+def is_blank(line: str, delim: str) -> bool:
+    """Whether a line holds nothing but delimiters and spaces."""
+    return not line.replace(delim, "").strip()
+
+
+def first_token(line: str, delim: str) -> str:
+    return line.split(delim, 1)[0].strip()
+
+
+def skip_header(cursor: Lines) -> None:
+    """Skip a repeated file header, which LabVIEW writes when it appends a run."""
+    while cursor.more() and first_token(cursor.current(), cursor.delim) != END:
+        cursor.advance()
+    cursor.advance()
+
+
+def parse_segment(cursor: Lines, decimal: str) -> Segment:
+    start = cursor.number()
+    fields: dict[str, list[str]] = {}
+    while cursor.more() and first_token(cursor.current(), cursor.delim) != END:
+        parts = cursor.current().split(cursor.delim)
+        if parts[0].strip():
+            fields[parts[0].strip()] = [p.strip() for p in parts[1:]]
+        cursor.advance()
+    if not cursor.more():
+        raise LvmError(f"line {start}: segment header has no {END} line")
+    cursor.advance()
+    if not cursor.more() or is_blank(cursor.current(), cursor.delim):
+        raise LvmError(f"line {cursor.number()}: segment has no column line")
+    columns = [p.strip() for p in cursor.current().split(cursor.delim)]
+    cursor.advance()
+    rows: list[list[str]] = []
+    numbers: list[int] = []
+    while cursor.more() and not is_blank(cursor.current(), cursor.delim):
+        if first_token(cursor.current(), cursor.delim) in _STOP:
+            break
+        rows.append(cursor.current().split(cursor.delim))
+        numbers.append(cursor.number())
+        cursor.advance()
+    return _build(columns, fields, rows, numbers, decimal, cursor.delim)
+
+
+def _layout(columns: list[str]) -> tuple[list[int], int | None]:
+    """The column index of every channel, and of the Comment column if any."""
+    last = len(columns)
+    while last and columns[last - 1] == "":
+        last -= 1
+    comment = None
+    if last and columns[last - 1].lower() == "comment":
+        last -= 1
+        comment = last
+    channels = [i for i in range(last) if columns[i] != "X_Value"]
+    return channels, comment
+
+
+def _build(
+    columns: list[str],
+    fields: dict[str, list[str]],
+    rows: list[list[str]],
+    numbers: list[int],
+    decimal: str,
+    delim: str,
+) -> Segment:
+    positions, comment_at = _layout(columns)
+    shift = 1 if columns[0] == "X_Value" else 0
+
+    def header(key: str, column: int) -> str | None:
+        values = fields.get(key, [])
+        cell = column - shift
+        return values[cell] if 0 <= cell < len(values) and values[cell] != "" else None
+
+    line = min(numbers, default=0)
+    channels: list[Channel] = []
+    for column in positions:
+        data = [_cell(r, column, decimal, n) for r, n in zip(rows, numbers, strict=True)]
+        x0, dx = header("X0", column), header("Delta_X", column)
+        channels.append(
+            Channel(
+                name=columns[column],
+                data=data,
+                unit=header("Y_Unit_Label", column) or "",
+                x0=0.0 if x0 is None else parse_number(x0, decimal, line),
+                delta_x=1.0 if dx is None else parse_number(dx, decimal, line),
+                x_dimension=header("X_Dimension", column) or "Time",
+            )
+        )
+    first = positions[0] if positions else shift
+    comment = ""
+    if comment_at is not None and rows and len(rows[0]) > comment_at:
+        comment = delim.join(rows[0][comment_at:])
+    return Segment(channels, header("Date", first) or "", header("Time", first) or "", comment)
+
+
+def _cell(row: list[str], column: int, decimal: str, line: int) -> float:
+    """A data cell: empty or missing means a missing sample (NaN), as LabVIEW reads it."""
+    text = row[column] if column < len(row) else ""
+    if not text.strip(" \t"):
+        return math.nan
+    return parse_number(text, decimal, line)

@@ -14,11 +14,13 @@ import hashlib
 import json
 import math
 import random
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 from _labview_com import LabVIEW, express, read, worker
+from _lvmio_inputs import write_inputs
 
 OUT = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "labview2026"
 BASIC = [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
@@ -50,8 +52,12 @@ def numbers(seed: int = 2026, count: int = 400) -> list[list[float]]:
     return [values[i::4] for i in range(4)]
 
 
-def main() -> int:
+def main(argv: list[str]) -> int:
     lv = LabVIEW()
+    if argv[:1] == ["--append"]:
+        # A second LabVIEW session appending to an existing file repeats the file header.
+        worker(lv, Path(argv[1]), [{"rows": [[7.0, 8.0]], "later_session": True}], 1)
+        return 0
     OUT.mkdir(parents=True, exist_ok=True)
     made: dict[str, str] = {}
 
@@ -112,7 +118,14 @@ def main() -> int:
         "appended_runs.lvm", "express worker VI, a second session appending to the first file"
     )
     worker(lv, appended, [{"rows": BASIC}], 1)
-    worker(lv, appended, [{"rows": [[7.0, 8.0]]}], 1)
+    subprocess.run([sys.executable, __file__, "--append", str(appended)], check=True)
+    worker(
+        lv,
+        target("comment_cp1252.lvm", "express worker VI, a comment outside ASCII"),
+        [{"rows": BASIC, "comment": "café ñ µ €"}],
+        1,
+    )
+    made.update(write_inputs(OUT / "read"))
 
     readback: dict[str, Any] = {}
     sources = sorted((OUT / "read").glob("*.lvm"))
@@ -124,7 +137,9 @@ def main() -> int:
     (OUT / "read_results.json").write_text(json.dumps(readback, indent=1) + "\n", encoding="utf-8")
 
     for source in sources:
-        made[source.relative_to(OUT).as_posix()] = "hand-written input for LabVIEW's reader"
+        made.setdefault(
+            source.relative_to(OUT).as_posix(), "hand-written input for LabVIEW's reader"
+        )
     manifest = {
         "generated_by": f"LabVIEW {lv.version} (Windows x64) through its ActiveX server",
         "locale_decimal": "comma (Spanish regional settings)",
@@ -140,4 +155,4 @@ def _entry(path: Path, how: str) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

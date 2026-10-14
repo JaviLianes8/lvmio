@@ -8,13 +8,13 @@ X_Columns	One
 Time_Pref	Relative
 Operator	Havie
 Date	2026/10/14
-Time	13:50:35,82611846923828125
+Time	13:59:10,4514021873474121094
 ***End_of_Header***	
 	
 Channels	2		
 Samples	3	3	
 Date	2026/10/14	2026/10/14	
-Time	13:50:35,82611846923828125	13:50:35,82611846923828125	
+Time	13:59:10,4514021873474121094	13:59:10,4514021873474121094	
 X_Dimension	Time	Time	
 X0	0,0000000000000000E+0	0,0000000000000000E+0	
 Delta_X	1,000000	1,000000	
@@ -24,10 +24,23 @@ X_Value	Untitled	Untitled 1	Comment
 1,000000	2,500000	5,000000
 2,000000	-3,250000	6,000000
 
+LabVIEW Measurement	
+Writer_Version	2
+Reader_Version	2
+Separator	Tab
+Decimal_Separator	,
+Multi_Headings	Yes
+X_Columns	One
+Time_Pref	Relative
+Operator	Havie
+Date	2026/10/14
+Time	13:59:10,4514021873474121094
+***End_of_Header***	
+	
 Channels	1	
 Samples	2	
 Date	2026/10/14	
-Time	13:50:36,23407745361328125	
+Time	13:59:10,9168887138366699219	
 X_Dimension	Time	
 X0	0,0000000000000000E+0	
 Delta_X	1,000000	

@@ -24,6 +24,7 @@ PUBLIC_API: list[str] = [
     "LvmError",
     "LvmFile",
     "Segment",
+    "format_lvm",
     "parse_lvm",
     "read_lvm",
     "write_lvm",
@@ -114,8 +115,13 @@ def test_lvmfile_iterates_segments_and_reports_multi_headings() -> None:
     assert len(one) == 1
     assert one.multi_headings is False
     two = LvmFile(segments=[Segment([Channel("A", [1.0])]), Segment([Channel("B", [2.0])])])
-    assert two.multi_headings is True
+    assert two.multi_headings is False
     assert [len(seg) for seg in two] == [1, 1]
+    # The writer marks a file with several segments, and the reader reports the field.
+    assert "Multi_Headings\tYes\r\n" in lvmio.format_lvm(two)
+    assert parse_lvm(lvmio.format_lvm(two)).multi_headings is True
+    assert parse_lvm(lvmio.format_lvm(one)).multi_headings is False
+    assert parse_lvm(lvmio.format_lvm(LvmFile(one.segments, multi_headings=True))).multi_headings
 
 
 def test_write_lvm_round_trips_every_input_shape(tmp_path: Path) -> None:

@@ -37,7 +37,7 @@ def format_number(value: float, decimals: int, decimal: str) -> str:
     size = abs(value)
     exponent = math.floor(math.log10(size)) if size else 0
     step = Decimal(1).scaleb(-decimals)
-    if size == 0 or -4 <= exponent < 7:
+    if -4 <= exponent < 7:
         text = f"{Decimal(size).quantize(step, rounding=ROUND_HALF_DOWN):f}"
     else:
         mantissa = Decimal(size).scaleb(-exponent).quantize(step, rounding=ROUND_HALF_UP)

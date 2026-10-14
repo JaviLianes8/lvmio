@@ -116,3 +116,11 @@ def test_a_long_segment_argument_is_not_echoed(cli: list[str], tmp_path: Path) -
     assert result.returncode == 2
     assert len(result.stderr) < 600
     assert "not a segment number" in result.stderr
+
+
+def test_a_data_row_after_a_blank_line_is_named_as_such() -> None:
+    lines = format_lvm({"V": [1.0, 2.0, 3.0]}).split("\r\n")
+    start = next(i for i, line in enumerate(lines) if line.startswith("X_Value"))
+    lines.insert(start + 2, "")
+    with pytest.raises(LvmError, match=f"^line {start + 4}: a data row after a blank line"):
+        parse_lvm("\r\n".join(lines))

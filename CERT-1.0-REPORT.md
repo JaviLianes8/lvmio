@@ -85,8 +85,8 @@ documented writer refusals (`TypeError`, `ValueError`) with nothing written on r
 
 ## Author mutation round (item 18)
 
-Each mutation was applied alone to a fresh clone of the pushed branch on the machine the
-turn system assigned, the suite run with `-x`, no bytecode written (`-B`,
+Each mutation was applied alone to a fresh clone of the pushed branch on a separate build
+machine, the suite run with `-x`, no bytecode written (`-B`,
 `PYTHONDONTWRITEBYTECODE`, `__pycache__` purged before each run), a 900 s limit per
 mutant, and the file restored; the baseline was green before and after. 50 mutations: 41
 killed at once, 8 survived and were killed by new contracts in

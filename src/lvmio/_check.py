@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import math
 import numbers
 from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Set as AbstractSet
 from dataclasses import replace
 from decimal import Decimal
 
@@ -41,20 +43,19 @@ def canonical(lvm: LvmFile) -> LvmFile:
     """Check the layout fields and spell them the way LabVIEW does."""
     separator = _choice(lvm.separator, _SEPARATORS, "separator")
     x_columns = _choice(lvm.x_columns, _X_COLUMNS, "x_columns")
-    if lvm.decimal_separator not in (".", ","):
-        raise ValueError(
-            f"decimal_separator must be '.' or ',', not {_text(lvm.decimal_separator)}"
-        )
-    if separator == "Comma" and lvm.decimal_separator == ",":
+    decimal = _exact(lvm.decimal_separator, "decimal_separator")
+    if decimal not in (".", ","):
+        raise ValueError(f"decimal_separator must be '.' or ',', not {shorten(decimal)}")
+    if separator == "Comma" and decimal == ",":
         raise ValueError("a comma cannot be both the separator and the decimal separator")
-    return replace(lvm, separator=separator, x_columns=x_columns)
+    return replace(lvm, separator=separator, x_columns=x_columns, decimal_separator=decimal)
 
 
 def check_file(lvm: LvmFile) -> LvmFile:
-    """Refuse text that would change the file's layout; return numbers as floats."""
+    """Refuse text that would read back differently; return exact str, list and float copies."""
     delim = "," if lvm.separator == "Comma" else "\t"
-    for name in ("writer_version", "reader_version", "time_pref", "operator", "date", "time"):
-        _field(getattr(lvm, name), name, delim)
+    names = ("writer_version", "reader_version", "time_pref", "operator", "date", "time")
+    text = {name: _field(getattr(lvm, name), name, delim) for name in names}
     if not isinstance(lvm.multi_headings, bool):
         raise TypeError(f"multi_headings must be bool, not {type(lvm.multi_headings).__name__}")
     if not isinstance(lvm.segments, (list, tuple)):
@@ -64,45 +65,55 @@ def check_file(lvm: LvmFile) -> LvmFile:
         if not isinstance(segment, Segment):
             raise TypeError(f"expected Segment objects, got {type(segment).__name__}")
         segments.append(_segment(segment, delim))
-    return replace(lvm, segments=segments)
+    return replace(
+        lvm,
+        segments=segments,
+        writer_version=text["writer_version"],
+        reader_version=text["reader_version"],
+        time_pref=text["time_pref"],
+        operator=text["operator"],
+        date=text["date"],
+        time=text["time"],
+    )
 
 
 def _segment(seg: Segment, delim: str) -> Segment:
-    _field(seg.date, "segment date", delim)
-    _field(seg.time, "segment time", delim)
-    if not isinstance(seg.comment, str):
-        raise TypeError(f"comment must be str, not {type(seg.comment).__name__}")
-    if "\r" in seg.comment or "\n" in seg.comment:
-        raise ValueError(f"comment cannot hold a line break: {shorten(seg.comment)}")
+    date = _field(seg.date, "segment date", delim)
+    time = _field(seg.time, "segment time", delim)
+    comment = _exact(seg.comment, "comment")
     if not isinstance(seg.channels, (list, tuple)):
         raise TypeError(f"channels must be a list, not {type(seg.channels).__name__}")
     channels = []
     for channel in seg.channels:
         if not isinstance(channel, Channel):
             raise TypeError(f"expected Channel objects, got {type(channel).__name__}")
-        _field(channel.name, "channel name", delim)
-        if not channel.name or channel.name.lower() in _RESERVED:
-            raise ValueError(f"channel name {_text(channel.name)} is reserved or empty")
-        _field(channel.unit, "unit", delim)
-        _field(channel.x_dimension, "x_dimension", delim)
-        if not channel.x_dimension:
+        name = _field(channel.name, "channel name", delim)
+        if not name or name.lower() in _RESERVED:
+            raise ValueError(f"channel name {shorten(name)} is reserved or empty")
+        x_dimension = _field(channel.x_dimension, "x_dimension", delim)
+        if not x_dimension:
             raise ValueError("x_dimension cannot be empty")
         channels.append(
-            replace(
-                channel,
-                data=_samples(channel.data, channel.name),
+            Channel(
+                name=name,
+                data=_samples(channel.data, name),
+                unit=_field(channel.unit, "unit", delim),
                 x0=_number(channel.x0, "x0"),
                 delta_x=_number(channel.delta_x, "delta_x"),
+                x_dimension=x_dimension,
             )
         )
-    return replace(seg, channels=channels)
+    if comment and not any(c.data for c in channels):
+        raise ValueError("a comment needs at least one data row to be written in")
+    return Segment(channels, date=date, time=time, comment=comment)
 
 
 def _samples(values: object, name: str) -> list[float]:
-    """Any iterable of real numbers: a list, a tuple, a NumPy array, a generator."""
-    if isinstance(values, (str, bytes, bytearray)) or not isinstance(values, Iterable):
-        raise TypeError(f"samples of {_text(name)} must be an iterable of numbers")
-    return [_number(v, f"a sample of {_text(name)}") for v in values]
+    """Any ordered iterable of real numbers: a list, a tuple, a NumPy array, a generator."""
+    unordered = (str, bytes, bytearray, AbstractSet, Mapping)
+    if isinstance(values, unordered) or not isinstance(values, Iterable):
+        raise TypeError(f"samples of {shorten(name)} must be an ordered iterable of numbers")
+    return [_number(v, f"a sample of {shorten(name)}") for v in values]
 
 
 def _number(value: object, what: str) -> float:
@@ -110,27 +121,32 @@ def _number(value: object, what: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (numbers.Real, Decimal)):
         raise TypeError(f"{what} must be a real number, not {type(value).__name__}")
     try:
-        return float(value)
+        result = float(value)
     except (ArithmeticError, ValueError) as exc:
         raise ValueError(f"{what} cannot be held in a double: {type(exc).__name__}") from None
+    if math.isinf(result) and isinstance(value, Decimal) and value.is_finite():
+        raise ValueError(f"{what} cannot be held in a double: too large")
+    return result
 
 
-def _field(value: object, name: str, delim: str) -> None:
+def _exact(value: object, name: str) -> str:
+    """An exact ``str`` copy, so a subclass cannot change what is checked or written."""
     if not isinstance(value, str):
         raise TypeError(f"{name} must be str, not {type(value).__name__}")
-    if delim in value or "\r" in value or "\n" in value:
-        raise ValueError(f"{name} cannot hold the separator or a line break: {shorten(value)}")
-    if value != value.strip(" \t"):
-        raise ValueError(f"{name} cannot start or end with blanks: {shorten(value)}")
+    return str.__str__(value)
+
+
+def _field(value: object, name: str, delim: str) -> str:
+    text = _exact(value, name)
+    if delim in text or "\r" in text or "\n" in text:
+        raise ValueError(f"{name} cannot hold the separator or a line break: {shorten(text)}")
+    if text != text.strip():
+        raise ValueError(f"{name} cannot start or end with blanks: {shorten(text)}")
+    return text
 
 
 def _choice(value: object, options: dict[str, str], name: str) -> str:
-    if not isinstance(value, str):
-        raise TypeError(f"{name} must be str, not {type(value).__name__}")
-    if value.lower() not in options:
-        raise ValueError(f"{name} must be one of {', '.join(options.values())}: {_text(value)}")
-    return options[value.lower()]
-
-
-def _text(value: object) -> str:
-    return shorten(value) if isinstance(value, str) else type(value).__name__
+    text = _exact(value, name)
+    if text.lower() not in options:
+        raise ValueError(f"{name} must be one of {', '.join(options.values())}: {shorten(text)}")
+    return options[text.lower()]

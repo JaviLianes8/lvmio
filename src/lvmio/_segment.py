@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 
+from ._comment import unescape_comment
 from ._errors import LvmError
 from ._model import Channel, Segment
 from ._number import parse_number
@@ -99,6 +100,10 @@ def _build(
 ) -> Segment:
     fields, where = header_block
     positions, comment_at = _layout(columns)
+    need = max(positions, default=-1) + 1
+    for row, number in zip(rows, numbers, strict=True):
+        if len(row) < need:
+            raise LvmError(f"line {number}: the row has {len(row)} cells, the column line {need}")
     shift = 1 if columns[0] == "X_Value" else 0
 
     def header(key: str, column: int) -> str | None:
@@ -123,13 +128,13 @@ def _build(
     first = positions[0] if positions else shift
     comment = ""
     if comment_at is not None and rows and len(rows[0]) > comment_at:
-        comment = delim.join(rows[0][comment_at:])
+        comment = unescape_comment(rows[0][comment_at])
     return Segment(channels, header("Date", first) or "", header("Time", first) or "", comment)
 
 
 def _cell(row: list[str], column: int, decimal: str, line: int) -> float:
     """A data cell: empty or missing means a missing sample (NaN), as LabVIEW reads it."""
-    text = row[column] if column < len(row) else ""
+    text = row[column]
     if not text.strip(" \t"):
         return math.nan
     return parse_number(text, decimal, line)

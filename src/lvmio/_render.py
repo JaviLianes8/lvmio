@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from ._comment import escape_comment
 from ._model import Channel, LvmFile, Segment
 from ._number import format_number, format_x0
 
@@ -70,7 +71,7 @@ def _segment(seg: Segment, lvm: LvmFile, delim: str, precision: int) -> list[str
             sample = format_number(channel.data[i], precision, dec) if i < len(channel.data) else ""
             cells += [_x(channel, i, lvm, precision), sample] if multi else [sample]
         if i == 0 and seg.comment:
-            cells.append(seg.comment)
+            cells.append(escape_comment(seg.comment, delim))
         lines.append(delim.join(cells))
     return lines
 

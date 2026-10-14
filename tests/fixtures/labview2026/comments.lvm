@@ -1,0 +1,145 @@
+LabVIEW Measurement	
+Writer_Version	2
+Reader_Version	2
+Separator	Tab
+Decimal_Separator	,
+Multi_Headings	Yes
+X_Columns	One
+Time_Pref	Relative
+Operator	Havie
+Date	2026/10/14
+Time	14:46:29,3244905471801757812
+***End_of_Header***	
+	
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,3244905471801757812	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	0,000000	C:\\data\\new\\t1
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,3404917716979980469	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	1,000000	a\\b
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,3554968833923339844	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	2,000000	50% done
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,3739352226257324219	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	3,000000	x,y;z
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,3923974037170410156	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	4,000000	tab\09here
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,408412933349609375	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	5,000000	cr\0Dlf\0Aend
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,4260511398315429688	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	6,000000	\01\1F
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,4415583610534667969	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	7,000000	  padded  
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,4560608863830566407	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	8,000000	quote "q" 'q'
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,4690642356872558594	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	9,000000	\\0D kept
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,4800672531127929688	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	10,000000	Channels
+
+Channels	1	
+Samples	1	
+Date	2026/10/14	
+Time	14:46:29,4901752471923828125	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	11,000000	end\\
+

@@ -76,7 +76,12 @@ def read(lv: LabVIEW, path: Path, limit: int = 6) -> list[dict[str, Any]]:
         conv.Run(False)
         rows = [[_jsonable(v) for v in row] for row in conv.GetControlValue("Array")]
         results.append(
-            {"error": int(error[1]), "channels": rows, "eof": bool(vi.GetControlValue("EOF?"))}
+            {
+                "error": int(error[1]),
+                "channels": rows,
+                "eof": bool(vi.GetControlValue("EOF?")),
+                "comment": str(vi.GetControlValue("Comment")),
+            }
         )
         if results[-1]["eof"] or error[0]:
             break

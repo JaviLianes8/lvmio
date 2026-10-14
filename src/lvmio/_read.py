@@ -6,8 +6,8 @@ import os
 
 from ._errors import LvmError
 from ._model import LvmFile, Segment
-from ._number import shorten
-from ._segment import END, Lines, is_blank, parse_segment, skip_header
+from ._number import parse_number, shorten
+from ._segment import END, Lines, first_token, is_blank, parse_segment, skip_header
 
 _MAGIC = "LabVIEW Measurement"
 
@@ -67,6 +67,8 @@ def parse_lvm(text: str) -> LvmFile:
         raise LvmError(f"not a LabVIEW Measurement file: line 1 is {shorten(lines[0])}")
     header, end, delim = _file_header(lines)
     decimal = header.get("Decimal_Separator") or "."
+    if decimal not in (".", ","):
+        raise LvmError(f"Decimal_Separator must be '.' or ',', not {shorten(decimal)}")
     cursor = Lines(lines, end + 1, delim)
     segments: list[Segment] = []
     while cursor.more():
@@ -76,6 +78,11 @@ def parse_lvm(text: str) -> LvmFile:
         elif line.split(delim)[0].strip() == _MAGIC:
             skip_header(cursor)
         else:
+            if _looks_like_data(line, delim, decimal):
+                raise LvmError(
+                    f"line {cursor.number()}: a data row after a blank line"
+                    " (a blank line ends a segment)"
+                )
             segments.append(parse_segment(cursor, decimal))
     return LvmFile(
         segments=segments,
@@ -113,3 +120,15 @@ def _file_header(lines: list[str]) -> tuple[dict[str, str], int, str]:
 def _key(line: str) -> str:
     """The first token of a line, whichever of tab or comma separates it."""
     return line.replace(",", "\t", 1).split("\t")[0].strip()
+
+
+def _looks_like_data(line: str, delim: str, decimal: str) -> bool:
+    """Whether a line that should open a segment header reads as a data row instead."""
+    token = first_token(line, delim)
+    if not token:
+        return True
+    try:
+        parse_number(token, decimal, 0)
+    except LvmError:
+        return False
+    return True

@@ -13,43 +13,18 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import random
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
+from _cases import COMMENTS, numbers, ties
+from _hand_inputs import write_hand_inputs
 from _labview_com import LabVIEW, express, read, worker
 from _lvmio_inputs import write_inputs
 
 OUT = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "labview2026"
 BASIC = [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
-
-
-def numbers(seed: int = 2026, count: int = 400) -> list[list[float]]:
-    """Seeded magnitudes across the double range plus the format boundaries."""
-    rng = random.Random(seed)
-    edges = [
-        0.0,
-        -0.0,
-        1e-4,
-        9.99999e-5,
-        1e7,
-        9999999.0,
-        9999999.4,
-        9999999.6,
-        0.0001000004,
-        1e-320,
-        5e-324,
-        1.7976931348623157e308,
-        2.2250738585072014e-308,
-        0.5,
-        123.4567895,
-    ]
-    values = edges + [-v for v in edges]
-    while len(values) < count:
-        values.append(rng.choice((-1, 1)) * rng.uniform(1, 10) * 10.0 ** rng.randint(-310, 307))
-    return [values[i::4] for i in range(4)]
 
 
 def main(argv: list[str]) -> int:
@@ -125,6 +100,24 @@ def main(argv: list[str]) -> int:
         [{"rows": BASIC, "comment": "caf\u00e9 \u00f1 \u00b5 \u20ac"}],
         1,
     )
+    worker(
+        lv,
+        target("ties.lvm", "express worker VI, exact rounding ties and notation boundaries"),
+        [{"rows": ties()}],
+        1,
+    )
+    exact_ties = [[value.hex() for value in channel] for channel in ties()]
+    target("ties_input.json", "the channels given to LabVIEW for ties.lvm").write_text(
+        json.dumps(exact_ties, indent=1) + "\n", encoding="utf-8"
+    )
+    passes = [{"rows": [[float(i)]], "comment": text} for i, text in enumerate(COMMENTS)]
+    worker(lv, target("comments.lvm", "express worker VI, one data set per comment"), passes, 1)
+    target("comments_input.json", "the comments given to LabVIEW for comments.lvm").write_text(
+        json.dumps(COMMENTS, indent=1) + "\n", encoding="utf-8"
+    )
+    for stale in (OUT / "read").glob("*.lvm"):
+        stale.unlink()
+    made.update(write_hand_inputs(OUT / "read"))
     made.update(write_inputs(OUT / "read"))
 
     readback: dict[str, Any] = {}
@@ -136,10 +129,6 @@ def main(argv: list[str]) -> int:
     )
     (OUT / "read_results.json").write_text(json.dumps(readback, indent=1) + "\n", encoding="utf-8")
 
-    for source in sources:
-        made.setdefault(
-            source.relative_to(OUT).as_posix(), "hand-written input for LabVIEW's reader"
-        )
     manifest = {
         "generated_by": f"LabVIEW {lv.version} (Windows x64) through its ActiveX server",
         "locale_decimal": "comma (Spanish regional settings)",

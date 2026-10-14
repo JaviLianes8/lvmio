@@ -4,22 +4,32 @@
  "files": {
   "appended_runs.lvm": {
    "size": 1088,
-   "sha256": "f8b6f5bd081b6e1b979a5c12b1a6622952a87be75b90fd5f516cfcb91f04beee",
+   "sha256": "423ecc8ee4dfe13b433647e73202f8e4752d3459026cd34c0f8832e51ee19f4b",
    "how": "express worker VI, a second session appending to the first file"
   },
   "comment_cp1252.lvm": {
    "size": 624,
-   "sha256": "f452798beaf0f1460e05f50a63b0c22a625e4860cac564e03e8cffc12d2d4278",
+   "sha256": "1375c0edcbebde5ec0ef7f76d4c23aa9eabc05aac5b6147cce2cef21b5ca837b",
    "how": "express worker VI, a comment outside ASCII"
+  },
+  "comments.lvm": {
+   "size": 2932,
+   "sha256": "e8dca5258b871e54ad55f0ad0c4ddc3a35997981fe4f82e77eac5df45fe95db4",
+   "how": "express worker VI, one data set per comment"
+  },
+  "comments_input.json": {
+   "size": 196,
+   "sha256": "8ef806ee44fb5ae9ad06d2aebffc001d029ebd93bd7f4f933e5cd798f648e26a",
+   "how": "the comments given to LabVIEW for comments.lvm"
   },
   "express_default.lvm": {
    "size": 588,
-   "sha256": "f63e5eb3cdd961adefd0607ed595b16e7d812da23d1a24ace3a4ad59d491284c",
+   "sha256": "a1e0a8f3838b3a3d251c019b2dc951547196b00add311bb27e359803d1b59a91",
    "how": "Write To Measurement File express VI instance, default configuration"
   },
   "numbers.lvm": {
    "size": 7425,
-   "sha256": "6cce1398b9246d00f7d964f0b418da958ca2cb6acfc5ea1e4ad4024ee64edcb7",
+   "sha256": "f33dbfe5f9eb80c820828977de6ee861b969a392d6f4816e01a689d6e7b90e1e",
    "how": "express worker VI, seeded values over the double range"
   },
   "numbers_input.json": {
@@ -29,18 +39,33 @@
   },
   "period_decimal.lvm": {
    "size": 613,
-   "sha256": "7dc3f1f919f53bac4e3b119a3a08be20feba4b1fbf8a90bf5fe50d2fbd40ed97",
+   "sha256": "6d1f77319fe05aab8e807516ffdd4b97ee8d7ff64dcbd10c3e6485509607e5ed",
    "how": "express worker VI, period chosen as decimal separator on a comma locale"
+  },
+  "read/blank_line_in_rows.lvm": {
+   "size": 380,
+   "sha256": "755b9bb159e60b9f29eac8e2d3e7eccf9ba0b08bcf13804eb7eee76937b619d8",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/comma_separator.lvm": {
    "size": 435,
    "sha256": "50cbc976dd2009c9ce5ddf30fb246302f47e11a1e52bcb523152b1ab49ba526e",
-   "how": "hand-written input for LabVIEW's reader"
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/comment_cells.lvm": {
+   "size": 389,
+   "sha256": "44e245b3fa449391f2545c7a340b50199b9b2b20a3f5afd8e6b9b48ad7eeb3f0",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/comment_escapes.lvm": {
+   "size": 397,
+   "sha256": "8131bde2e0ec675b64d70a9ac53cccdd115c7ce64cf9648a1f25e4f5bc5a8c41",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/decimal_comma.lvm": {
    "size": 443,
    "sha256": "85e34acf61a24de2e149dd7ea570b2e7d061e3c0b1cb7edc6cd669ec3bbd6db8",
-   "how": "hand-written input for LabVIEW's reader"
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/lvmio_comma.lvm": {
    "size": 557,
@@ -85,146 +110,246 @@
   "read/no_x_empty_cells.lvm": {
    "size": 460,
    "sha256": "6eeb24bf49b6b342e9894becb0eca9e6ce26620da3df1ac06e2965edc4a51b19",
-   "how": "hand-written input for LabVIEW's reader"
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/no_x_value_column.lvm": {
+   "size": 405,
+   "sha256": "b43053c76076a1e8b5fbe9fb48b58235e9ac98edebb5d120a1b48852aa249dcb",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/short_row.lvm": {
+   "size": 454,
+   "sha256": "e59ae40e98446069a1d3d19713820270fcf57dac1e14fc80a789794b4db8a182",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/tab_one_x.lvm": {
-   "size": 466,
-   "sha256": "382dd27088990ec2879a1ec029b7dac40e2a43bc26e7c5abd0d8c94c4265a84a",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 462,
+   "sha256": "eaeb167e900d7d254255969234075bf491b6c6a6968dcd5413698ccc796ca8ee",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_00.lvm": {
-   "size": 380,
-   "sha256": "aed35e6e20a474c0be304d82fbe5efbeb398e02c9855cee8046373de40d918c0",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "88c80a67476a52def8b5ee5c74117dea0531aad6355e60a839c14a67bbb71ec1",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_01.lvm": {
-   "size": 380,
-   "sha256": "3a198b6bbdfccb25e46c5131d8f549826bf83238bddfb7cb53da21cdc74a04f9",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "1f5d111db2a82eece1dce8acee6e0f97227a288d45ea4b608026a47652af2a14",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_02.lvm": {
-   "size": 381,
-   "sha256": "8b7007d9aab54b3b11353117eb9b31d0d83d5d95a4dd57100f95e0f76255700b",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 379,
+   "sha256": "f5f0a4955d98f3985bf1cb1db5e3fb8064b3724e9cab31953d621b31deb4a1a7",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_03.lvm": {
-   "size": 380,
-   "sha256": "ef223a3a7b296c002127ea95eccaac064d819a516bedc3888a0b127b9bdc839a",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "0ba876b2f096d70908ad5297ffec0317f73e1f4c91d8e1c04688aa3793e57691",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_04.lvm": {
-   "size": 380,
-   "sha256": "b92fd6a6297a05836e486357991601d55ee624fdcb41882296536e44d483516f",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "55c44d86144aa57a1e1ed996471b2572707324d2a227d18075f7bc6c26aaea46",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_05.lvm": {
-   "size": 381,
-   "sha256": "2a2c74101a5f083f6e89720c514e19efd4bec80be0f04a30fc37e741b05598cd",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 379,
+   "sha256": "9de03f9a1253930132ed0811a5f9a21c31a5cc7dca8e0cf6d032da1eb396d54c",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_06.lvm": {
-   "size": 379,
-   "sha256": "3336324aab3c293a4dff35181872be339e444819a962888876df78baf53ccbbb",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 377,
+   "sha256": "862ec6701c7619f435240a4b2394d8a3f0659f5692fd2b5e6363130501393a86",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_07.lvm": {
-   "size": 379,
-   "sha256": "2b87beead5c1b22ec3fe6fff6777f5105c0d36780d30f0c16a13b7be0bf7313f",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 377,
+   "sha256": "8b17dd32eb84b89f27fbb2a20be295416930f1a7590ad04eefc50d90f2e2a85a",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_08.lvm": {
-   "size": 379,
-   "sha256": "c9095fe86dff0615f87febdc9075ab0a0e6716d511988184577f34864842d3b4",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 377,
+   "sha256": "81bbc83e725d9e4e993a6e7896ace2ddd8201dba33788f0592c8bc93427475ff",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_09.lvm": {
-   "size": 383,
-   "sha256": "d21f6a0da4df6ece806911bd867dca45f3f5625172f795e1678be2f87b12b8a7",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 381,
+   "sha256": "c8df3e952b4efd36f55c6adf77c7f12e154aef5a4275ac62d4c5f774429e84a0",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_10.lvm": {
-   "size": 383,
-   "sha256": "c0c4fd7542b7c5e3ab9fdd0a72918030805d38d8133c4ecf7dbfac201df209d4",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 381,
+   "sha256": "5e09385eb2ec4e579c6269315e94801ede7070a43e6b7d93fe401078d9232070",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_11.lvm": {
-   "size": 383,
-   "sha256": "f452c86e5c5115f17595def93cda312f8a0da966807a06e25cfbe0dbfd2d3d35",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 381,
+   "sha256": "7be16af4daef95d437e4a8390f95f26d7827fcd5abdd1aa8b5660218307630a4",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_12.lvm": {
-   "size": 381,
-   "sha256": "efd31c45fb5e72a86bb6332fa3f94dca64826fdc4d7cc55761fc9fa8f79bcf4c",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 379,
+   "sha256": "477e9997f5f69472617c2ee7fc5bc1a7f2c2686611929208276f59391e1e8a7e",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_13.lvm": {
-   "size": 380,
-   "sha256": "a86754e6496217e981827e5b2968a224425a83a29c56c4048328487d746b1d94",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "e287246531f334f1976d5b4cacb8099093b46e4daa7a1cc9f9a78fe740cfe088",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_14.lvm": {
-   "size": 380,
-   "sha256": "ac38f7098b78bbfb63a3081acd5ac94a89b158e3b7b96d81f9a3b57112d97683",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "1470ea1e0adb3199810a07c47f5b43d67e2a590051540e248d9523db5e37401d",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_15.lvm": {
-   "size": 380,
-   "sha256": "f1bb801a320e9cb11d877efcb93d827877fd72430094e0403d833627ff52a826",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "03a6dfb9d0e5057de952330c779a9fefe2d5ccd5f88a0bcc15197830ff70dd3e",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_16.lvm": {
-   "size": 380,
-   "sha256": "41e0267439454327a4a73cdbc9d03fe5c77612367f0ca20339ef8f36955c8c44",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 378,
+   "sha256": "78ed727a2a4f54e6c30ff171df41345dc093b148856b1c1e850b3d1e3dc7504a",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_17.lvm": {
-   "size": 385,
-   "sha256": "40e5dc42ce20e5dff9cba71696a7b4b7cf6231c89b1c86bbff4976589a46523d",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 383,
+   "sha256": "771a1151c6e90675ca95837421f84bb30ff22e5430a5617b4603c6d0e0741b4d",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_18.lvm": {
-   "size": 382,
-   "sha256": "7d9bf6507df1457c071aabcd4fbc92e831496d44e3186d7002888ba11aceb1f1",
-   "how": "hand-written input for LabVIEW's reader"
+   "size": 380,
+   "sha256": "e6ab77817c4a3b376907ae299dd4876211aa4dd6955f1dfa611108dc177da934",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/token_19.lvm": {
+   "size": 379,
+   "sha256": "a67c435bbd9f2318a6240a4988c1861066500622f9b6c1197f13717ac0e1484d",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_20.lvm": {
+   "size": 379,
+   "sha256": "c1c2df226c63d02e89e9ad86a0020c83af24b1a11f13248b8c9d511d8ef4edbe",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_21.lvm": {
+   "size": 379,
+   "sha256": "55e73e80186511917059c16654a60d4ab74a731c0de0b2dcc15c82fb00f5dc18",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_22.lvm": {
+   "size": 378,
+   "sha256": "212ec0c5e6985b8fa58ab8d67b370a8d547812c984ca8ac11aff4fba242f207a",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_23.lvm": {
+   "size": 379,
+   "sha256": "889c9548c55e360e1e23b59be01593ee27795db20644358f338c6e1bb4e9a2f7",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_24.lvm": {
+   "size": 378,
+   "sha256": "8c47615a11003775721a95b0b7289e58a44a7fd7ad09fee3b670dab125c4550a",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_25.lvm": {
+   "size": 379,
+   "sha256": "22aa5cc4e4ba4c900ada2e48af19537665a4af5d4d3c20f792e1ac9a72c23012",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_26.lvm": {
+   "size": 379,
+   "sha256": "f87c1dcdd7c908fb167f95357cab5018293f6e65db3a8a6c1bc7e2b86eb24642",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_27.lvm": {
+   "size": 380,
+   "sha256": "fc5536901b0804f55abf7c9a24239d742c13a78aed009adb02997840b1b6289d",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_28.lvm": {
    "size": 381,
-   "sha256": "c0c5712f3b796aa58af4013858d6b3bf1196f1e77e50a49b3ba456429fab43c4",
-   "how": "hand-written input for LabVIEW's reader"
+   "sha256": "644b61888fe23be310a51c622b12ae5c48fbbebfe57b6cb7268a7952ed54f97c",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_29.lvm": {
+   "size": 383,
+   "sha256": "0ecf30450e5c48999ec01a7cc40b8b72099c4e6ebf746e384eea018d74a37fc7",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_30.lvm": {
+   "size": 378,
+   "sha256": "bf10bcc75fad17023022c3f283162a555d77a2bc66b61bd1186eea4f2818ae81",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_31.lvm": {
+   "size": 380,
+   "sha256": "cfcae7e65e4b25a6f388d72b34e80798099b4a44f7ddc29c8831673231ade4e2",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_32.lvm": {
+   "size": 383,
+   "sha256": "6896ac3870a4ad65686369ae5a272576b503be005a042e806fc1715869de1436",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_33.lvm": {
+   "size": 384,
+   "sha256": "1bd66db8e925b59ec4e35ef967fe2e292226d5de2002f37faecaf2a600fec488",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_34.lvm": {
+   "size": 378,
+   "sha256": "c4f7b9260ebaf5702c9094f375db9d0c5f376fea1abdb5f37a88ad177beefacb",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
+  },
+  "read/token_35.lvm": {
+   "size": 379,
+   "sha256": "b498cac0f645f555e485f10739ef2acfe9a7338eddb2ad938ec8a5f61ac40997",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read/two_segments.lvm": {
    "size": 603,
-   "sha256": "5d23d4bd5c17265a2eca84d8b9bf3476c08e0c770f84af002a325cd9614646d8",
-   "how": "hand-written input for LabVIEW's reader"
+   "sha256": "9d3b3dd17d701f3621d46c27f86b5705142b44d62b6081bdcfc3732bdcf82d0a",
+   "how": "hand-written input for LabVIEW's reader (scripts/_cases.py)"
   },
   "read_results.json": {
-   "size": 15769,
-   "sha256": "f8202a3689d3df1fd74f56d28ea26f712536b06ad8311b748b556fc7eff92a49",
+   "size": 27582,
+   "sha256": "2d4121f901eda10e2253bdc823fa9dd98aa47d44c42fdb177aec590e07c62559",
    "how": "what LabVIEW's Read From Measurement File returns for each .lvm here"
   },
   "segments.lvm": {
-   "size": 1302,
-   "sha256": "06b6d1bc8c5179119a38b0405bedbf738f40eff3cc156a59a5cd8e91a5e6517c",
+   "size": 1292,
+   "sha256": "a50236ade475c81ea95102baf1970713b6adef0c149c803d098d3ddc7be69f6b",
    "how": "express worker VI, three appends in one session"
   },
   "specials.lvm": {
    "size": 599,
-   "sha256": "60274ecec6adbf17e6a5e68277addb017b564a97a5874c285201b12050dcd872",
+   "sha256": "b8e721c003765966050b6defe32f73ea8c1c0ee90b6c7bcb2ccec2ca84bec383",
    "how": "express worker VI, NaN, infinities and signed zero"
+  },
+  "ties.lvm": {
+   "size": 6602,
+   "sha256": "9b1c7ae214dfebf8f5b578e770b0112b4001cfcf1ca194fe05a7c26bee5f2a2d",
+   "how": "express worker VI, exact rounding ties and notation boundaries"
+  },
+  "ties_input.json": {
+   "size": 11275,
+   "sha256": "c0a03bb965c0dbb6fc7ea9e8e49656c7cf0fcdfd2a24b5470e928e696108bcc0",
+   "how": "the channels given to LabVIEW for ties.lvm"
   },
   "x_columns_multi.lvm": {
    "size": 658,
-   "sha256": "c1e91783ea14a1fda55efcc3e867822195914e9a6d5baa5bc0c04658018d7ec2",
+   "sha256": "6b4801eaa3b2fbedaf3bdf47cb9b1461372b9f2207a5c8a5c5be634d0aafeab7",
    "how": "express worker VI, X columns code 2"
   },
   "x_columns_no.lvm": {
-   "size": 573,
-   "sha256": "e9904814810285caa9c7db18be41ffdee96c877cc30ec88e34a46081ef4c25d8",
+   "size": 582,
+   "sha256": "c91a64cbbad4432bcd86fb9da84820c42570f0f80074ba69d5f606783f215aa1",
    "how": "express worker VI, X columns code 0"
   },
   "x_columns_one.lvm": {
-   "size": 613,
-   "sha256": "5b5535c4effe61996868793d0478b4b16d7701935369a4709bd2f246c0a5ca2e",
+   "size": 601,
+   "sha256": "9146f82d15e41aa70008c03e07fe02fa44236237199f16d42a40f598517d352d",
    "how": "express worker VI, X columns code 1"
   }
  }

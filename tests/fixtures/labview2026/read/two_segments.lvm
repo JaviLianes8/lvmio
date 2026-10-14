@@ -30,7 +30,7 @@ Date	2026/10/14
 Time	10:00:00
 Y_Unit_Label	mA
 X_Dimension	Time
-X0	5
+X0	0
 Delta_X	0.25
 ***End_of_Header***	
 X_Value	C	Comment

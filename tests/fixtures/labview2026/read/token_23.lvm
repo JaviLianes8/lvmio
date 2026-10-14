@@ -1,0 +1,25 @@
+LabVIEW Measurement	
+Writer_Version	2
+Reader_Version	2
+Separator	Tab
+Decimal_Separator	.
+Multi_Headings	No
+X_Columns	One
+Time_Pref	Relative
+Operator	tester
+Date	2026/10/14
+Time	10:00:00
+***End_of_Header***	
+
+Channels	1	
+Samples	2
+Date	2026/10/14
+Time	10:00:00
+Y_Unit_Label	
+X_Dimension	Time
+X0	0
+Delta_X	1
+***End_of_Header***	
+X_Value	S	Comment
+0	1
+1	1.5e

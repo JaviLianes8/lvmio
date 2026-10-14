@@ -18,6 +18,7 @@ MODULES = [
     "lvmio._check",
     "lvmio._cli",
     "lvmio._cli_output",
+    "lvmio._comment",
     "lvmio._errors",
     "lvmio._model",
     "lvmio._number",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import re
+from decimal import ROUND_HALF_DOWN, ROUND_HALF_UP, Decimal
 
 from ._errors import LvmError
 
@@ -14,13 +15,17 @@ _SPECIAL = {"nan": math.nan, "inf": math.inf, "infinity": math.inf}
 def format_number(value: float, decimals: int, decimal: str) -> str:
     """Format a sample the way LabVIEW's measurement file writer does.
 
-    Fixed notation for zero and magnitudes from 1e-4 up to 1e7, exponent notation
-    with an unpadded exponent otherwise, and ``NaN``, ``Inf`` and ``-Inf``.
+    The notation follows ``floor(log10(|value|))`` computed in double precision: fixed
+    from -4 to 6, exponent notation (unpadded exponent) otherwise. Fixed notation rounds
+    the exact binary value with ties toward zero, exponent notation with ties away from
+    zero, as LabVIEW 2026 does. NaN and the infinities are ``NaN``, ``Inf`` and ``-Inf``.
 
     >>> format_number(2.5, 6, ".")
     '2.500000'
     >>> format_number(1.5e-7, 6, ",")
     '1,500000E-7'
+    >>> format_number(0.0234375, 6, "."), format_number(10000005.0, 6, ".")
+    ('0.023437', '1.000001E+7')
     >>> format_number(float("-inf"), 6, ".")
     '-Inf'
     """
@@ -28,11 +33,19 @@ def format_number(value: float, decimals: int, decimal: str) -> str:
         return "NaN"
     if math.isinf(value):
         return "Inf" if value > 0 else "-Inf"
-    if value == 0 or 1e-4 <= abs(value) < 1e7:
-        text = f"{value:.{decimals}f}"
+    sign = "-" if math.copysign(1.0, value) < 0 else ""
+    size = abs(value)
+    exponent = math.floor(math.log10(size)) if size else 0
+    step = Decimal(1).scaleb(-decimals)
+    if size == 0 or -4 <= exponent < 7:
+        text = f"{Decimal(size).quantize(step, rounding=ROUND_HALF_DOWN):f}"
     else:
-        mantissa, exponent = f"{value:.{decimals}E}".split("E")
-        text = f"{mantissa}E{int(exponent):+d}"
+        mantissa = Decimal(size).scaleb(-exponent).quantize(step, rounding=ROUND_HALF_UP)
+        if mantissa >= 10:
+            mantissa = (mantissa / 10).quantize(step, rounding=ROUND_HALF_UP)
+            exponent += 1
+        text = f"{mantissa:f}E{exponent:+d}"
+    text = sign + text
     return text if decimal == "." else text.replace(".", decimal)
 
 

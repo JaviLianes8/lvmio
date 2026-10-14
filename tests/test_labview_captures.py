@@ -25,10 +25,35 @@ RESULTS: dict[str, list[dict[str, Any]]] = json.loads(
 )
 WRITTEN = sorted(p.name for p in HERE.glob("*.lvm"))
 BASIC = [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
-# LabVIEW reads these by their longest numeric prefix; lvmio refuses them instead.
-REFUSED_BY_LVMIO = {"0x10", "1_0", "1,5", "2.5V"}
+CRLF, TAB, BACKSLASH = "\r\n", "\t", chr(92)
+# LabVIEW reads these cells by their longest numeric prefix (or a blank line as a row);
+# lvmio refuses them instead of returning part of the text. GUIDE.md lists them.
+LABVIEW_READS_LVMIO_REFUSES = {
+    "0x10",
+    "1_0",
+    "1,5",
+    "2.5V",
+    "1.5e",
+    "1d5",
+    "Inf5",
+    "NaN1",
+    "1E5.5",
+    "1.#INF",
+    "nan(ind)",
+    "0b1",
+    "1e5e5",
+    "Infinite",
+    "infinityx",
+    "1 2",
+    "read/blank_line_in_rows.lvm",
+}
+# LabVIEW refuses these (error 100); lvmio reads them. GUIDE.md lists them.
+LVMIO_READS_LABVIEW_REFUSES = {"-nan", "+NaN", "   ", "read/no_x_value_column.lvm"}
 # LabVIEW's reader truncates its own writer's periods in a file declaring a comma.
 READ_DIFFERENTLY = {"period_decimal.lvm"}
+# 9999999.9999995 is written by LabVIEW as 10000000,000000, which reads back as 1e7 and is
+# then written as 1,000000E+7: the one place a LabVIEW file does not survive a rewrite.
+REWRITE_BOUNDARY = {"ties.lvm"}
 
 
 def _value(item: float | str) -> float:
@@ -49,17 +74,24 @@ def test_every_capture_matches_its_manifest(name: str) -> None:
     assert (len(data), hashlib.sha256(data).hexdigest()) == (entry["size"], entry["sha256"])
 
 
+def _key(name: str) -> str:
+    """A token file is known by its cell, any other file by its name."""
+    if not name.startswith("read/token_"):
+        return name
+    lines = [line for line in (HERE / name).read_bytes().decode("utf-8").split(CRLF) if line]
+    return lines[-1].split(TAB)[1]
+
+
 @pytest.mark.parametrize("name", sorted(n for n in RESULTS if n not in READ_DIFFERENTLY))
 def test_lvmio_reads_what_labview_reads(name: str) -> None:
-    first = RESULTS[name][0]
-    token = _token(name)
-    if first["error"]:
+    first, key = RESULTS[name][0], _key(name)
+    if key in LABVIEW_READS_LVMIO_REFUSES:
+        assert first["error"] == 0
         with pytest.raises(LvmError):
             read_lvm(HERE / name)
         return
-    if token in REFUSED_BY_LVMIO:
-        with pytest.raises(LvmError, match="not a number"):
-            read_lvm(HERE / name)
+    if first["error"]:
+        assert key in LVMIO_READS_LABVIEW_REFUSES or _refused(name), key
         return
     segment = read_lvm(HERE / name).segments[0]
     width = max((len(c) for c in first["channels"]), default=0)
@@ -68,20 +100,32 @@ def test_lvmio_reads_what_labview_reads(name: str) -> None:
     assert len(ours) == len(theirs)
     for mine, labview in zip(ours, theirs, strict=True):
         assert _same(mine, labview)
+    if name == "read/comment_escapes.lvm":
+        # LabVIEW turns the malformed codes \zz and a final \4 into NUL; lvmio keeps them.
+        assert first["comment"] == "aAb" + TAB + "c" + BACKSLASH + "d" + chr(0)
+        assert (
+            segment.comment
+            == "aAb" + TAB + "c" + BACKSLASH + "d" + BACKSLASH + "zz" + BACKSLASH + "4"
+        )
+        return
+    assert segment.comment == first["comment"]
 
 
-def _token(name: str) -> str | None:
-    if not name.startswith("read/token_"):
-        return None
-    return (HERE / name).read_bytes().decode("utf-8").split("\r\n")[-2].split("\t")[1]
+def _refused(name: str) -> bool:
+    try:
+        read_lvm(HERE / name)
+    except LvmError:
+        return True
+    return False
 
 
-def test_the_refused_spellings_are_exactly_the_ones_labview_reads_in_part() -> None:
-    tokens = {_token(n) for n in RESULTS if n.startswith("read/token_")}
-    assert tokens >= REFUSED_BY_LVMIO
-    for name in RESULTS:
-        if _token(name) in REFUSED_BY_LVMIO:
-            assert RESULTS[name][0]["error"] == 0
+def test_the_one_sided_lists_are_all_in_the_captures() -> None:
+    keys = {_key(n): n for n in RESULTS}
+    for key in LABVIEW_READS_LVMIO_REFUSES | LVMIO_READS_LABVIEW_REFUSES:
+        assert key in keys, key
+    for key in LVMIO_READS_LABVIEW_REFUSES:
+        assert RESULTS[keys[key]][0]["error"] == 100
+        read_lvm(HERE / keys[key])
 
 
 def test_a_period_in_a_comma_file_is_read_as_the_decimal_point() -> None:
@@ -92,7 +136,8 @@ def test_a_period_in_a_comma_file_is_read_as_the_decimal_point() -> None:
 
 
 @pytest.mark.parametrize(
-    "name", [n for n in WRITTEN if n not in ("period_decimal.lvm", "appended_runs.lvm")]
+    "name",
+    [n for n in WRITTEN if n not in {"period_decimal.lvm", "appended_runs.lvm", *REWRITE_BOUNDARY}],
 )
 def test_rewriting_a_labview_file_gives_back_its_exact_bytes(name: str) -> None:
     raw = (HERE / name).read_bytes().decode("cp1252")
@@ -112,18 +157,19 @@ def test_every_x_columns_layout_reads_the_same_channels() -> None:
         assert lvm.segments[0].channels[1].time_axis() == [0.0, 1.0, 2.0]
 
 
-def test_labview_number_format_on_400_seeded_values() -> None:
-    inputs = json.loads((HERE / "numbers_input.json").read_text(encoding="utf-8"))
+@pytest.mark.parametrize("name", ["numbers", "ties"])
+def test_labview_number_format_on_every_captured_value(name: str) -> None:
+    inputs = json.loads((HERE / f"{name}_input.json").read_text(encoding="utf-8"))
     channels = [
         lvmio.Channel(f"c{i}", [float.fromhex(v) for v in ch]) for i, ch in enumerate(inputs)
     ]
     ours = format_lvm(channels, decimal_separator=",").split("\r\n")
-    theirs = (HERE / "numbers.lvm").read_bytes().decode("ascii").split("\r\n")
+    theirs = (HERE / f"{name}.lvm").read_bytes().decode("ascii").split("\r\n")
     start_ours = ours.index(next(line for line in ours if line.startswith("X_Value")))
     start_theirs = theirs.index(next(line for line in theirs if line.startswith("X_Value")))
     rows_ours = [r.split("\t")[1:] for r in ours[start_ours + 1 : -2]]
     rows_theirs = [r.split("\t")[1:] for r in theirs[start_theirs + 1 : -2]]
-    assert len(rows_theirs) == 100
+    assert len(rows_theirs) >= 100
     assert rows_ours == rows_theirs
 
 
@@ -161,3 +207,22 @@ def test_the_express_vi_default_file() -> None:
     assert (lvm.x_columns, lvm.decimal_separator, lvm.separator) == ("No", ",", "Tab")
     assert [c.data for c in lvm.segments[0]] == BASIC
     assert [c.unit for c in lvm.segments[0]] == ["", ""]
+
+
+def test_the_rewrite_boundary_is_the_only_difference_in_ties() -> None:
+    raw = (HERE / "ties.lvm").read_bytes().decode("ascii")
+    again = format_lvm(parse_lvm(raw))
+    pairs = zip(raw.split(CRLF), again.split(CRLF), strict=True)
+    changed = [(a, b) for a, b in pairs if a != b]
+    # The row holding 9999999.9999995 and the row holding its negative, nothing else.
+    assert len(changed) == 2
+    for before, after in changed:
+        assert "10000000,000000" in before and "1,000000E+7" in after
+        assert before.replace("10000000,000000", "1,000000E+7") == after
+
+
+def test_comments_round_trip_with_labview_escapes() -> None:
+    comments = json.loads((HERE / "comments_input.json").read_text(encoding="utf-8"))
+    lvm = read_lvm(HERE / "comments.lvm")
+    assert [s.comment for s in lvm] == comments
+    assert RESULTS["comments.lvm"][0]["comment"] == comments[0]

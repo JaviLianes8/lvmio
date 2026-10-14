@@ -80,3 +80,28 @@ def test_the_header_text_escapes_a_description_with_a_line_break(
     out = capsys.readouterr().out
     assert "description: line1" + chr(92) + "0Asegments: 99" in out
     assert out.count("segments:") == 2
+
+
+def test_a_comment_on_a_later_row_starts_a_segment_even_when_x_continues() -> None:
+    first = Segment([Channel("V", [1.0, 2.0])], comment="c1")
+    text = format_lvm(first, x_columns="One").replace(
+        "1.000000\t2.000000", "1.000000\t2.000000\tc2"
+    )
+    lvm = parse_lvm(text)
+    assert [(s.comment, s.channels[0].x0, s.channels[0].data) for s in lvm] == [
+        ("c1", 0.0, [1.0]),
+        ("c2", 1.0, [2.0]),
+    ]
+
+
+def test_every_x_column_of_a_multi_file_is_checked() -> None:
+    from lvmio import LvmError
+
+    text = format_lvm([Channel("A", [1.0]), Channel("B", [2.0])], x_columns="Multi")
+    lines = text.split("\r\n")
+    row = lines.index(next(x for x in lines if x.startswith("X_Value"))) + 1
+    cells = lines[row].split("\t")
+    cells[2] = "abc"
+    lines[row] = "\t".join(cells)
+    with pytest.raises(LvmError, match="not a number: 'abc'"):
+        parse_lvm("\r\n".join(lines))

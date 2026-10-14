@@ -122,7 +122,7 @@ def main(argv: list[str]) -> int:
     worker(
         lv,
         target("comment_cp1252.lvm", "express worker VI, a comment outside ASCII"),
-        [{"rows": BASIC, "comment": "café ñ µ €"}],
+        [{"rows": BASIC, "comment": "caf\u00e9 \u00f1 \u00b5 \u20ac"}],
         1,
     )
     made.update(write_inputs(OUT / "read"))

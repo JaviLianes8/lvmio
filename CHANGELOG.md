@@ -6,6 +6,48 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-14
+
+The public API is now stable: `Channel`, `Segment`, `LvmFile`, `LvmError`, `parse_lvm`,
+`read_lvm`, `format_lvm` and `write_lvm`, and the `lvmio` command. Reading and writing follow
+files that LabVIEW 2026 wrote and read; the guide describes the format and the upgrade.
+
+### Added
+
+- `format_lvm(data, ...)` returns the text that `write_lvm` writes.
+- `x_columns` argument for the writer; `X_Columns` `Multi` is read and written.
+- `encoding` argument for `read_lvm` and `write_lvm`; `read_lvm` reads Windows-1252 files,
+  which LabVIEW writes on Western-European Windows systems.
+- `Segment.comment`, the comment of a data set.
+- `python -m lvmio`, and `--encoding` on every command.
+
+### Changed
+
+- Samples are written in LabVIEW's number format (fixed notation from 1e-4 to 1e7, exponent
+  notation otherwise, `NaN`, `Inf`, `-Inf`); `X0` keeps 17 significant digits.
+- The file layout matches LabVIEW's writer: `X_Value` always heads the column line, header
+  lines are padded the same way, `Y_Unit_Label` is left out when no channel has a unit, and
+  a line with the separator follows the file header.
+- `LvmFile.multi_headings` is a field read from the file instead of a property computed from
+  the number of segments. The writer still writes `Yes` for more than one segment.
+- Number cells must be whole numbers: `1_0`, `0x10`, `2.5V` and Unicode digits raise
+  `LvmError` (0.2 read `1_0` as 10). A period is also read as the decimal point in a file
+  declaring a comma, as LabVIEW writes such files.
+- A file header or segment header without `***End_of_Header***` raises `LvmError`.
+- The writer refuses data it cannot write faithfully (`TypeError` or `ValueError`, see the
+  guide) and writes nothing in that case.
+- Error messages give the line number and quote at most 40 characters.
+- The command line reads standard input as bytes, catches every reading error with one line
+  on standard error, and exits quietly when its output pipe closes. JSON output writes
+  infinities as `"Inf"` and `"-Inf"`.
+
+### Fixed
+
+- A file header repeated between segments (a later LabVIEW session appending) no longer
+  produces an empty segment.
+- `1e-9` was written as `0.000000` and lost.
+- CSV output from `lvmio dump` had a blank line after every row on Windows.
+
 ## [0.2.1]
 
 ### Changed

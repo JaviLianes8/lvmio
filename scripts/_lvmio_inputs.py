@@ -33,8 +33,8 @@ def write_inputs(folder: Path) -> dict[str, str]:
             {},
         ),
         "lvmio_cp1252.lvm": (
-            LvmFile([Segment([Channel("Temperatura µ", [21.5, 22.0], unit="°C")])]),
-            {"operator": "José", "encoding": "cp1252"},
+            LvmFile([Segment([Channel("Temperatura \u00b5", [21.5, 22.0], unit="\u00b0C")])]),
+            {"operator": "Jos\u00e9", "encoding": "cp1252"},
         ),
         "lvmio_precision.lvm": (LvmFile([Segment([volts, amps])]), {"precision": 9}),
     }

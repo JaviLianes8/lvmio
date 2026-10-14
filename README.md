@@ -1,6 +1,12 @@
 # lvmio
 
-Typed reader and writer for the LabVIEW Measurement (.lvm) file format, stdlib only.
+Typed reader and writer for LabVIEW Measurement (`.lvm`) files, standard library only.
+
+`.lvm` is the text format LabVIEW's Write To Measurement File express VI produces. lvmio
+reads those files into frozen dataclasses and writes files in the same layout, byte for
+byte: the files LabVIEW 2026 wrote in the test captures come back unchanged after a read
+and a write (two exceptions are explained in the guide), and LabVIEW's own reader reads
+lvmio's files with the values that were written.
 
 ## Install
 
@@ -8,112 +14,89 @@ Typed reader and writer for the LabVIEW Measurement (.lvm) file format, stdlib o
 pip install lvmio
 ```
 
-## Usage
+Python 3.10 or newer. No runtime dependencies.
 
-Write channels to a spec-faithful `.lvm` file and read them back:
+## Quick start
 
-```python
-from lvmio import Channel, LvmFile, Segment, read_lvm, write_lvm
+```pycon
+>>> from lvmio import Channel, LvmFile, Segment, format_lvm, parse_lvm
+>>> channels = [
+...     Channel("Voltage", [1.0, 2.5, -3.25], unit="V", delta_x=0.1),
+...     Channel("Current", [0.5, 0.25, 1e-9], unit="A", delta_x=0.1),
+... ]
+>>> text = format_lvm(LvmFile([Segment(channels, comment="run 1")]), operator="lab")
+>>> lvm = parse_lvm(text)
+>>> segment = lvm.segments[0]
+>>> segment.names, segment["Current"].data, segment.comment
+(['Voltage', 'Current'], [0.5, 0.25, 1e-09], 'run 1')
+>>> segment["Voltage"].time_axis()
+[0.0, 0.1, 0.2]
 
-channels = [
-    Channel("Voltage", [1.0, 2.0, 3.0], unit="V", delta_x=0.1),
-    Channel("Current", [0.5, 0.25, 0.125], unit="A", delta_x=0.1),
-]
-write_lvm("run.lvm", LvmFile(segments=[Segment(channels)]), operator="lab")
-
-lvm = read_lvm("run.lvm")
-first = lvm.segments[0].channels[0]
-print(first.name, first.data)  # Voltage [1.0, 2.0, 3.0]
 ```
 
-`write_lvm` also accepts a bare list of `Channel` objects, a single `Segment`,
-or a mapping of name to samples:
+`write_lvm(path, data)` and `read_lvm(path)` do the same with files. `data` can be an
+`LvmFile`, one `Segment`, a list of `Channel` objects or a mapping of name to samples:
 
-```python
-write_lvm("quick.lvm", {"x": [1.0, 2.0], "y": [3.0, 4.0]})
+```pycon
+>>> import pathlib, tempfile
+>>> from lvmio import read_lvm, write_lvm
+>>> path = pathlib.Path(tempfile.mkdtemp(), "quick.lvm")
+>>> write_lvm(path, {"x": [1.0, 2.0], "y": [3.0, 4.0]}, decimal_separator=",")
+>>> read_lvm(path).segments[0]["y"].data
+[3.0, 4.0]
+
 ```
 
-Keyword arguments override file header fields: `operator`, `date`, `time`,
-`separator` (`"Tab"` or `"Comma"`), `decimal_separator`, and `precision` (the
-number of decimal places used for numeric output).
+Keyword arguments set the file header: `operator`, `date`, `time`, `separator`
+(`"Tab"` or `"Comma"`), `decimal_separator` (`"."` or `","`), `x_columns` (`"No"`, `"One"`
+or `"Multi"`), `precision` (decimals per sample, 6 by default as in LabVIEW) and, for
+`write_lvm`, `encoding`.
 
-### Working with a parsed file
+## What it handles
 
-The parsed objects are frozen dataclasses with convenient access:
+- The three X column layouts LabVIEW writes: `No` (an empty X column), `One` (one shared X
+  column) and `Multi` (an X column before every channel).
+- Tab and comma separators, the decimal comma, several segments with their comments, and a
+  file header repeated in the middle of a file (LabVIEW writes one when a later session
+  appends to the file).
+- LabVIEW's number format (`2.500000`, `1.000000E-9`, `NaN`, `Inf`, `-Inf`); empty cells
+  read as NaN.
+- Text in UTF-8 or in Windows-1252, the code page LabVIEW writes on a Western-European
+  Windows system; `read_lvm` tries UTF-8 first and then Windows-1252.
 
-```python
-lvm = read_lvm("run.lvm")
-segment = lvm.segments[0]
-
-for channel in segment:  # Segment iterates over its channels
-    print(channel.name, len(channel))
-
-voltage = segment["Voltage"]  # access a channel by name
-axis = voltage.time_axis()  # [x0, x0 + delta_x, ...], one value per sample
-missing = segment.get("absent")  # None when the channel is not present
-```
-
-Empty cells in the data (unconnected channels, or rows without a value) parse to
-`float('nan')`, so every channel keeps one value per row and stays aligned with its
-own time axis.
-
-`parse_lvm(text)` parses a `.lvm` string already in memory; `read_lvm(path)` is the
-path based convenience that calls it.
+Where lvmio and LabVIEW's reader do not read a cell the same way, lvmio refuses it rather
+than return a different number: the cases are listed in the [guide](https://github.com/JaviLianes8/lvmio/blob/main/GUIDE.md).
 
 ## Command line
 
-Installing the package adds an `lvmio` console command:
-
 ```
-lvmio header run.lvm            # file metadata, add --json for JSON
-lvmio channels run.lvm          # list the channels per segment
-lvmio dump run.lvm --channel Voltage --time    # one channel as CSV with its time axis
-lvmio dump run.lvm --format json               # all channels of a segment as JSON
-cat run.lvm | lvmio header -    # read from standard input
+lvmio header run.lvm                 # file header fields, --json for JSON
+lvmio channels run.lvm               # channels and sample counts per segment
+lvmio dump run.lvm --channel Voltage --time   # one channel as CSV with its X axis
+lvmio dump run.lvm --format json     # a segment as JSON
+lvmio header old.lvm --encoding cp1252
+cat run.lvm | lvmio header -
 ```
 
-Errors go to standard error and the process exits with status 1. Run `lvmio --help`
-or `lvmio <command> --help` for the full list of options.
-
-## Supported subset
-
-The format has a file header block (`LabVIEW Measurement`, `Writer_Version`,
-`Separator`, `Decimal_Separator`, `Multi_Headings`, `X_Columns`, `Time_Pref`,
-`Operator`, `Date`, `Time`) followed by one or more data segments, each with its
-own channel header and tab-delimited rows.
-
-Covered:
-
-- Tab and comma separators, and a configurable decimal separator (including the
-  decimal comma and scientific notation that European LabVIEW writes).
-- Single or multiple segments (`Multi_Headings` is set from the segment count).
-- `X_Columns` set to `One` (a shared X axis from `X0` and `Delta_X`) or `No`. Real
-  `No` files still carry an empty leading X column, and the reader handles that.
-- Per-channel `Y_Unit_Label`, `X_Dimension`, `X0` and `Delta_X`.
-- The trailing `Comment` column on the data header, and comments on some rows.
-- Empty data cells, which become `float('nan')`.
-
-Behaviour on the layouts LabVIEW writes is locked in by golden fixtures under
-`tests/fixtures/`, generated by `scripts/make_lvm_fixtures.py` (each file says so in its
-`Description` header), and cross-checked against the independent `lvm_read` package.
-
-Out of scope for now: `X_Columns` set to `Multi` (one X column per channel) and
-absolute-time X axes. These parse as plain columns but are not modelled.
+`python -m lvmio` runs the same command. Errors print one line to standard error and exit
+with status 1.
 
 ## Why
 
-LabVIEW produces and consumes `.lvm` natively with its Write/Read To Measurement File
-express VIs, and on the Python side `lvm-read` already reads the format well. Reading,
-then, is a solved problem. What is missing is the writer: there is no maintained,
-typed Python package that **writes** a `.lvm` file a LabVIEW VI will read back, which
-otherwise means matching NI's header blocks and tab-delimited segments by hand.
-`lvmio` fills that writer gap and keeps a small, correct reader alongside it as a
-convenience, not as the novelty, so a round trip stays within one dependency-free
-package. It uses the standard library only.
+LabVIEW reads and writes `.lvm` itself. On the Python side, the `lvm_read` package (1.26)
+reads the format into NumPy arrays and has no writer. lvmio writes files in the layout
+LabVIEW's own writer produces, so a Python program can hand data to a LabVIEW VI, and it
+reads them back into typed objects without NumPy.
+
+## Documentation
+
+- [Guide](https://github.com/JaviLianes8/lvmio/blob/main/GUIDE.md): the format as LabVIEW
+  2026 writes it, reading rules, errors, and upgrading from 0.2.
+- [Changelog](https://github.com/JaviLianes8/lvmio/blob/main/CHANGELOG.md)
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/JaviLianes8/lvmio/blob/main/LICENSE).
 
 ## Links
 

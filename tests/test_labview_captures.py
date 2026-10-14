@@ -145,7 +145,7 @@ def test_a_second_session_appending_repeats_the_file_header() -> None:
 
 def test_labview_writes_windows_1252_and_lvmio_reads_it() -> None:
     lvm = read_lvm(HERE / "comment_cp1252.lvm")
-    assert lvm.segments[0].comment == "café ñ µ €"
+    assert lvm.segments[0].comment == "caf\u00e9 \u00f1 \u00b5 \u20ac"
     with pytest.raises(LvmError, match="not utf-8 text at byte"):
         read_lvm(HERE / "comment_cp1252.lvm", encoding="utf-8")
 

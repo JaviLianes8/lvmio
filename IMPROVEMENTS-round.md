@@ -1,9 +1,10 @@
 # Improvement round for lvmio
 
-A ranked list of substantial improvements, scored against genuine LabVIEW output
-(real `.lvm` files produced by NI software, now committed under `tests/fixtures/`)
-and cross-checked with the `lvm_read` package as an oracle. Items marked DONE are
-delivered in this round.
+A ranked list of substantial improvements, scored against the `.lvm` fixtures of the
+time and cross-checked with the `lvm_read` package as an oracle. Items marked DONE are
+delivered in this round. Note added for 1.0.0: those fixtures turned out to be of unknown
+origin and were replaced in 0.2.1 by generated files; files written by LabVIEW 2026 itself
+arrived with 1.0.0 (`tests/fixtures/labview2026`).
 
 ## 1. Correct column handling for real `X_Columns=No` files (DONE, correctness)
 

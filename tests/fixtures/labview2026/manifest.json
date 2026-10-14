@@ -1,0 +1,186 @@
+{
+ "generated_by": "LabVIEW 26.3.1f1 (Windows x64) through its ActiveX server",
+ "locale_decimal": "comma (Spanish regional settings)",
+ "files": {
+  "appended_runs.lvm": {
+   "size": 838,
+   "sha256": "0c312bce55c014b566fd671daf23291547343f3f2f27f6064c04ca7f93756568",
+   "how": "express worker VI, a second session appending to the first file"
+  },
+  "express_default.lvm": {
+   "size": 588,
+   "sha256": "c51356971613b9c801fce80d7fc5dc1b6fd8dd690bbfb9886bf6132f28f8e0a6",
+   "how": "Write To Measurement File express VI instance, default configuration"
+  },
+  "numbers.lvm": {
+   "size": 7425,
+   "sha256": "98fb7385791d1799f90453cbc94b2e1804a593ce1cbeb5cb7b428204c724d749",
+   "how": "express worker VI, seeded values over the double range"
+  },
+  "numbers_input.json": {
+   "size": 11735,
+   "sha256": "634a1951b5b0f0a0b4099d519b9e83851c49a8ba2f6f9a952c20598f51e9d002",
+   "how": "the channels given to LabVIEW for numbers.lvm"
+  },
+  "period_decimal.lvm": {
+   "size": 613,
+   "sha256": "2085810163e06e454ef82a829767cc62eb28d4b3e52309dca058bb8a9a079d52",
+   "how": "express worker VI, period chosen as decimal separator on a comma locale"
+  },
+  "read/comma_separator.lvm": {
+   "size": 435,
+   "sha256": "50cbc976dd2009c9ce5ddf30fb246302f47e11a1e52bcb523152b1ab49ba526e",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/decimal_comma.lvm": {
+   "size": 443,
+   "sha256": "85e34acf61a24de2e149dd7ea570b2e7d061e3c0b1cb7edc6cd669ec3bbd6db8",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/no_x_empty_cells.lvm": {
+   "size": 460,
+   "sha256": "6eeb24bf49b6b342e9894becb0eca9e6ce26620da3df1ac06e2965edc4a51b19",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/tab_one_x.lvm": {
+   "size": 466,
+   "sha256": "382dd27088990ec2879a1ec029b7dac40e2a43bc26e7c5abd0d8c94c4265a84a",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_00.lvm": {
+   "size": 380,
+   "sha256": "aed35e6e20a474c0be304d82fbe5efbeb398e02c9855cee8046373de40d918c0",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_01.lvm": {
+   "size": 380,
+   "sha256": "3a198b6bbdfccb25e46c5131d8f549826bf83238bddfb7cb53da21cdc74a04f9",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_02.lvm": {
+   "size": 381,
+   "sha256": "8b7007d9aab54b3b11353117eb9b31d0d83d5d95a4dd57100f95e0f76255700b",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_03.lvm": {
+   "size": 380,
+   "sha256": "ef223a3a7b296c002127ea95eccaac064d819a516bedc3888a0b127b9bdc839a",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_04.lvm": {
+   "size": 380,
+   "sha256": "b92fd6a6297a05836e486357991601d55ee624fdcb41882296536e44d483516f",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_05.lvm": {
+   "size": 381,
+   "sha256": "2a2c74101a5f083f6e89720c514e19efd4bec80be0f04a30fc37e741b05598cd",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_06.lvm": {
+   "size": 379,
+   "sha256": "3336324aab3c293a4dff35181872be339e444819a962888876df78baf53ccbbb",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_07.lvm": {
+   "size": 379,
+   "sha256": "2b87beead5c1b22ec3fe6fff6777f5105c0d36780d30f0c16a13b7be0bf7313f",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_08.lvm": {
+   "size": 379,
+   "sha256": "c9095fe86dff0615f87febdc9075ab0a0e6716d511988184577f34864842d3b4",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_09.lvm": {
+   "size": 383,
+   "sha256": "d21f6a0da4df6ece806911bd867dca45f3f5625172f795e1678be2f87b12b8a7",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_10.lvm": {
+   "size": 383,
+   "sha256": "c0c4fd7542b7c5e3ab9fdd0a72918030805d38d8133c4ecf7dbfac201df209d4",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_11.lvm": {
+   "size": 383,
+   "sha256": "f452c86e5c5115f17595def93cda312f8a0da966807a06e25cfbe0dbfd2d3d35",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_12.lvm": {
+   "size": 381,
+   "sha256": "efd31c45fb5e72a86bb6332fa3f94dca64826fdc4d7cc55761fc9fa8f79bcf4c",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_13.lvm": {
+   "size": 380,
+   "sha256": "a86754e6496217e981827e5b2968a224425a83a29c56c4048328487d746b1d94",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_14.lvm": {
+   "size": 380,
+   "sha256": "ac38f7098b78bbfb63a3081acd5ac94a89b158e3b7b96d81f9a3b57112d97683",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_15.lvm": {
+   "size": 380,
+   "sha256": "f1bb801a320e9cb11d877efcb93d827877fd72430094e0403d833627ff52a826",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_16.lvm": {
+   "size": 380,
+   "sha256": "41e0267439454327a4a73cdbc9d03fe5c77612367f0ca20339ef8f36955c8c44",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_17.lvm": {
+   "size": 385,
+   "sha256": "40e5dc42ce20e5dff9cba71696a7b4b7cf6231c89b1c86bbff4976589a46523d",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_18.lvm": {
+   "size": 382,
+   "sha256": "7d9bf6507df1457c071aabcd4fbc92e831496d44e3186d7002888ba11aceb1f1",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/token_19.lvm": {
+   "size": 381,
+   "sha256": "c0c5712f3b796aa58af4013858d6b3bf1196f1e77e50a49b3ba456429fab43c4",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read/two_segments.lvm": {
+   "size": 603,
+   "sha256": "5d23d4bd5c17265a2eca84d8b9bf3476c08e0c770f84af002a325cd9614646d8",
+   "how": "hand-written input for LabVIEW's reader"
+  },
+  "read_results.json": {
+   "size": 13711,
+   "sha256": "d9f37bc1a6adec2bf4a688caa3c5f6ab4914e880db987060fa6e0679c6efa909",
+   "how": "what LabVIEW's Read From Measurement File returns for each .lvm here"
+  },
+  "segments.lvm": {
+   "size": 1299,
+   "sha256": "6cf921e36571a8044390134a2cff5dc24054ed244247e2583d60cfd8820a477a",
+   "how": "express worker VI, three appends in one session"
+  },
+  "specials.lvm": {
+   "size": 599,
+   "sha256": "a61d3f99e985901193b1e4c17a3290e49d2adace109aa99eb8aa9bb58965fc92",
+   "how": "express worker VI, NaN, infinities and signed zero"
+  },
+  "x_columns_multi.lvm": {
+   "size": 658,
+   "sha256": "dc636d2ee84fbd5c386866dc671da6408d7a5f1f723c1edf52421647b604a28d",
+   "how": "express worker VI, X columns code 2"
+  },
+  "x_columns_no.lvm": {
+   "size": 588,
+   "sha256": "db0eab7a8cfe997de0ea079c51f467c819031e96ad405607f1a510e28107657d",
+   "how": "express worker VI, X columns code 0"
+  },
+  "x_columns_one.lvm": {
+   "size": 613,
+   "sha256": "b7c46380d96f9eef708523a60c5599276ec78c789a42d660af9f6087ae468d2b",
+   "how": "express worker VI, X columns code 1"
+  }
+ }
+}

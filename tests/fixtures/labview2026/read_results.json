@@ -11512,6 +11512,51 @@
    "comment": ""
   }
  ],
+ "read/samples_per_channel_full.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     1.0,
+     1.0
+    ],
+    [
+     11.0,
+     11.0,
+     11.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "read/samples_per_channel_padding.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     "NaN",
+     "NaN",
+     "NaN"
+    ],
+    [
+     11.0,
+     12.0,
+     13.0,
+     14.0,
+     15.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
  "read/short_row.lvm": [
   {
    "error": 100,

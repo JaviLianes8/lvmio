@@ -108,8 +108,10 @@ is escaped too (`\2C`), so the comment stays one cell.
 Samples may be given as any iterable of real numbers: a list, a tuple, a `range`, a NumPy
 array or a generator. `Channel` turns its `data` into a list when it is created (its type is
 `list[float]`), and the writer stores every sample as a Python float. A channel shorter
-than the others is padded with empty cells, and its `Samples` count stays its own length;
-both readers take it back at that length (lvmio drops the empty cells past `Samples`). `Date` and `Time` are
+than the others is padded with empty cells, and its `Samples` count stays its own length.
+lvmio reads it back at that length (it drops the empty cells past `Samples`); LabVIEW's
+reader reads every channel up to the largest `Samples` count of the segment, so the padding
+comes back as NaN there. `Date` and `Time` are
 written as given; LabVIEW expects its own form (`2026/10/14`, `10:00:00,5` with the file's
 decimal separator) and reads other text differently.
 
@@ -150,10 +152,11 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   one placed between two segments, which adds a row to the segment before it); only a blank
   line, without a separator and with nothing but spaces, ends a segment. An X cell must be
   empty or a number, so a stray header line between data rows is refused. A channel has one
-  value per data row, except that it stops at its `Samples` count when only empty cells
-  follow (the padding of a shorter channel), as LabVIEW reads it. Otherwise the `Samples`
-  and `Channels` counts are not used: the column line and the data rows decide (LabVIEW's
-  reader follows `Samples` in every case; see the differences below). A row with fewer cells than the last channel's column is refused, as
+  value per data row, except that it stops at its own `Samples` count when only empty
+  cells follow (the padding of a shorter channel). Otherwise the `Samples` and `Channels`
+  counts are not used: the column line and the data rows decide (LabVIEW's reader reads
+  every channel up to the largest `Samples` count of the segment; see the differences
+  below). A row with fewer cells than the last channel's column is refused, as
   LabVIEW refuses it.
 - A number is an optional sign, digits with an optional decimal point, and an optional
   exponent, or `NaN`, `Inf` or `Infinity` in any case. Spaces and tabs around it are
@@ -241,7 +244,9 @@ Both read a value, but not the same one:
 | an `X0` that is not a multiple of 2^-64 s, or at or beyond 2^63 s | the nearest LabVIEW timestamp (1.23e-9 as 1.2299999999640723e-9, 1e-20 as 0, 1e19 wraps negative; `relay/lvmio_x0.lvm`) | the number as written |
 | a file without a `Y_Unit_Label` line | the unit `V` for every channel | an empty unit |
 | a `Samples` count below the data rows (1 for 2 rows) | that many rows | every row |
-| a blank `Samples` count | no samples | every row |
+| a blank `Samples` count (when no other channel has a count) | no samples | every row |
+| a channel shorter than the others, its cells empty past its own `Samples` count | NaN up to the largest count of the segment | the channel at its own count |
+| `Samples` counts that differ while every cell holds a value (`2` and `3` over 5 rows) | every channel to the largest count (3 rows) | every row |
 | a `Channels ` key with a trailing space | no channels | every channel |
 | a row of empty cells between data rows | NaN, then zeros for the rows after it | NaN for that row, then the rows as written |
 | units with an empty cell before others (`""`, `A`, `V`) | the units shifted left past the empty cell (`A`, `V`, `""`) | each unit on its own channel |

@@ -31,6 +31,14 @@ def _three_rows(lines: list[str], where: int) -> None:
     lines[CHANNELS + 1] = "Samples" + TAB + "3" + TAB + "3"
 
 
+def _per_channel(first: str, second: str, cells: list[list[str]]) -> list[str]:
+    """Two channels over five rows with their own Samples counts."""
+    rows = [[str(i), *pair] for i, pair in enumerate(cells)]
+    lines = _head() + _seg(["A", "B"], ["", ""], "1", rows)
+    lines[CHANNELS + 1] = "Samples" + TAB + first + TAB + second
+    return lines
+
+
 def layouts() -> dict[str, list[str]]:
     """File name to lines (joined with CRLF by the caller)."""
     return {
@@ -45,6 +53,10 @@ def layouts() -> dict[str, list[str]]:
             lambda ls: ls.__delitem__(slice(CHANNELS + 2, CHANNELS + 4))
         ),
         "no_delta_x_line.lvm": _edited(lambda ls: ls.pop(DELTA_X)),
+        "samples_per_channel_full.lvm": _per_channel("2", "3", [["1", "11"]] * 5),
+        "samples_per_channel_padding.lvm": _per_channel(
+            "2", "5", [["1", "11"], ["2", "12"], ["", "13"], ["", "14"], ["", "15"]]
+        ),
         "blank_delta_x.lvm": _edited(lambda ls: ls.__setitem__(DELTA_X, "Delta_X" + TAB + TAB)),
         "text_delta_x.lvm": _edited(
             lambda ls: ls.__setitem__(DELTA_X, "Delta_X" + TAB + "abc" + TAB + "abc")

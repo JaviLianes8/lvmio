@@ -61,8 +61,9 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
   and X values and `Delta_X` keep at least 6 decimals whatever the precision.
 - Mapping keys must be `str` (0.2 turned other keys into names), and `x0` and `delta_x`
   must be finite.
-- A channel stops at its `Samples` count when only empty cells follow, as LabVIEW reads it
-  (0.2 padded every channel with NaN to the longest one). `Segment` and `LvmFile` store
+- A channel stops at its own `Samples` count when only empty cells follow, so a shorter
+  channel reads back at its length (0.2 padded every channel with NaN to the longest one;
+  LabVIEW's reader pads to the largest count). `Segment` and `LvmFile` store
   their containers as lists.
 - X cells must be empty or numbers (0.2 ignored them); a blank `X0` or `Delta_X` cell means
   its default (0.2 raised `LvmError`); an empty `X_Dimension` cell stays empty.

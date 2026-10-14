@@ -42,3 +42,15 @@ def test_a_missing_samples_line_or_extra_channels_are_refused_by_labview_only() 
         assert RESULTS[f"read/{name}"][0]["error"] == 100
         assert _lvmio(name) == [1.0, 2.0]
     assert not any(math.isnan(v) for v in _lvmio("samples_missing.lvm"))
+
+
+def test_labview_reads_every_channel_to_the_largest_samples_count() -> None:
+    assert _labview("samples_per_channel_full.lvm") == [[1.0, 1.0, 1.0], [11.0, 11.0, 11.0]]
+    full = read_lvm(HERE / "read" / "samples_per_channel_full.lvm").segments[0]
+    assert [len(c) for c in full] == [5, 5]
+    assert _labview("samples_per_channel_padding.lvm") == [
+        [1.0, 2.0, "NaN", "NaN", "NaN"],
+        [11.0, 12.0, 13.0, 14.0, 15.0],
+    ]
+    padded = read_lvm(HERE / "read" / "samples_per_channel_padding.lvm").segments[0]
+    assert [c.data for c in padded] == [[1.0, 2.0], [11.0, 12.0, 13.0, 14.0, 15.0]]

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 from collections.abc import Sequence
 
@@ -86,7 +87,7 @@ def _load(path: str, encoding: str | None) -> LvmFile:
 
 def _index(text: str) -> int:
     """A segment index; long or malformed text is refused without echoing it."""
-    if len(text) > 18 or not text.lstrip("-").isdigit() or not text.isascii():
+    if len(text) > 18 or not re.fullmatch(r"-?[0-9]+", text):
         raise argparse.ArgumentTypeError(f"not a segment number: {shorten(text, 20)}")
     return int(text)
 

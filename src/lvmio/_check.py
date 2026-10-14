@@ -105,12 +105,14 @@ def _segment(seg: Segment, delim: str) -> Segment:
         )
     if comment and not any(c.data for c in channels):
         raise ValueError("a comment needs at least one data row to be written in")
+    if (date or time) and not channels:
+        raise ValueError("a segment date or time needs at least one channel to be written in")
     return Segment(channels, date=date, time=time, comment=comment)
 
 
 def _samples(values: object, name: str) -> list[float]:
     """Any ordered iterable of real numbers: a list, a tuple, a NumPy array, a generator."""
-    unordered = (str, bytes, bytearray, AbstractSet, Mapping)
+    unordered = (str, bytes, bytearray, memoryview, AbstractSet, Mapping)
     if isinstance(values, unordered) or not isinstance(values, Iterable):
         raise TypeError(f"samples of {shorten(name)} must be an ordered iterable of numbers")
     return [_number(v, f"a sample of {shorten(name)}") for v in values]

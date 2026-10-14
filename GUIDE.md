@@ -92,8 +92,8 @@ The writer refuses, before writing anything:
 | Error | When |
 | --- | --- |
 | `TypeError` | data that is not an `LvmFile`, `Segment`, list of `Channel` or mapping of `str` to an iterable of numbers; a sample, `x0` or `delta_x` that is not a real number (`int`, `float`, `Fraction`, `Decimal` and NumPy numbers are; `bool`, `str` and `complex` are not); a text field that is not `str`; `precision` that is not an `int` |
-| `TypeError` (continued) | unordered samples (a `set` or a mapping) |
-| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an empty `x_dimension`; a comment on a segment with no samples (it has no row to go in); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
+| `TypeError` (continued) | unordered samples (a `set` or a mapping) and `memoryview` samples, refused like `bytes` |
+| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an empty `x_dimension`; a comment on a segment with no samples (it has no row to go in), or a segment date or time on a segment with no channels (there is no cell for it); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
 | `LookupError` | `write_lvm` with an unknown encoding name |
 
 Text fields are copied to plain `str` and `precision` to a plain `int` before they are
@@ -170,10 +170,11 @@ the values LabVIEW was given when it wrote them.
 `LvmError` (a `ValueError`) is raised for text that is not a LabVIEW Measurement file:
 
 - the first line is not `LabVIEW Measurement`;
-- the file header or a segment header has no `***End_of_Header***` line;
+- the file header, a repeated file header or a segment header has no
+  `***End_of_Header***` line before a blank line or the end of the text;
 - a segment header is not followed by a column line;
 - a data row follows a blank line, or a row has fewer cells than the column line needs;
-- `Decimal_Separator` is not `.` or `,`;
+- `Decimal_Separator` is not `.` or `,`, or is a comma in a comma-separated file;
 - a cell is not a number as defined above (the message gives the line number);
 - the bytes are not valid in the encoding (or in neither UTF-8 nor Windows-1252).
 
@@ -190,7 +191,7 @@ for files it cannot open, `LookupError` for an unknown encoding name, and `parse
 | `lvmio dump FILE [--channel NAME] [--segment N] [--format csv\|json] [--time]` | the samples; CSV leaves missing samples empty and writes infinities as `Inf` and `-Inf`; JSON writes missing samples as `null` and infinities as `"Inf"` and `"-Inf"` |
 
 Every command takes `--encoding` and `-` for standard input. Output sent to a file or a pipe
-is UTF-8. Exit status 0 on success; 1 on any reading error, with one line on standard
+is UTF-8; with no standard output at all the command prints nothing. Exit status 0 on success; 1 on any reading error, with one line on standard
 error; 2 for invalid arguments, with argparse's usage message.
 
 ## Objects

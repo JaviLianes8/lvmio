@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import replace
+from operator import index as as_index
 
 from ._check import as_file, canonical, check_file
 from ._model import Channel, LvmFile, Segment
@@ -50,9 +51,9 @@ def format_lvm(
         separator=lvm.separator if separator is None else separator,
         x_columns=lvm.x_columns if x_columns is None else x_columns,
     )
-    if isinstance(precision, bool) or not isinstance(precision, int):
+    if isinstance(precision, bool) or not hasattr(type(precision), "__index__"):
         raise TypeError(f"precision must be an int, not {type(precision).__name__}")
-    precision = int.__index__(precision)
+    precision = int.__index__(as_index(precision))
     if not 0 <= precision <= 17:
         raise ValueError("precision must be between 0 and 17")
     lvm = check_file(canonical(lvm))

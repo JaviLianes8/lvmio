@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 
 from ._comment import unescape_comment
 from ._errors import LvmError
@@ -44,23 +45,33 @@ def first_token(line: str, delim: str) -> str:
 
 def skip_header(cursor: Lines) -> None:
     """Skip a repeated file header, which LabVIEW writes when it appends a run."""
-    while cursor.more() and first_token(cursor.current(), cursor.delim) != END:
-        cursor.advance()
+    _to_end(cursor, "repeated file header", lambda line: None)
     cursor.advance()
 
 
-def parse_segment(cursor: Lines, decimal: str) -> Segment:
+def _to_end(cursor: Lines, what: str, take: Callable[[str], None]) -> None:
+    """Hand every header line to ``take`` up to the end marker, which must come first."""
     start = cursor.number()
+    while cursor.more() and first_token(cursor.current(), cursor.delim) != END:
+        if is_blank(cursor.current(), cursor.delim):
+            break
+        take(cursor.current())
+        cursor.advance()
+    if not cursor.more() or first_token(cursor.current(), cursor.delim) != END:
+        raise LvmError(f"line {start}: {what} has no {END} line")
+
+
+def parse_segment(cursor: Lines, decimal: str) -> Segment:
     fields: dict[str, list[str]] = {}
     where: dict[str, int] = {}
-    while cursor.more() and first_token(cursor.current(), cursor.delim) != END:
-        parts = cursor.current().split(cursor.delim)
+
+    def take(line: str) -> None:
+        parts = line.split(cursor.delim)
         if parts[0].strip():
             fields[parts[0].strip()] = [p.strip() for p in parts[1:]]
             where[parts[0].strip()] = cursor.number()
-        cursor.advance()
-    if not cursor.more():
-        raise LvmError(f"line {start}: segment header has no {END} line")
+
+    _to_end(cursor, "segment header", take)
     cursor.advance()
     if not cursor.more() or is_blank(cursor.current(), cursor.delim):
         raise LvmError(f"line {cursor.number()}: segment has no column line")

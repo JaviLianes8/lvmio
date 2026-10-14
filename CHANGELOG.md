@@ -29,8 +29,9 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
   `NaN`, `Inf`, `-Inf`; `X0` keeps 17 significant digits.
 - Comments are written and read with LabVIEW's escapes (`\XX` for control characters,
   `\\` for a backslash), so they may hold any character; a comment is one cell.
-- Rows with fewer cells than the column line, a data row after a blank line, and a
-  `Decimal_Separator` other than `.` or `,` raise `LvmError`.
+- Rows with fewer cells than the column line, a data row after a blank line, a header
+  block whose end marker does not come before a blank line, and a `Decimal_Separator`
+  other than `.` or `,` (or a comma in a comma-separated file) raise `LvmError`.
 - The writer refuses names and header fields starting or ending with any whitespace,
   unordered samples (sets, mappings), finite numbers too large for a double, and a comment
   on a segment with no samples.

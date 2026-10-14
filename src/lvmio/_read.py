@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 
 from ._errors import LvmError
 from ._model import LvmFile, Segment
@@ -38,7 +39,8 @@ def decode(data: bytes, encoding: str | None) -> str:
         try:
             return data.decode(encoding)
         except UnicodeDecodeError as exc:
-            raise LvmError(f"not {encoding} text at byte {exc.start}") from None
+            name = encoding if len(encoding) <= 40 else shorten(encoding)
+            raise LvmError(f"not {name} text at byte {exc.start}") from None
     try:
         return data.decode("utf-8")
     except UnicodeDecodeError:
@@ -62,6 +64,7 @@ def parse_lvm(text: str) -> LvmFile:
     """
     if not isinstance(text, str):
         raise TypeError(f"parse_lvm expects str, not {type(text).__name__}")
+    text = str.__str__(text)
     lines = text.removeprefix("\ufeff").replace("\r\n", "\n").replace("\r", "\n").split("\n")
     if lines[0].rstrip("\t, ") != _MAGIC:
         raise LvmError(f"not a LabVIEW Measurement file: line 1 is {shorten(lines[0])}")
@@ -69,6 +72,8 @@ def parse_lvm(text: str) -> LvmFile:
     decimal = header.get("Decimal_Separator") or "."
     if decimal not in (".", ","):
         raise LvmError(f"Decimal_Separator must be '.' or ',', not {shorten(decimal)}")
+    if decimal == "," and delim == ",":
+        raise LvmError("a comma cannot be both the separator and the decimal separator")
     cursor = Lines(lines, end + 1, delim)
     segments: list[Segment] = []
     while cursor.more():
@@ -104,16 +109,22 @@ def _file_header(lines: list[str]) -> tuple[dict[str, str], int, str]:
     end = next((i for i, line in enumerate(lines) if _key(line) == END), None)
     if end is None:
         raise LvmError(f"the file header has no {END} line")
-    delim = "\t"
+    declared = None
     for line in lines[1:end]:
-        if _key(line) == "Separator" and line[len("Separator") + 1 :].strip().lower() == "comma":
-            delim = ","
+        if _key(line) == "Separator":
+            cells = re.split("[\t,]", line.strip())
+            declared = cells[1].strip() if len(cells) > 1 else ""
+    delim = "," if declared is not None and declared.lower() == "comma" else "\t"
     fields: dict[str, str] = {}
     for line in lines[1:end]:
         parts = line.split(delim)
         key = parts[0].strip()
-        if key:
+        if key == "Decimal_Separator" and delim == "," and line.strip().startswith(key + ",,"):
+            fields[key] = ","
+        elif key:
             fields[key] = parts[1].strip() if len(parts) > 1 else ""
+    if declared is not None:
+        fields["Separator"] = declared
     return fields, end, delim
 
 

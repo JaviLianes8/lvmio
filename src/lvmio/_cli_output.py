@@ -7,7 +7,6 @@ import csv
 import io
 import json
 import math
-import sys
 
 from ._model import Channel, LvmFile, Segment
 
@@ -93,7 +92,7 @@ def _dump_csv(channels: list[Channel], with_time: bool) -> None:
     for i in range(count):
         time_cell = [_fmt(axis[i])] if with_time and i < len(axis) else ([""] if with_time else [])
         writer.writerow(time_cell + [_fmt(_at(c.data, i)) for c in channels])
-    sys.stdout.write(out.getvalue())
+    print(out.getvalue(), end="")
 
 
 def _dump_json(channels: list[Channel], with_time: bool) -> None:

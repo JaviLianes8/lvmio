@@ -1,2 +1,6 @@
-# LabVIEW captures are kept byte for byte (CRLF line endings, hashed in manifest.json).
+* text=auto eol=lf
+
+# .lvm fixtures and the LabVIEW captures are kept byte for byte (CRLF line endings),
+# so the hashes recorded for them keep matching. No end of line conversion applies.
+tests/fixtures/*.lvm -text
 tests/fixtures/labview2026/** -text

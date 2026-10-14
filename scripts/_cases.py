@@ -74,7 +74,21 @@ TOKENS = [
     "infinityx",
     "1 2",
     "\u2212" + "1",
+    chr(12) + "1",
+    chr(12) + "1" + chr(12),
+    " " + chr(12) + "2.5",
 ]
+
+
+def x0_offsets(seed: int = 8208, count: int = 60) -> list[dict[str, object]]:
+    """Waveforms whose start sample moves X0 to a non-zero time, one segment each."""
+    rng = random.Random(seed)
+    steps: list[dict[str, object]] = []
+    for _ in range(count):
+        dt = rng.choice([1 / 96000, 1 / 44100, 1 / 3, 1e-3, 0.1, 1 / 7, 2.5e-5, 1 / 1024, 0.3])
+        start = rng.randint(1, 5000)
+        steps.append({"rows": [[0.0] * (start + 2)], "dt": dt, "start": start})
+    return steps
 
 
 def numbers(seed: int = 2026, count: int = 400) -> list[list[float]]:

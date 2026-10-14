@@ -60,9 +60,12 @@ written `0,000488`) the X cells and `Delta_X` disagree in the file. lvmio, like 
 own reader, takes the increment from `Delta_X`; it writes X cells as `x0 + i * delta_x`,
 which can also differ from LabVIEW by one unit in the last decimal for X values within
 about 1e-16 (relative) of a halfway point, with or without an `X0` offset (14 of 3000 rows
-for an increment of 1e-7 in `delta_x_1e-7.lvm`). LabVIEW's reader starts the waveform at
-the segment's `Date` and `Time` plus `X0`; `Channel.time_axis()` is relative to `X0` only,
-and a file with an empty `Date` and `Time` reads in LabVIEW as starting in 1904.
+for an increment of 1e-7 in `delta_x_1e-7.lvm`). `X0` itself is written with 17
+significant digits, and for a value within a hair of a 17-digit halfway point LabVIEW's
+last digit can differ from the correctly rounded one lvmio writes (2 of the 60 `X0`
+values in `x0_offsets.lvm`); both spellings read back as the same double. lvmio does not
+combine a segment's `Date` and `Time` with `X0`: `Channel.time_axis()` is relative to `X0`
+only.
 
 When a second LabVIEW session appends to an existing file it writes the whole file header
 again before its segment.
@@ -82,7 +85,9 @@ throughout); `appended_runs.lvm`, whose repeated file header lvmio does not repe
 `1,000000E-4`, reads back as 1e-4 and is then written `0,000100`; `delta_x_2048hz.lvm`,
 whose increment does not fit the `Delta_X` format, so lvmio rewrites its X column from
 `Delta_X`; and `delta_x_1e-7.lvm`, whose increment fits but where 14 X cells are near ties
-(see X values above). The samples are unchanged in all of them. The same holds for
+(see X values above); and `x0_offsets.lvm`, where two `X0` values are spelled one unit
+apart and X cells are rebuilt from a rounded `Delta_X`. The samples are unchanged in all of
+them. The same holds for
 lvmio's own output of such values: rounding to seven digits can move a value across a
 notation boundary, so a second write can spell it differently.
 Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment
@@ -123,8 +128,10 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   `Comment` column is the comment column. Header cells are matched to channels by column
   position, so `No`, `One` and `Multi` files give the same channels.
 - An empty cell is a missing sample: NaN. Every channel of a segment has one value per data
-  row, as in LabVIEW's reader. A row with fewer cells than the last channel's column is
-  refused, as LabVIEW refuses it.
+  row. The `Samples` and `Channels` counts in the segment header are not used: the column
+  line and the data rows decide (LabVIEW's reader follows `Samples` instead; see the
+  differences below). A row with fewer cells than the last channel's column is refused, as
+  LabVIEW refuses it.
 - A number is an optional sign, digits with an optional decimal point, and an optional
   exponent, or `NaN`, `Inf` or `Infinity` in any case. Spaces and tabs around it are
   ignored. In a file declaring a decimal comma both the comma and the period are read as the
@@ -155,6 +162,7 @@ such cells with an `LvmError` instead of returning part of them:
 | `1E5.5`, `1e5e5` | 100000 | refuses |
 | `Inf5`, `Infinite`, `infinityx` | Inf | refuses |
 | `NaN1`, `nan(ind)` | NaN | refuses |
+| a form feed before or after the number (`\x0c1`, `\x0c1\x0c`) | 1 | refuses |
 | a blank line between data rows | goes on reading rows | refuses: a blank line ends a segment |
 
 LabVIEW refuses these (error 100) and lvmio reads them:
@@ -162,7 +170,9 @@ LabVIEW refuses these (error 100) and lvmio reads them:
 | Input | lvmio reads |
 | --- | --- |
 | `-nan`, `+NaN` | NaN |
-| a cell holding only spaces | NaN, like an empty cell |
+| a cell holding only spaces or tabs | NaN, like an empty cell |
+| a segment header without a `Samples` line | every data row |
+| a `Channels` count above the number of channel columns | the channel columns |
 | a column line without `X_Value` (as lvmio 0.2 wrote `X_Columns` `No` files) | the columns as channels |
 | a cell starting with a period in a file that declares a decimal comma (`+.5e+3`) | 500 |
 
@@ -172,14 +182,19 @@ Both read a value, but not the same one:
 | --- | --- | --- |
 | `2.500000` in a file that declares a decimal comma | 2 | 2.5 |
 | a comment holding `\zz` or ending with `\4` | NUL in place of the code, and drops the rest | the text as written |
-| some cells, about one in a few thousand at 6 digits (`0.011227`, `-8.633024E-6`) | the double one unit in the last place away | the correctly rounded double, as Python's `float` |
+| some cells, about one in a few thousand at precisions below 17 (`0.011227`, `-8.633024E-6`) | the double one unit in the last place away | the correctly rounded double, as Python's `float` |
+| a `Samples` count above the data rows (5 for 2 rows) | the rows, then NaN and zeros up to the count | the rows |
+| a `Samples` count below the data rows (1 for 2 rows) | that many rows | every row |
+| a blank `Samples` count | no samples | every row |
 
 The first row is what LabVIEW's writer produces when it is set to a period on a comma
 locale (`period_decimal.lvm`): LabVIEW's reader then truncates its own values, while lvmio
 reads the values that were written. LabVIEW's writer never produces the second. The third
 is LabVIEW's own decimal conversion: `read/lvmio_ulp.lvm` holds six such cells, and
 `0.011227` comes back from LabVIEW as 0.011227000000000001; no cell written with 17
-digits was seen to differ.
+digits was seen to differ. LabVIEW's own writer always writes a `Samples` count equal to
+the rows of each channel, so the `Samples` rows only matter for files from other writers
+(`read/samples_*.lvm`).
 
 LabVIEW's reader, driven through its ActiveX server, returned the first data set of a file on
 every call, so only first data sets were compared with it; later segments are compared with
@@ -199,7 +214,8 @@ the values LabVIEW was given when it wrote them.
 - the bytes are not valid in the encoding (or in neither UTF-8 nor Windows-1252).
 
 Messages quote at most 40 characters of the offending text. `read_lvm` raises `OSError`
-for files it cannot open, `LookupError` for an unknown encoding name, and `parse_lvm` raises
+for files it cannot open (and `ValueError` for a path holding a NUL character, as Python's
+`open` does), `LookupError` for an unknown encoding name, and `parse_lvm` raises
 `TypeError` for anything but `str`.
 
 ## Command line

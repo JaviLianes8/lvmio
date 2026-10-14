@@ -10595,6 +10595,22 @@
    "comment": ""
   }
  ],
+ "x0_offsets.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
+  }
+ ],
  "x_columns_multi.lvm": [
   {
    "error": 0,
@@ -10663,6 +10679,14 @@
     ]
    ],
    "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/channels_more_than_columns.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
    "comment": ""
   }
  ],
@@ -10975,6 +10999,56 @@
   {
    "error": 100,
    "channels": [],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/samples_blank.lvm": [
+  {
+   "error": 0,
+   "channels": [],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "read/samples_fewer_than_rows.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "read/samples_missing.lvm": [
+  {
+   "error": 100,
+   "channels": [],
+   "eof": false,
+   "comment": ""
+  }
+ ],
+ "read/samples_more_than_rows.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     "NaN",
+     0.0,
+     0.0
+    ]
+   ],
    "eof": true,
    "comment": ""
   }
@@ -11445,6 +11519,45 @@
   {
    "error": 100,
    "channels": [],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/token_36.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     1.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/token_37.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     1.0
+    ]
+   ],
+   "eof": true,
+   "comment": ""
+  }
+ ],
+ "read/token_38.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.5
+    ]
+   ],
    "eof": true,
    "comment": ""
   }

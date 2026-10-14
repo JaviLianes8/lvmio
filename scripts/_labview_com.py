@@ -20,6 +20,7 @@ SCALE_DT = (
     r"C:\Program Files\National Instruments\LabVIEW 2026\vi.lib\Waveform\WDTOps.llb"
     "\\WDT Scale Delta t DBL.vi"
 )
+SUBSET = SCALE_DT.replace("Scale Delta t", "Get Waveform Subset")
 READ = r"express input\ExFileReadBlock.llb\Ex_Inst_Read LabVIEW Measurement File.vi"
 
 
@@ -39,8 +40,12 @@ class LabVIEW:
         conv.Run(False)
         return conv.GetControlValue("Dynamic Data Type")
 
-    def waveform(self, samples: list[float], dt: float) -> Any:
-        """One channel with the given X increment, through vi.lib's Scale Delta t VI."""
+    def waveform(self, samples: list[float], dt: float, start: int = 0) -> Any:
+        """One channel with an X increment; ``start`` keeps samples from that index on.
+
+        vi.lib's Scale Delta t VI sets the increment and Get Waveform Subset moves the start
+        time, which LabVIEW writes as ``X0``.
+        """
         to_ddt = self.vi(ONE_TO_DDT)
         to_ddt.SetControlValue("Array", samples)
         to_ddt.Run(False)
@@ -52,8 +57,18 @@ class LabVIEW:
         scale.SetControlValue("waveform in", to_wave.GetControlValue("Waveform"))
         scale.SetControlValue("scale factor", dt)
         scale.Run(False)
+        wave = scale.GetControlValue("waveform out")
+        if start:
+            subset = self.app.GetVIReference(SUBSET, "", False, 0)
+            subset._FlagAsMethod("GetControlValue", "SetControlValue", "Run")
+            subset.SetControlValue("waveform in", wave)
+            subset.SetControlValue("start samples/time", start)
+            subset.SetControlValue("duration", len(samples) - start)
+            subset.SetControlValue("start/duration format", 0)
+            subset.Run(False)
+            wave = subset.GetControlValue("waveform out")
         back = self.vi(WAVE_TO_DDT)
-        back.SetControlValue("Waveform", scale.GetControlValue("waveform out"))
+        back.SetControlValue("Waveform", wave)
         back.Run(False)
         return back.GetControlValue("Dynamic Data Type")
 
@@ -72,7 +87,8 @@ def worker(lv: LabVIEW, path: Path, passes: list[dict[str, Any]], x_columns: int
     vi = lv.vi(WORKER)
     for index, step in enumerate(passes):
         if "dt" in step:
-            vi.SetControlValue("Signals", lv.waveform(step["rows"][0], step["dt"]))
+            wave = lv.waveform(step["rows"][0], step["dt"], step.get("start", 0))
+            vi.SetControlValue("Signals", wave)
         else:
             vi.SetControlValue("Signals", lv.signals(step["rows"]))
         vi.SetControlValue("File Path in", str(path))

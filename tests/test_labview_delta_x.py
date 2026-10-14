@@ -59,3 +59,20 @@ def test_every_x_columns_layout_reads_the_same_channels() -> None:
         assert [c.name for c in lvm.segments[0]] == ["Untitled", "Untitled 1"]
         assert [c.data for c in lvm.segments[0]] == [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
         assert lvm.segments[0].channels[1].time_axis() == [0.0, 1.0, 2.0]
+
+
+def test_labview_spells_some_x0_values_one_unit_off_and_both_read_the_same() -> None:
+    raw = (HERE / "x0_offsets.lvm").read_bytes().decode("ascii")
+    lvm = parse_lvm(raw)
+    assert len(lvm) == 60
+    assert any(seg.channels[0].x0 != 0 for seg in lvm)
+    changed = _rewrite("x0_offsets.lvm")
+    x0_lines = [(a, b) for a, b in changed if a.startswith("X0" + TAB)]
+    assert len(x0_lines) == 2
+    for before, after in x0_lines:
+        assert before != after
+        theirs, ours = (float(line.split(TAB)[1].replace(",", ".")) for line in (before, after))
+        assert theirs == ours
+    for before, after in changed:
+        if not before.startswith("X0" + TAB):
+            assert before.split(TAB)[1:] == after.split(TAB)[1:]

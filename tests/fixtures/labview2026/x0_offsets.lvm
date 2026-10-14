@@ -1,0 +1,733 @@
+LabVIEW Measurement	
+Writer_Version	2
+Reader_Version	2
+Separator	Tab
+Decimal_Separator	,
+Multi_Headings	Yes
+X_Columns	One
+Time_Pref	Relative
+Operator	Havie
+Date	2026/10/14
+Time	16:09:39,0418057441711425781
+***End_of_Header***	
+	
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,0418057441711425781	
+X_Dimension	Time	
+X0	4,2839999999999998E+2	
+Delta_X	0,300000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+428,400000	0,000000
+428,700000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,1198215484619140625	
+X_Dimension	Time	
+X0	3,8085937500000000E+0	
+Delta_X	0,000977	
+***End_of_Header***		
+X_Value	Untitled	Comment
+3,808594	0,000000
+3,809570	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,2069544792175292969	
+X_Dimension	Time	
+X0	2,1874999999999998E-3	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,002187	0,000000
+0,002198	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,3241648674011230469	
+X_Dimension	Time	
+X0	3,4114285714285711E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+341,142857	0,000000
+341,285714	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,426975250244140625	
+X_Dimension	Time	
+X0	3,5620000000000003E+0	
+Delta_X	0,001000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+3,562000	0,000000
+3,563000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,4955582618713378907	
+X_Dimension	Time	
+X0	8,3160000000000002E+2	
+Delta_X	0,300000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+831,600000	0,000000
+831,900000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,560443878173828125	
+X_Dimension	Time	
+X0	4,1957142857142855E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+419,571429	0,000000
+419,714286	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,6310782432556152344	
+X_Dimension	Time	
+X0	5,9433333333333326E+2	
+Delta_X	0,333333	
+***End_of_Header***		
+X_Value	Untitled	Comment
+594,333333	0,000000
+594,666667	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,6977167129516601562	
+X_Dimension	Time	
+X0	9,2669999999999993E+2	
+Delta_X	0,300000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+926,700000	0,000000
+927,000000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,7797245979309082031	
+X_Dimension	Time	
+X0	2,6269999999999999E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+262,700000	0,000000
+262,800000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,8777170181274414062	
+X_Dimension	Time	
+X0	4,0442857142857139E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+404,428571	0,000000
+404,571429	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:39,9633984565734863281	
+X_Dimension	Time	
+X0	1,4482421875000000E+0	
+Delta_X	0,000977	
+***End_of_Header***		
+X_Value	Untitled	Comment
+1,448242	0,000000
+1,449219	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,04349517822265625	
+X_Dimension	Time	
+X0	3,7350000000000000E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+373,500000	0,000000
+373,600000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,1104984283447265625	
+X_Dimension	Time	
+X0	2,4666666666666664E+1	
+Delta_X	0,333333	
+***End_of_Header***		
+X_Value	Untitled	Comment
+24,666667	0,000000
+25,000000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,1846666336059570312	
+X_Dimension	Time	
+X0	3,0712890625000000E+0	
+Delta_X	0,000977	
+***End_of_Header***		
+X_Value	Untitled	Comment
+3,071289	0,000000
+3,072266	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,2940583229064941406	
+X_Dimension	Time	
+X0	3,3240000000000003E+0	
+Delta_X	0,001000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+3,324000	0,000000
+3,325000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,37343597412109375	
+X_Dimension	Time	
+X0	2,9540000000000003E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+295,400000	0,000000
+295,500000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,4513287544250488282	
+X_Dimension	Time	
+X0	1,1133333333333333E+3	
+Delta_X	0,333333	
+***End_of_Header***		
+X_Value	Untitled	Comment
+1113,333333	0,000000
+1113,666667	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,5495934486389160156	
+X_Dimension	Time	
+X0	4,8145833333333332E-2	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,048146	0,000000
+0,048156	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,6435985565185546875	
+X_Dimension	Time	
+X0	1,0550999999999999E+3	
+Delta_X	0,300000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+1055,100000	0,000000
+1055,400000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,7477560043334960938	
+X_Dimension	Time	
+X0	3,7685714285714283E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+376,857143	0,000000
+377,000000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,8485217094421386719	
+X_Dimension	Time	
+X0	4,5916666666666668E-2	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,045917	0,000000
+0,045927	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,9236063957214355469	
+X_Dimension	Time	
+X0	2,5034013605442176E-2	
+Delta_X	2,267574E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,025034	0,000000
+0,025057	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:40,9959120750427246094	
+X_Dimension	Time	
+X0	3,6785714285714283E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+367,857143	0,000000
+368,000000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,0791630744934082031	
+X_Dimension	Time	
+X0	4,0666666666666663E+2	
+Delta_X	0,333333	
+***End_of_Header***		
+X_Value	Untitled	Comment
+406,666667	0,000000
+407,000000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,1646871566772460937	
+X_Dimension	Time	
+X0	2,2499999999999998E-3	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,002250	0,000000
+0,002260	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,244548797607421875	
+X_Dimension	Time	
+X0	6,5475000000000005E-2	
+Delta_X	2,500000E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,065475	0,000000
+0,065500	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,3083176612854003906	
+X_Dimension	Time	
+X0	3,6458333333333330E-4	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000365	0,000000
+0,000375	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,373859405517578125	
+X_Dimension	Time	
+X0	3,6914062500000000E+0	
+Delta_X	0,000977	
+***End_of_Header***		
+X_Value	Untitled	Comment
+3,691406	0,000000
+3,692383	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,4388742446899414063	
+X_Dimension	Time	
+X0	5,3200000000000000E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+532,000000	0,000000
+532,142857	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,5119733810424804688	
+X_Dimension	Time	
+X0	2,7400000000000000E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+274,000000	0,000000
+274,142857	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,5867366790771484375	
+X_Dimension	Time	
+X0	1,8640000000000001E+0	
+Delta_X	0,001000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+1,864000	0,000000
+1,865000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,6639389991760253906	
+X_Dimension	Time	
+X0	2,3825000000000002E-2	
+Delta_X	2,500000E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,023825	0,000000
+0,023850	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,7385158538818359375	
+X_Dimension	Time	
+X0	3,3559999999999999E+0	
+Delta_X	0,001000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+3,356000	0,000000
+3,357000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,8342113494873046875	
+X_Dimension	Time	
+X0	1,1614583333333333E-2	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,011615	0,000000
+0,011625	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:41,9395442008972167969	
+X_Dimension	Time	
+X0	3,2517006802721092E-2	
+Delta_X	2,267574E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,032517	0,000000
+0,032540	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,0017671585083007813	
+X_Dimension	Time	
+X0	4,1833333333333331E+2	
+Delta_X	0,333333	
+***End_of_Header***		
+X_Value	Untitled	Comment
+418,333333	0,000000
+418,666667	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,0678014755249023438	
+X_Dimension	Time	
+X0	2,7820000000000000E+0	
+Delta_X	0,001000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+2,782000	0,000000
+2,783000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,1322784423828125	
+X_Dimension	Time	
+X0	9,9895833333333330E-3	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,009990	0,000000
+0,010000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,196987152099609375	
+X_Dimension	Time	
+X0	1,2975000000000000E-2	
+Delta_X	2,500000E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,012975	0,000000
+0,013000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,2670192718505859375	
+X_Dimension	Time	
+X0	3,2110000000000002E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+321,100000	0,000000
+321,200000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,33914947509765625	
+X_Dimension	Time	
+X0	2,1540000000000001E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+215,400000	0,000000
+215,500000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,4160432815551757813	
+X_Dimension	Time	
+X0	1,3364583333333332E-2	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,013365	0,000000
+0,013375	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,4980549812316894532	
+X_Dimension	Time	
+X0	1,3913999999999999E+3	
+Delta_X	0,300000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+1391,400000	0,000000
+1391,700000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,5771689414978027344	
+X_Dimension	Time	
+X0	1,0406249999999999E-2	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,010406	0,000000
+0,010417	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,6538448333740234375	
+X_Dimension	Time	
+X0	3,6971428571428567E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+369,714286	0,000000
+369,857143	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,7288503646850585938	
+X_Dimension	Time	
+X0	3,7083333333333329E-2	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,037083	0,000000
+0,037094	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,799953460693359375	
+X_Dimension	Time	
+X0	1,8940000000000001E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+189,400000	0,000000
+189,500000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,8775181770324707031	
+X_Dimension	Time	
+X0	3,0350000000000002E-2	
+Delta_X	2,500000E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,030350	0,000000
+0,030375	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:42,9553790092468261719	
+X_Dimension	Time	
+X0	5,5475000000000003E-2	
+Delta_X	2,500000E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,055475	0,000000
+0,055500	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,0362706184387207031	
+X_Dimension	Time	
+X0	3,8571428571428567E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+385,714286	0,000000
+385,857143	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,1628589630126953125	
+X_Dimension	Time	
+X0	3,5963718820861676E-2	
+Delta_X	2,267574E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,035964	0,000000
+0,035986	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,2497057914733886719	
+X_Dimension	Time	
+X0	2,5449999999999999E+0	
+Delta_X	0,001000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+2,545000	0,000000
+2,546000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,3191685676574707031	
+X_Dimension	Time	
+X0	3,5740000000000003E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+357,400000	0,000000
+357,500000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,3927617073059082031	
+X_Dimension	Time	
+X0	4,8354166666666663E-2	
+Delta_X	1,041667E-5	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,048354	0,000000
+0,048365	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,4588918685913085938	
+X_Dimension	Time	
+X0	4,2157142857142855E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+421,571429	0,000000
+421,714286	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,5344510078430175781	
+X_Dimension	Time	
+X0	4,0300000000000000E+2	
+Delta_X	0,142857	
+***End_of_Header***		
+X_Value	Untitled	Comment
+403,000000	0,000000
+403,142857	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,6222929954528808594	
+X_Dimension	Time	
+X0	1,3408203125000000E+0	
+Delta_X	0,000977	
+***End_of_Header***		
+X_Value	Untitled	Comment
+1,340820	0,000000
+1,341797	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,7053089141845703125	
+X_Dimension	Time	
+X0	4,6509999999999998E+0	
+Delta_X	0,001000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+4,651000	0,000000
+4,652000	0,000000
+
+Channels	1	
+Samples	2	
+Date	2026/10/14	
+Time	16:09:43,7765722274780273438	
+X_Dimension	Time	
+X0	4,8880000000000001E+2	
+Delta_X	0,100000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+488,800000	0,000000
+488,900000	0,000000
+

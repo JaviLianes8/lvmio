@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import codecs
 import os
 import re
 
@@ -33,14 +34,25 @@ def read_lvm(path: str | os.PathLike[str], *, encoding: str | None = None) -> Lv
     return parse_lvm(decode(data, encoding))
 
 
+def encoding_name(encoding: str) -> str:
+    """The encoding as messages show it; ``LookupError`` with a short message if unknown."""
+    name = encoding if len(encoding) <= 40 else shorten(encoding)
+    try:
+        codecs.lookup(encoding)
+    except LookupError:
+        raise LookupError(f"unknown encoding: {name}") from None
+    return name
+
+
 def decode(data: bytes, encoding: str | None) -> str:
     """Bytes to text: the given encoding, or UTF-8 and then Windows-1252."""
     if encoding is not None:
+        name = encoding_name(encoding)
         try:
             return data.decode(encoding)
-        except UnicodeDecodeError as exc:
-            name = encoding if len(encoding) <= 40 else shorten(encoding)
-            raise LvmError(f"not {name} text at byte {exc.start}") from None
+        except UnicodeError as exc:
+            where = f" at byte {exc.start}" if isinstance(exc, UnicodeDecodeError) else ""
+            raise LvmError(f"not {name} text{where}") from None
     try:
         return data.decode("utf-8")
     except UnicodeDecodeError:
@@ -106,9 +118,9 @@ def parse_lvm(text: str) -> LvmFile:
 
 def _file_header(lines: list[str]) -> tuple[dict[str, str], int, str]:
     """The file header fields, the index of its end marker line and the delimiter."""
-    end = next((i for i, line in enumerate(lines) if _key(line) == END), None)
-    if end is None:
-        raise LvmError(f"the file header has no {END} line")
+    end = next((i for i, line in enumerate(lines) if _key(line) == END or _blank(line)), None)
+    if end is None or _key(lines[end]) != END:
+        raise LvmError(f"the file header has no {END} line before a blank line")
     declared = None
     for line in lines[1:end]:
         if _key(line) == "Separator":
@@ -126,6 +138,11 @@ def _file_header(lines: list[str]) -> tuple[dict[str, str], int, str]:
     if declared is not None:
         fields["Separator"] = declared
     return fields, end, delim
+
+
+def _blank(line: str) -> bool:
+    """A blank line under either separator."""
+    return not line.replace("\t", "").replace(",", "").strip()
 
 
 def _key(line: str) -> str:

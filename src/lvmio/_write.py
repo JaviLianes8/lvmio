@@ -10,6 +10,7 @@ from operator import index as as_index
 from ._check import as_file, canonical, check_file
 from ._model import Channel, LvmFile, Segment
 from ._number import shorten
+from ._read import encoding_name
 from ._render import render
 
 
@@ -97,10 +98,12 @@ def write_lvm(
         x_columns=x_columns,
         precision=precision,
     )
+    name = encoding_name(encoding)
     try:
         payload = text.encode(encoding)
-    except UnicodeEncodeError as exc:
-        character = shorten(text[exc.start : exc.start + 1])
-        raise ValueError(f"the character {character} cannot be written as {encoding}") from None
+    except UnicodeError as exc:
+        start = exc.start if isinstance(exc, UnicodeEncodeError) else 0
+        character = shorten(text[start : start + 1])
+        raise ValueError(f"the character {character} cannot be written as {name}") from None
     with open(os.fspath(path), "wb") as handle:
         handle.write(payload)

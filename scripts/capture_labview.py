@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from _cases import COMMENTS, exponent_ties, near_ties, numbers, ties
+from _cases import COMMENTS, exponent_ties, near_ties, numbers, ties, x0_offsets
 from _hand_inputs import write_hand_inputs
 from _labview_com import LabVIEW, express, read, worker
 from _lvmio_inputs import write_inputs
@@ -115,6 +115,8 @@ def main(argv: list[str]) -> int:
         samples = [float(i % 7) for i in range(3000)]
         how = f"express worker VI, one channel with an X increment of {dt!r}"
         worker(lv, target(f"delta_x_{label}.lvm", how), [{"rows": [samples], "dt": dt}], 1)
+    how = "express worker VI, 60 waveforms whose start sample sets a non-zero X0"
+    worker(lv, target("x0_offsets.lvm", how), x0_offsets(), 1)
     for name, values in (("exponent_ties", exponent_ties()), ("near_ties", near_ties())):
         how = f"express worker VI, {name.replace('_', ' ')}"
         worker(lv, target(f"{name}.lvm", how), [{"rows": values}], 1)

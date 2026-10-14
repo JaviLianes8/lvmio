@@ -94,3 +94,39 @@ def test_memoryview_samples_are_refused_and_numpy_precision_is_accepted() -> Non
         format_lvm({"V": memoryview(b"ab")})
     np = pytest.importorskip("numpy")
     assert "1.500\r\n" in format_lvm({"V": [1.5]}, precision=np.int64(3))
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "LabVIEW Measurement\t\nOperator\tana\n\nChannels\t1\n***End_of_Header***\t\n"
+        "\nChannels\t1\n***End_of_Header***\t\nX_Value\tV\n0\t1.5\n",
+        "LabVIEW Measurement\t\n\n***End_of_Header***\t\n\n" + _seg(1),
+    ],
+)
+def test_the_file_header_must_end_before_a_blank_line(text: str) -> None:
+    with pytest.raises(LvmError, match=r"file header has no .* line before a blank line"):
+        parse_lvm(text)
+
+
+def test_unknown_and_unusable_encodings_get_short_messages(tmp_path: Path) -> None:
+    path = tmp_path / "a.lvm"
+    path.write_bytes(format_lvm({"V": [1.0]}).encode("ascii"))
+    for call in (
+        lambda: read_lvm(path, encoding="x" * 100_000),
+        lambda: format_and_write(tmp_path, "q" * 100_000),
+    ):
+        with pytest.raises(LookupError) as info:
+            call()
+        assert len(str(info.value)) < 120
+    with pytest.raises(ValueError) as refused:
+        format_and_write(tmp_path, "ascii" + "-" * 5000, operator="Jos" + chr(0xE9))
+    assert len(str(refused.value)) < 160
+    with pytest.raises(LvmError, match=r"^not undefined text$"):
+        read_lvm(path, encoding="undefined")
+
+
+def format_and_write(folder: Path, encoding: str, operator: str = "lab") -> None:
+    from lvmio import write_lvm
+
+    write_lvm(folder / "w.lvm", {"V": [1.0]}, operator=operator, encoding=encoding)

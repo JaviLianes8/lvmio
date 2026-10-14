@@ -100,9 +100,7 @@ def _file_header(lines: list[str]) -> tuple[dict[str, str], int, str]:
     for line in lines[1:end]:
         parts = line.split(delim)
         key = parts[0].strip()
-        if key == "Decimal_Separator" and delim == "," and line.startswith(key + ",,"):
-            fields[key] = ","
-        elif key:
+        if key:
             fields[key] = parts[1].strip() if len(parts) > 1 else ""
     return fields, end, delim
 

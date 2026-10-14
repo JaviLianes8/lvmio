@@ -70,6 +70,10 @@ class Segment:
     comment: str = ""
     notes: str = ""
 
+    def __post_init__(self) -> None:
+        if not isinstance(self.channels, list):
+            object.__setattr__(self, "channels", list(self.channels))
+
     @property
     def samples(self) -> list[int]:
         """The sample count of each channel, in order.
@@ -144,6 +148,10 @@ class LvmFile:
     time: str = ""
     multi_headings: bool = False
     description: str = ""
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.segments, list):
+            object.__setattr__(self, "segments", list(self.segments))
 
     def __len__(self) -> int:
         """The number of data segments in the file."""

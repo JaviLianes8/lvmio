@@ -29,7 +29,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``lvmio`` console script; returns the exit status.
 
     Errors print one short line to standard error and return 1; invalid arguments make
-    argparse print its usage and exit with status 2. Redirected output is UTF-8.
+    argparse print its usage and exit with status 2. Output is UTF-8 whatever the console.
 
     >>> main(["header", "no-such-file.lvm"])
     1
@@ -93,7 +93,7 @@ def _index(text: str) -> int:
 
 
 def _utf8_when_redirected() -> None:
-    """Redirected output is UTF-8, so every channel name can be written on any system."""
+    """Output that is not UTF-8 is switched to it, so every channel name can be written."""
     stream = sys.stdout
     encoding = str(getattr(stream, "encoding", "") or "").lower().replace("-", "")
     if stream is not None and hasattr(stream, "reconfigure") and encoding != "utf8":

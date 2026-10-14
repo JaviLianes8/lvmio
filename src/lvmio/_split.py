@@ -56,7 +56,8 @@ def own_step(
 
 def close(previous: tuple[float, float], x: tuple[float, float], step: float) -> bool:
     """Whether ``x`` follows ``previous`` by ``step``, within the cells' printed resolution."""
-    slack = 0.25 * abs(step) + 2 * (previous[1] + x[1])
+    rounding = 2 * math.ulp(max(abs(previous[0]), abs(x[0])))
+    slack = 0.25 * abs(step) + 2 * (previous[1] + x[1]) + rounding
     return abs(x[0] - (previous[0] + step)) <= slack
 
 
@@ -76,6 +77,19 @@ def cell_value(
     digits = len(mantissa.partition(".")[2])
     power = int(exponent) if exponent.lstrip("+-").isdigit() else 0
     return value, 10.0 ** (power - digits)
+
+
+def trim_to_samples(data: list[float], cells: list[str], samples: str | None) -> list[float]:
+    """Drop the empty cells past a channel's ``Samples`` count: padding of a shorter channel.
+
+    Only empty cells are dropped, so data past the count (a later write) is kept.
+    """
+    if samples is None or not samples.isdigit() or int(samples) >= len(data):
+        return data
+    count = int(samples)
+    if any(cell.strip(" \t") for cell in cells[count:]):
+        return data
+    return data[:count]
 
 
 def _comment(row: list[str], comment_at: int | None) -> bool:

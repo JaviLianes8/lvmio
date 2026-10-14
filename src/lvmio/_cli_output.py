@@ -8,6 +8,7 @@ import io
 import json
 import math
 
+from ._comment import escape_comment
 from ._model import Channel, LvmFile, Segment
 
 
@@ -45,7 +46,8 @@ def _print_header(lvm: LvmFile, as_json: bool) -> None:
         print(json.dumps(fields, indent=2, allow_nan=False))
         return
     for key, value in fields.items():
-        print(f"{key}: {value}")
+        text = escape_comment(value, "\t") if isinstance(value, str) else value
+        print(f"{key}: {text}")
 
 
 def _print_channels(lvm: LvmFile) -> None:

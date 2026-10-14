@@ -92,16 +92,14 @@ def _segment(seg: Segment, delim: str) -> Segment:
         if not name or name.lower() in _RESERVED:
             raise ValueError(f"channel name {shorten(name)} is reserved or empty")
         x_dimension = _field(channel.x_dimension, "x_dimension", delim)
-        x0 = _number(channel.x0, "x0")
-        if not math.isfinite(x0):
-            raise ValueError(f"x0 must be finite, not {x0}")
+        x0 = _finite(channel.x0, "x0")
         channels.append(
             Channel(
                 name=name,
                 data=_samples(channel.data, name),
                 unit=_field(channel.unit, "unit", delim),
                 x0=x0,
-                delta_x=_number(channel.delta_x, "delta_x"),
+                delta_x=_finite(channel.delta_x, "delta_x"),
                 x_dimension=x_dimension,
                 date=_field(channel.date, "channel date", delim),
                 time=_field(channel.time, "channel time", delim),
@@ -121,6 +119,13 @@ def _samples(values: object, name: str) -> list[float]:
     if isinstance(values, unordered) or not isinstance(values, Iterable):
         raise TypeError(f"samples of {shorten(name)} must be an ordered iterable of numbers")
     return [_number(v, f"a sample of {shorten(name)}") for v in values]
+
+
+def _finite(value: object, what: str) -> float:
+    number = _number(value, what)
+    if not math.isfinite(number):
+        raise ValueError(f"{what} must be finite, not {number}")
+    return number
 
 
 def _number(value: object, what: str) -> float:

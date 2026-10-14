@@ -57,7 +57,7 @@ X values: LabVIEW computes the X column from the waveform's true increment but w
 `Delta_X` in the sample number format (6 decimals, or a 6-decimal mantissa in exponent
 notation such as `2,083333E-5`), so for an increment that does not fit (1/2048 s is
 written `0,000488`) the X cells and `Delta_X` disagree in the file. lvmio, like LabVIEW's
-own reader, takes the increment from `Delta_X`; it writes X cells as `x0 + i * delta_x`,
+own reader, takes the increment from `Delta_X` (for a later write, see Reading); it writes X cells as `x0 + i * delta_x`,
 which can also differ from LabVIEW by one unit in the last decimal for X values within
 about 1e-16 (relative) of a halfway point, with or without an `X0` offset (14 of 3000 rows
 for an increment of 1e-7 in `delta_x_1e-7.lvm`). `X0` itself is written with 17
@@ -107,7 +107,9 @@ is escaped too (`\2C`), so the comment stays one cell.
 
 Samples may be given as any iterable of real numbers: a list, a tuple, a `range`, a NumPy
 array or a generator. `Channel` turns its `data` into a list when it is created (its type is
-`list[float]`), and the writer stores every sample as a Python float. `Date` and `Time` are
+`list[float]`), and the writer stores every sample as a Python float. A channel shorter
+than the others is padded with empty cells, and its `Samples` count stays its own length;
+both readers take it back at that length (lvmio drops the empty cells past `Samples`). `Date` and `Time` are
 written as given; LabVIEW expects its own form (`2026/10/14`, `10:00:00,5` with the file's
 decimal separator) and reads other text differently.
 
@@ -326,8 +328,9 @@ the objects are not hashable. They compare by value.
   and `Delta_X` keep at least 6 decimals whatever the precision.
 - Mapping keys must be `str` (0.2 turned `1` into the channel name `'1'`).
 - X cells must be empty or numbers (0.2 ignored them); a blank `X0` or `Delta_X` cell
-  means the default (0.2 raised `LvmError`). Rows with a comment after the first row, or a
-  falling X value, start a new segment.
+  means the default (0.2 raised `LvmError`). Rows with a comment after the first row, or
+  whose X value does not follow the previous one by the increment (it restarts, jumps or
+  changes step), start a new segment.
 - `--segment` takes only an optional minus sign and digits (0.2 took `+0`).
 - New: `format_lvm`, the `x_columns` and `encoding` arguments, `encoding` for `read_lvm`,
   `python -m lvmio` and `--encoding` on the command line.

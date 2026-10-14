@@ -13,7 +13,16 @@ from pathlib import Path
 import pytest
 
 import lvmio
-from lvmio import Channel, LvmError, LvmFile, Segment, parse_lvm, read_lvm, write_lvm
+from lvmio import (
+    Channel,
+    LvmError,
+    LvmFile,
+    Segment,
+    format_lvm,
+    parse_lvm,
+    read_lvm,
+    write_lvm,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -81,9 +90,12 @@ def test_x_columns_no_file_reads_the_real_channels() -> None:
 
 def test_empty_fields_become_nan() -> None:
     lvm = read_lvm(FIXTURES / "with_empty_fields.lvm")
-    untitled = lvm.segments[0]["Spare"]
-    assert len(untitled) == 8
-    assert all(math.isnan(v) for v in untitled.data)
+    # The unconnected channel's Samples count is 0: its empty cells are padding, as LabVIEW
+    # reads it. An empty cell within a channel's count is a missing sample: NaN.
+    assert lvm.segments[0]["Spare"].data == []
+    text = format_lvm([Channel("A", [1.0, math.nan, 3.0]), Channel("B", [4.0])])
+    assert math.isnan(parse_lvm(text).segments[0]["A"].data[1])
+    assert parse_lvm(text).segments[0]["B"].data == [4.0]
     connected = lvm.segments[0]["Dev1/ai0"]
     assert connected.data[0] == pytest.approx(-0.02)
 

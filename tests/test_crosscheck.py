@@ -46,8 +46,9 @@ def test_numeric_data_matches_lvm_read(name: str) -> None:
         mine_all = [
             v for seg in ours.segments if seg.names == segment.names for v in seg[channel.name].data
         ]
-        assert len(mine_all) == len(column)
-        for mine, theirs in zip(mine_all, column, strict=True):
+        # lvm_read pads every channel to the rows; lvmio, like LabVIEW, stops at Samples.
+        assert all(math.isnan(v) for v in column[len(mine_all) :])
+        for mine, theirs in zip(mine_all, column[: len(mine_all)], strict=True):
             assert _same(float(mine), float(theirs))
 
 
@@ -84,6 +85,6 @@ def test_labview_captures_match_lvm_read_exactly(name: str) -> None:
     data = np.asarray(oracle["data"])
     for channel in segment.channels:
         column = [float(v) for v in data[:, names.index(channel.name)].tolist()]
-        assert len(channel.data) == len(column)
-        for mine, theirs in zip(channel.data, column, strict=True):
+        assert all(math.isnan(v) for v in column[len(channel.data) :])
+        for mine, theirs in zip(channel.data, column[: len(channel.data)], strict=True):
             assert (math.isnan(mine) and math.isnan(theirs)) or mine == theirs

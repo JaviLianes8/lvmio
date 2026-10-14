@@ -10,7 +10,7 @@ from ._comment import unescape_comment
 from ._errors import LvmError
 from ._model import Channel, Segment
 from ._number import parse_number
-from ._split import own_step, starts
+from ._split import own_step, starts, trim_to_samples
 
 END = "***End_of_Header***"
 _STOP = ("Channels", "LabVIEW Measurement")
@@ -155,6 +155,9 @@ def _build(
             x0_text, dx_text = header("X0", column), header("Delta_X", column)
             x0 = 0.0 if x0_text is None else parse_number(x0_text, decimal, where["X0"])
             dx = 1.0 if dx_text is None else parse_number(dx_text, decimal, where["Delta_X"])
+            if len(bounds) == 2:
+                cells = [r[column] for r in rows]
+                data = trim_to_samples(data, cells, header("Samples", column))
             if lo:
                 own = column - 1 if columns[column - 1] == "X_Value" and column > 1 else x_column
                 cell = rows[lo][own].strip(" \t") if own is not None else ""

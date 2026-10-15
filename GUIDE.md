@@ -156,10 +156,10 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   position, so `No`, `One` and `Multi` files give the same channels.
 - An empty cell is a missing sample: NaN, and a line of separators is a row of NaN (also
   one placed between two segments, which adds a row to the segment before it); only a blank
-  line, without a separator and with nothing but spaces, ends a segment. An X cell must be
+  line, without a separator and with nothing but spaces and tabs, ends a segment. An X cell must be
   empty or a number, so a stray header line between data rows is refused. A channel has one
-  value per data row, except that it stops at its own `Samples` count when only empty
-  cells follow (the padding of a shorter channel). Otherwise the `Samples` and `Channels`
+  value per data row, except that in the first write it stops at its own `Samples` count
+  when only empty cells of that write follow (the padding of a shorter channel). Otherwise the `Samples` and `Channels`
   counts are not used: the column line and the data rows decide (LabVIEW's reader reads
   every channel up to the largest `Samples` count of the segment; see the differences
   below). A row with fewer cells than the last channel's column is refused, as
@@ -172,7 +172,8 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   `Time` when its line is missing (an empty cell stays empty), a unit to empty.
 - A row after the first starts a new segment when it carries a comment, or when its X cell
   is not the previous X cell plus the increment, beyond half a unit of the `Delta_X` cell's
-  last digit plus a unit of each X cell's last digit: the X restarts, jumps or changes step.
+  last digit plus a unit of each X cell's last digit, plus a few units in the last place of
+  a double for the rounding in computing X values: the X restarts, jumps or changes step.
   The new segment has the same channels, the comment of that row, an `X0` from that row's X
   cell and, when its own X cells step differently and the next step agrees, that increment
   (rounded to the digits the cells are printed with). This is how LabVIEW's "one header
@@ -181,7 +182,9 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   without losing a comment or an X origin. A later write whose first row happens to continue
   the previous X stays one row longer in the earlier segment (every sample keeps its X
   value). In `X_Columns` `One` the shared X column gives the origin and increment of every
-  channel of a later write; in `No`, where there are no X cells, only comments start a
+  channel of a later write; in `Multi` a jump in any channel's X column starts a segment for
+  all channels, and each channel takes its origin and increment from its own X column; in
+  `No`, where there are no X cells, only comments start a
   segment and its `X0` is extrapolated as `X0 + row * Delta_X`. A negative increment is an
   ordinary step (`negative_dx.lvm`).
 - `Channel.date` and `Channel.time` are each channel's own `Date` and `Time` cells;

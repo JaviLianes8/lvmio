@@ -4,7 +4,18 @@ from __future__ import annotations
 
 import math
 import re
-from decimal import ROUND_HALF_DOWN, ROUND_HALF_UP, Decimal
+from decimal import (
+    MAX_EMAX,
+    MIN_EMIN,
+    ROUND_HALF_DOWN,
+    ROUND_HALF_EVEN,
+    ROUND_HALF_UP,
+    Context,
+    Decimal,
+    DivisionByZero,
+    InvalidOperation,
+    Overflow,
+)
 
 from ._errors import LvmError
 
@@ -13,6 +24,14 @@ _NUMBER = re.compile(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?
 # zero; at every other exponent it rounds away from zero (measured for 7 to 19, the only
 # exponents where a double can hold a tie exactly).
 _TIES_TOWARD_ZERO = frozenset({11, 16, 17})
+# A fixed context, so the caller's decimal context never changes what is written.
+_CONTEXT = Context(
+    prec=28,
+    rounding=ROUND_HALF_EVEN,
+    Emin=MIN_EMIN,
+    Emax=MAX_EMAX,
+    traps=[InvalidOperation, DivisionByZero, Overflow],
+)
 _SPECIAL = {"nan": math.nan, "inf": math.inf, "infinity": math.inf}
 
 
@@ -41,14 +60,14 @@ def format_number(value: float, decimals: int, decimal: str) -> str:
     sign = "-" if math.copysign(1.0, value) < 0 else ""
     size = abs(value)
     exponent = math.floor(math.log10(size)) if size else 0
-    step = Decimal(1).scaleb(-decimals)
+    step, ctx = Decimal(1).scaleb(-decimals, _CONTEXT), _CONTEXT
     if -4 <= exponent < 7:
-        text = f"{Decimal(size).quantize(step, rounding=ROUND_HALF_DOWN):f}"
+        text = f"{Decimal(size).quantize(step, ROUND_HALF_DOWN, ctx):f}"
     else:
         mode = ROUND_HALF_DOWN if exponent in _TIES_TOWARD_ZERO else ROUND_HALF_UP
-        mantissa = Decimal(size).scaleb(-exponent).quantize(step, rounding=mode)
+        mantissa = Decimal(size).scaleb(-exponent, ctx).quantize(step, mode, ctx)
         if mantissa >= 10:
-            mantissa = (mantissa / 10).quantize(step, rounding=mode)
+            mantissa = ctx.divide(mantissa, 10).quantize(step, mode, ctx)
             exponent += 1
         text = f"{mantissa:f}E{exponent:+d}"
     text = sign + text

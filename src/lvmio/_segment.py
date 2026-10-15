@@ -136,16 +136,14 @@ def _build(
         values, cell = fields["X_Dimension"], column - shift
         return values[cell] if 0 <= cell < len(values) else ""
 
-    for column in (i for i, name in enumerate(columns[:need]) if name == "X_Value"):
+    x_columns = [i for i, name in enumerate(columns[:need]) if name == "X_Value"]
+    for column in x_columns:
         for row, number in zip(rows, numbers, strict=True):
             _cell(row, column, decimal, number)  # an X cell is empty or a number
-    first = positions[0] if positions else shift
-    x_column = 0 if shift else None
-    segments = []
-    step_text = header("Delta_X", first) if positions else None
-    step = 1.0 if step_text is None else parse_number(step_text, decimal, where["Delta_X"])
-    step_digit = 0.0 if step_text is None else resolution(step_text, decimal)
-    bounds = [*starts(rows, numbers, x_column, comment_at, decimal, (step, step_digit)), len(rows)]
+    first, x_column = (positions[0] if positions else shift), (0 if shift else None)
+    segments: list[Segment] = []
+    axes = [(c, _step(header("Delta_X", c + 1), decimal, where)) for c in x_columns]
+    bounds = [*starts(rows, numbers, axes, comment_at, decimal), len(rows)]
     for lo, hi in pairwise(bounds):
         channels: list[Channel] = []
         for column in positions:
@@ -156,15 +154,16 @@ def _build(
             x0_text, dx_text = header("X0", column), header("Delta_X", column)
             x0 = 0.0 if x0_text is None else parse_number(x0_text, decimal, where["X0"])
             dx = 1.0 if dx_text is None else parse_number(dx_text, decimal, where["Delta_X"])
-            if len(bounds) == 2:
-                cells = [r[column] for r in rows]
+            if not lo:  # the padding of a shorter channel belongs to the first write
+                cells = [r[column] for r in rows[lo:hi]]
                 data = trim_to_samples(data, cells, header("Samples", column))
             if lo:
                 own = column - 1 if columns[column - 1] == "X_Value" and column > 1 else x_column
                 cell = rows[lo][own].strip(" \t") if own is not None else ""
                 x0 = parse_number(cell, decimal, numbers[lo]) if cell else x0 + lo * dx
                 digit = 0.0 if dx_text is None else resolution(dx_text, decimal)
-                dx = own_step(rows[lo:hi], own, decimal, numbers[lo:hi], (dx, digit))[0]
+                ahead = slice(lo, min(hi, lo + 3))
+                dx = own_step(rows[ahead], own, decimal, numbers[ahead], (dx, digit))[0]
             channels.append(
                 Channel(
                     name=columns[column],
@@ -184,6 +183,13 @@ def _build(
         date, time = header("Date", first) or "", header("Time", first) or ""
         segments.append(Segment(channels, date=date, time=time, comment=comment, notes=notes))
     return segments
+
+
+def _step(text: str | None, decimal: str, where: dict[str, int]) -> tuple[float, float]:
+    """A header increment and the size of its last printed digit (1 and 0 when absent)."""
+    if text is None:
+        return 1.0, 0.0
+    return parse_number(text, decimal, where["Delta_X"]), resolution(text, decimal)
 
 
 def _cell(row: list[str], column: int, decimal: str, line: int) -> float:

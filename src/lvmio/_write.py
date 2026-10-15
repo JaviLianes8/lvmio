@@ -103,8 +103,21 @@ def write_lvm(
     try:
         payload = text.encode(encoding)
     except UnicodeError as exc:
-        start = exc.start if isinstance(exc, UnicodeEncodeError) else 0
+        start = exc.start if isinstance(exc, UnicodeEncodeError) else -1
+        if not _fails_alone(text[start : start + 1], encoding):
+            raise ValueError(f"the text cannot be written as {name}") from None
         character = shorten(text[start : start + 1])
         raise ValueError(f"the character {character} cannot be written as {name}") from None
     with open(os.fspath(path), "wb") as handle:
         handle.write(payload)
+
+
+def _fails_alone(character: str, encoding: str) -> bool:
+    """Whether the codec refuses this one character (some codecs refuse only whole texts)."""
+    if not character:
+        return False
+    try:
+        character.encode(encoding)
+    except UnicodeError:
+        return True
+    return False

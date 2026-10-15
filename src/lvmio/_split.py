@@ -19,30 +19,58 @@ Cell = tuple[float, float]  # a value and the size of its last printed digit
 def starts(
     rows: list[list[str]],
     numbers: list[int],
-    x_column: int | None,
+    axes: list[tuple[int, Cell]],
     comment_at: int | None,
     decimal: str,
-    step: Cell,
 ) -> list[int]:
-    """Row indexes that begin a segment, the first always 0."""
+    """Row indexes that begin a segment, the first always 0.
+
+    ``axes`` holds every X column with its header increment; a jump in any of them (in
+    ``Multi`` each channel has its own) starts a segment.
+    """
     found = [0]
-    current = step
-    previous: Cell | None = None
+    state = [_Axis(column, step) for column, step in axes]
     for index, row in enumerate(rows):
-        x = cell_value(row, x_column, decimal, numbers[index])
-        jump = x is not None and previous is not None and not close(previous, x, current)
+        xs = [cell_value(row, axis.column, decimal, numbers[index]) for axis in state]
+        jump = any(axis.jumps(x) for axis, x in zip(state, xs, strict=True))
         if index and (_comment(row, comment_at) or jump):
             found.append(index)
-            current = own_step(rows[index:], x_column, decimal, numbers[index:], step)
-        if x is not None:
-            previous = x
+            ahead = slice(index, index + 3)
+            for axis in state:
+                axis.restart(rows[ahead], numbers[ahead], decimal)
+        for axis, x in zip(state, xs, strict=True):
+            axis.see(x)
     return found
+
+
+class _Axis:
+    """One X column as the rows go by: its increment, last value and the write's origin."""
+
+    def __init__(self, column: int, step: Cell) -> None:
+        self.column, self.step, self.current = column, step, step
+        self.previous: Cell | None = None
+        self.origin, self.fresh = 0.0, True  # the write's first X value, and whether unseen
+
+    def jumps(self, x: Cell | None) -> bool:
+        if x is None or self.previous is None:
+            return False
+        return not close(self.previous, x, self.current, self.origin)
+
+    def restart(self, rows: list[list[str]], numbers: list[int], decimal: str) -> None:
+        self.current = own_step(rows, self.column, decimal, numbers, self.step)
+        self.fresh = True
+
+    def see(self, x: Cell | None) -> None:
+        if x is not None:
+            if self.fresh:
+                self.origin, self.fresh = x[0], False
+            self.previous = x
 
 
 def own_step(
     rows: list[list[str]], column: int | None, decimal: str, numbers: list[int], step: Cell
 ) -> Cell:
-    """The increment of the write starting at ``rows[0]``.
+    """The increment of the write starting at ``rows[0]`` (only its first three rows count).
 
     Its own X cells give it only when two consecutive steps agree and are not zero;
     otherwise the header's increment stands.
@@ -68,9 +96,13 @@ def _rounded(value: float, digit: float) -> float:
     return round(value, round(-math.log10(digit)))
 
 
-def close(previous: Cell, x: Cell, step: Cell) -> bool:
-    """Whether ``x`` is ``previous`` plus ``step``, within what the printed digits allow."""
-    rounding = 4 * math.ulp(max(abs(previous[0]), abs(x[0]), abs(step[0])))
+def close(previous: Cell, x: Cell, step: Cell, origin: float = 0.0) -> bool:
+    """Whether ``x`` is ``previous`` plus ``step``, within what the printed digits allow.
+
+    X values are computed as ``origin + index * step`` in double precision, so the rounding
+    allowance scales with the largest of the values involved, the origin included.
+    """
+    rounding = 4 * math.ulp(max(abs(previous[0]), abs(x[0]), abs(step[0]), abs(origin)))
     slack = 0.5 * step[1] + previous[1] + x[1] + rounding
     return abs(x[0] - (previous[0] + step[0])) <= slack
 

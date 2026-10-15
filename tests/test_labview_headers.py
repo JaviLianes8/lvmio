@@ -113,3 +113,19 @@ def test_a_negative_increment_is_one_segment_and_round_trips() -> None:
     assert format_lvm(lvm) == _raw("negative_dx.lvm")
     ours = LvmFile([Segment([Channel("V", [1.0, 2.0, 3.0], delta_x=-1e-7)])])
     assert len(parse_lvm(format_lvm(ours))) == 1
+
+
+def test_later_writes_with_a_small_step_change_or_one_row_each_are_kept_apart() -> None:
+    small = read_lvm(HERE / "one_header_small_step.lvm")
+    assert [(s.channels[0].x0, s.channels[0].delta_x, len(s.channels[0])) for s in small] == [
+        (0.0, 0.1, 6),
+        (0.625, 0.125, 4),
+    ]
+    restart = read_lvm(HERE / "one_header_restart_step.lvm")
+    assert [(s.channels[0].x0, s.channels[0].delta_x) for s in restart] == [
+        (0.0, 0.1),
+        (0.0, 0.125),
+    ]
+    loop = read_lvm(HERE / "one_header_scalar_loop.lvm")
+    assert [s.channels[0].data for s in loop] == [[float(i)] for i in range(6)]
+    assert [s.channels[1].data for s in loop] == [[10.0 + i] for i in range(6)]

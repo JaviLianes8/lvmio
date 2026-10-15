@@ -84,9 +84,15 @@ TOKENS = [
 ]
 
 # Later writes in "one header only" mode whose X jumps forward or changes step.
+_FIRST = {"rows": [[1.0, 2.0, 3.0]], "dt": 1.0, "headings": 1}
+_TENTHS = {"rows": [[1.0, 2.0, 3.0, 4.0, 5.0]], "dt": 0.1, "headings": 1}
+_LATER = [0.0] * 4 + [6.0, 7.0, 8.0, 9.0, 10.0]
 ONE_HEADER_LATER = {
-    "gap": {"rows": [[0.0] * 6 + [7.0, 8.0, 9.0]], "dt": 1.0, "start": 6, "headings": 1},
-    "step": {"rows": [[0.0] * 6 + [7.0, 8.0, 9.0]], "dt": 0.5, "start": 6, "headings": 1},
+    "gap": [_FIRST, {"rows": [[0.0] * 6 + [7.0, 8.0, 9.0]], "dt": 1.0, "start": 6, "headings": 1}],
+    "step": [_FIRST, {"rows": [[0.0] * 6 + [7.0, 8.0, 9.0]], "dt": 0.5, "start": 6, "headings": 1}],
+    "small_step": [_TENTHS, {"rows": [_LATER], "dt": 0.125, "start": 4, "headings": 1}],
+    "restart_step": [_TENTHS, {"rows": [_LATER[4:]], "dt": 0.125, "headings": 1}],
+    "scalar_loop": [{"rows": [[float(i)], [10.0 + i]], "headings": 1} for i in range(6)],
 }
 
 

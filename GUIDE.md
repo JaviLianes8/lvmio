@@ -98,8 +98,14 @@ but the text written back differs:
   lvmio's own output too.
 - `delta_x_2048hz.lvm`, `delta_x_1e-7.lvm` and `x0_offsets.lvm`: X cells are rebuilt from
   `Delta_X` (see X values above), and two `X0` values are spelled one unit apart.
-- `one_header_same.lvm`, `one_header_gap.lvm`, `one_header_step.lvm`: written back as
-  separate segments with their own headers (see Reading).
+- `one_header_same.lvm`, `one_header_gap.lvm`, `one_header_step.lvm` and the other
+  `one_header_*.lvm` files: written back as separate segments with their own headers (see
+  Reading).
+
+lvmio's own files follow the same rules: an increment that does not fit the digits of
+`Delta_X` (1/2048 at precision 6) is written with X cells from the exact increment, and a
+read and a second write rebuild them from the rounded `Delta_X`; from then on the file is
+stable.
 
 `one_header_fewer.lvm` and `one_header_more.lvm` are refused (see the differences).
 Comments are escaped as LabVIEW escapes them; in a comma-separated file a comma in a comment
@@ -131,7 +137,7 @@ The writer refuses, before writing anything:
 | --- | --- |
 | `TypeError` | data that is not an `LvmFile`, `Segment`, list of `Channel` or mapping of `str` to an iterable of numbers; a sample, `x0` or `delta_x` that is not a real number (`int`, `float`, `Fraction`, `Decimal` and NumPy numbers are; `bool`, `str` and `complex` are not); a text field that is not `str`; `precision` that is not an `int` |
 | `TypeError` (continued) | unordered samples (a `set` or a mapping) and `memoryview` samples, refused like `bytes` |
-| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an `x0` that is not finite; a `description` starting or ending with whitespace; a comment on a segment with no samples (it has no row to go in), or a segment date or time on a segment with no channels (there is no cell for it); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
+| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an `x0` or `delta_x` that is not finite; a `description` starting or ending with whitespace; a comment on a segment with no samples (it has no row to go in), or a segment date or time on a segment with no channels (there is no cell for it); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
 | `LookupError` | `write_lvm` with an unknown encoding name |
 
 Text fields are copied to plain `str` and `precision` to a plain `int` before they are
@@ -165,15 +171,18 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
 - `X0` and `Delta_X` default to 0 and 1 when their line is missing, `X_Dimension` to
   `Time` when its line is missing (an empty cell stays empty), a unit to empty.
 - A row after the first starts a new segment when it carries a comment, or when its X cell
-  is not the previous X cell plus the increment (allowing for the digits the cells are
-  printed with): the X restarts, jumps or changes step. The new segment has the same
-  channels, the comment of that row, an `X0` from that row's X cell and, when its own X cells
-  step differently, that increment. This is how LabVIEW's "one header only" mode appends
-  each later write (`one_header_same.lvm`, `one_header_gap.lvm`, `one_header_step.lvm`),
-  and how files with a comment on every write read without losing a comment or an X
-  origin. A later write whose first row happens to continue the previous X stays one row
-  longer in the earlier segment (every sample keeps its X value), and in `X_Columns` `No`,
-  where there are no X cells, only comments start a segment. A negative increment is an
+  is not the previous X cell plus the increment, beyond half a unit of the `Delta_X` cell's
+  last digit plus a unit of each X cell's last digit: the X restarts, jumps or changes step.
+  The new segment has the same channels, the comment of that row, an `X0` from that row's X
+  cell and, when its own X cells step differently and the next step agrees, that increment
+  (rounded to the digits the cells are printed with). This is how LabVIEW's "one header
+  only" mode appends each later write (`one_header_*.lvm`, including a step change of 25 %
+  and a logging loop of one row per write), and how files with a comment on every write read
+  without losing a comment or an X origin. A later write whose first row happens to continue
+  the previous X stays one row longer in the earlier segment (every sample keeps its X
+  value). In `X_Columns` `One` the shared X column gives the origin and increment of every
+  channel of a later write; in `No`, where there are no X cells, only comments start a
+  segment and its `X0` is extrapolated as `X0 + row * Delta_X`. A negative increment is an
   ordinary step (`negative_dx.lvm`).
 - `Channel.date` and `Channel.time` are each channel's own `Date` and `Time` cells;
   `Segment.date` and `Segment.time` are the first channel's. `Segment.notes` is the

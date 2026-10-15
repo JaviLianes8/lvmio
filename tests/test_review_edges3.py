@@ -105,3 +105,17 @@ def test_every_x_column_of_a_multi_file_is_checked() -> None:
     lines[row] = "\t".join(cells)
     with pytest.raises(LvmError, match="not a number: 'abc'"):
         parse_lvm("\r\n".join(lines))
+
+
+@pytest.mark.parametrize("cell", ["0e400", "0E+309", "000e400", "0e" + "9" * 5000])
+def test_an_x_cell_with_a_huge_exponent_reads_without_crashing(cell: str) -> None:
+    head = "LabVIEW Measurement\t\n***End_of_Header***\t\n\nChannels\t1\n***End_of_Header***\t\n"
+    lvm = parse_lvm(head + "X_Value\tV\tComment\n" + cell + "\t1\n1\t2\n")
+    assert [v for s in lvm for v in s.channels[0].data] == [1.0, 2.0]
+
+
+@pytest.mark.parametrize("count", [chr(0xB2), chr(0x2460), "1" + chr(0xB9), "9" * 5000])
+def test_an_odd_samples_count_is_not_used(count: str) -> None:
+    head = "LabVIEW Measurement\t\n***End_of_Header***\t\n\nChannels\t1\nSamples\t" + count + "\n"
+    lvm = parse_lvm(head + "***End_of_Header***\t\nX_Value\tV\tComment\n0\t1\n1\t\n")
+    assert len(lvm.segments[0].channels[0].data) == 2

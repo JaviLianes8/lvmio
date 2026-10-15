@@ -125,10 +125,9 @@ def main(argv: list[str]) -> int:
         how = f"express worker VI, one header only, a later write with {label} channels"
         later = {"rows": rows, "comment": "c2", "headings": 1}
         worker(lv, target(f"one_header_{label}.lvm", how), [first, later], 1)
-    for label, later in ONE_HEADER_LATER.items():
-        how = f"express worker VI, one header only, a later write with an X {label}"
-        start = {"rows": [[1.0, 2.0, 3.0]], "dt": 1.0, "headings": 1}
-        worker(lv, target(f"one_header_{label}.lvm", how), [start, later], 1)
+    for label, writes in ONE_HEADER_LATER.items():
+        how = f"express worker VI, one header only, writes: {label.replace('_', ' ')}"
+        worker(lv, target(f"one_header_{label}.lvm", how), writes, 1)
     how = "express worker VI, one waveform with a negative X increment"
     worker(lv, target("negative_dx.lvm", how), [{"rows": [[1.0, 2.0, 3.0]], "dt": -1.0}], 1)
     text = "line one" + chr(13) + chr(10) + "line two" + chr(9) + "x, y" + chr(92) + "z"

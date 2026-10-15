@@ -10208,6 +10208,25 @@
    "repeats_first": true
   }
  ],
+ "one_header_restart_step.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     3.0,
+     4.0,
+     5.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
+  }
+ ],
  "one_header_same.lvm": [
   {
    "error": 0,
@@ -10225,6 +10244,43 @@
    ],
    "eof": false,
    "comment": "c1"
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "one_header_scalar_loop.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     0.0
+    ],
+    [
+     10.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
+  },
+  {
+   "repeats_first": true
+  }
+ ],
+ "one_header_small_step.lvm": [
+  {
+   "error": 0,
+   "channels": [
+    [
+     1.0,
+     2.0,
+     3.0,
+     4.0,
+     5.0
+    ]
+   ],
+   "eof": false,
+   "comment": ""
   },
   {
    "repeats_first": true

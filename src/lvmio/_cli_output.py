@@ -53,11 +53,16 @@ def _print_header(lvm: LvmFile, as_json: bool) -> None:
 def _print_channels(lvm: LvmFile) -> None:
     for index, segment in enumerate(lvm):
         print(
-            f"segment {index}: {len(segment)} channels, {max(segment.samples, default=0)} samples"
+            f"segment {index}: {_count(len(segment), 'channel')}, "
+            f"{_count(max(segment.samples, default=0), 'sample')}"
         )
         for channel in segment:
             unit = f" [{_shown(channel.unit)}]" if channel.unit else ""
-            print(f"  {_shown(channel.name)}{unit}: {len(channel)} samples")
+            print(f"  {_shown(channel.name)}{unit}: {_count(len(channel), 'sample')}")
+
+
+def _count(number: int, noun: str) -> str:
+    return f"{number} {noun}" + ("" if number == 1 else "s")
 
 
 def _shown(text: str) -> str:

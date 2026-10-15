@@ -57,7 +57,7 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
 - Separator and `X_Columns` names are accepted in any case and written as LabVIEW spells
   them (`separator="tab"` writes `Tab`).
 - `read_lvm` and `write_lvm` take any path-like object.
-- `precision` must be an `int` from 0 to 17 (0.2 took any number of decimals and floats),
+- `precision` must be an `int` from 0 to 17 (0.2 took any number of decimals, and integral `Decimal` and `Fraction` values),
   and X values and `Delta_X` keep at least 6 decimals whatever the precision.
 - Mapping keys must be `str` (0.2 turned other keys into names), and `x0` and `delta_x`
   must be finite.

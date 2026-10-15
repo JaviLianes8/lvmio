@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import contextlib
 import decimal
+import io
 import time
 from pathlib import Path
 
 import pytest
 
-from lvmio import Channel, format_lvm, parse_lvm, write_lvm
+from lvmio import Channel, format_lvm, parse_lvm, read_lvm, write_lvm
+from lvmio._cli_output import _print_channels
 from lvmio._number import format_number
 
 HEAD = "LabVIEW Measurement\t\nSeparator\tTab\nDecimal_Separator\t.\n"
@@ -88,3 +91,16 @@ def test_an_encoding_that_fails_without_a_position_names_no_character(
     with pytest.raises(ValueError, match=f"^the text cannot be written as {encoding}$"):
         write_lvm(tmp_path / "x.lvm", {"a": [1.0]}, encoding=encoding)
     assert not (tmp_path / "x.lvm").exists()
+
+
+def test_an_unknown_encoding_is_reported_before_the_file_is_opened(tmp_path: Path) -> None:
+    with pytest.raises(LookupError, match="unknown encoding: nope"):
+        read_lvm(tmp_path / "missing.lvm", encoding="nope")
+
+
+def test_the_channel_list_counts_in_the_singular_for_one() -> None:
+    lvm = parse_lvm(format_lvm([Channel("A", [1.0])]))
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        _print_channels(lvm)
+    assert out.getvalue() == "segment 0: 1 channel, 1 sample\n  A: 1 sample\n"

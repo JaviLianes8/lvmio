@@ -111,7 +111,7 @@ def test_cli_channels_escapes_control_characters(cli: list[str], tmp_path: Path)
     path.write_bytes(text.encode())
     result = run(cli, "channels", str(path))
     assert chr(27) not in result.stdout
-    assert "A" + chr(92) + "1B[2J [V]: 1 samples" in result.stdout
+    assert "A" + chr(92) + "1B[2J [V]: 1 sample" in result.stdout
 
 
 def test_bare_carriage_return_line_endings_are_read() -> None:

@@ -30,6 +30,8 @@ def read_lvm(path: str | os.PathLike[str], *, encoding: str | None = None) -> Lv
     >>> read_lvm(path).operator
     'José'
     """
+    if encoding is not None:
+        encoding_name(encoding)  # an unknown encoding is reported before the file is opened
     with open(os.fspath(path), "rb") as handle:
         data = handle.read()
     return parse_lvm(decode(data, encoding))

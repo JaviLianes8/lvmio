@@ -130,6 +130,7 @@ again by a new reviewer with the same lens.
 | a. API and docs | 1 | dcceacf | FAIL | NumPy arrays and generators refused by the writer, redirected CLI output on non-cp1252 names, exit 2 undocumented, header line numbers, private module names, docstring and CHANGELOG gaps; fixed in 6b464e7 |
 | a | 2 | a6942f0 | FAIL | generator data consumed by a first write, description blanks lost, CHANGELOG omissions, hints narrower than the docs, two inaccurate sentences; fixed in 1dac43c |
 | a | 3 | 1dac43c | FAIL | a stale GUIDE bullet, lvmio's own files with a large X0 split at precision 17, padded short channels read back with NaN; fixed in fe27684 and 85faffb |
+| a and d | 4 | 8e8e756 | PASS | API, typing of a client script, frozen objects, about 20 error cases and every example checked; wheel and sdist contents, the suite against the installed wheel on CPython 3.10 to 3.14, console script and `python -m lvmio` on the captures, upgrade from 0.2.1; minor: a CHANGELOG precision note, error order for a missing file with an unknown encoding, singular counts; fixed in 5eb5dd9 |
 | b. Correctness and ground truth | 1 | 27c680c | FAIL | rounding of exact ties, comment escapes, undocumented reader differences; fixed in 21bb068 and 27c680c |
 | b | 2 | ac8c4dc | FAIL | exponent ties at decimal exponents 11, 16, 17, near ties, the 1e-4 rewrite boundary, UTF-8 in LabVIEW; fixed in 554d3cc |
 | b | 3 | 554d3cc | FAIL | Delta_X rounding and X cells, Delta_X floor unpinned, fixed-notation near ties; fixed in e99fb62 |

@@ -8,12 +8,12 @@ arrived with 1.0.0 (`tests/fixtures/labview2026`).
 
 ## 1. Correct column handling for real `X_Columns=No` files (DONE, correctness)
 
-Genuine LabVIEW files with `X_Columns=No` still emit the `X_Value` column in the
-data header and a leading empty X field on every data row (see the committed
-`short.lvm` and `comments_on_some_rows.lvm`). The old reader keyed the column offset
+The fixtures of the time with `X_Columns=No` (`short.lvm`, `comments_on_some_rows.lvm`,
+then taken to be LabVIEW output) still have an `X_Value` column in the data header and a
+leading empty X field on every data row. The old reader keyed the column offset
 off the `X_Columns` header field, so it read channel 0 from the empty X column and
 shifted every signal by one. The reader now derives the offset from the data
-header itself (a leading `X_Value` token), which matches NI output and `lvm_read`
+header itself (a leading `X_Value` token), which matches those files and `lvm_read`
 for both `No` and `One` files.
 
 ## 2. Empty data fields become NaN, not dropped (DONE, correctness)

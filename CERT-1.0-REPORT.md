@@ -9,13 +9,41 @@ Progress:
 - [x] Contract, fuzz and author mutation round (items 6, 9, 18)
 - [x] Docs: README, GUIDE, CHANGELOG (items 11, 12)
 - [x] Packaging, e2e and upgrade from PyPI 0.2.1 (items 8, 10, 13, 14), author run
-- [ ] Independent reviewer and five QA lenses report PASS (items 16, 19)
+- [x] Independent reviewer and five QA lenses report PASS (items 16, 19)
 - [x] Gates (item 15), final run
 - [ ] PR and trace guard CLEAN (item 17); merge and publish left to the maintainer
 
 ## Scorecard
 
-Filled in at the head of the pull request once the reviewer and the five lenses report.
+Independent review (item 16) at 8c57de8, confirmed against the final head.
+
+| # | Item | Result |
+| --- | --- | --- |
+| 1 | Public API reviewed for stability | PASS: 8 names, keyword-only options, every change in CHANGELOG and GUIDE |
+| 2 | `__all__` exact, no private imports in docs | PASS |
+| 3 | Docstrings with runnable examples, doctests | PASS: 18 module doctests, README and GUIDE examples run as tests |
+| 4 | Typed end to end | PASS: `mypy --strict src tests` clean, `py.typed` shipped |
+| 5 | Typed, documented, bounded errors | PASS: a 1 MB bad input gives a 108-character message |
+| 6 | Contract tests of every public name | PASS: `test_contract*.py` and the review contracts |
+| 7 | Real ground truth | PASS: 136 LabVIEW 2026 captures, hashes in `manifest.json` |
+| 8 | Real e2e from the wheel | PASS: six interpreters, console script, upgrade from 0.2.1 |
+| 9 | Seeded fuzz, no crash, hang or blowup | PASS: linear to 160k rows, fuzz files only raise `LvmError` |
+| 10 | Supported Pythons | PASS: CPython 3.10 to 3.14 and 3.14 free-threaded |
+| 11 | README and `twine check` | PASS |
+| 12 | Dated CHANGELOG 1.0.0 section | PASS |
+| 13 | pyproject 1.0.0, Production/Stable | PASS |
+| 14 | sdist and wheel contents | PASS: 20-file wheel, sdist without scratch files |
+| 15 | Gates each exit 0 | PASS: see Gates |
+| 16 | Independent reviewer | PASS: 18 items PASS, item 17 pending, no blocking findings |
+| 17 | PR and trace guard | see the pull request; merge and publish left to the maintainer |
+| 18 | Contracts bite (mutations) | PASS: five author rounds (last: 100 mutants, 99 killed, 1 equivalent and removed) |
+| 19 | Five independent QA lenses | PASS: a round 4, b and c round 13, d round 4, e round 7 |
+
+Minor review findings, addressed after the review: a mutant-by-mutant table
+(`CERT-1.0-MUTATIONS.md`), process wording removed from this report, the stray
+`lvmio.annotations` attribute removed, and two inaccurate sentences in CONTRIBUTING and
+IMPROVEMENTS-round corrected. Kept as they are: long paths in command line errors are cut at
+40 characters like every other quoted input, and the capture date stays in this report.
 
 ## Baseline on 0.2.1 (before any change)
 
@@ -85,11 +113,11 @@ documented writer refusals (`TypeError`, `ValueError`) with nothing written on r
 
 ## Author mutation rounds (item 18)
 
-Each mutation was applied alone to a fresh clone of the pushed branch on a separate build
-machine, the suite run with `-x`, no bytecode written (`-B`, `PYTHONDONTWRITEBYTECODE`,
+Each mutation was applied alone to a fresh clone of the pushed branch, the suite run with `-x`, no bytecode written (`-B`, `PYTHONDONTWRITEBYTECODE`,
 `__pycache__` purged before each run), a 900 s limit per mutant, and the file restored; the
 baseline was green before and after every round. The list grew with the code: number
 format, reader, segment and split rules, writer checks, rendering, model and command line.
+`CERT-1.0-MUTATIONS.md` lists round 5 mutant by mutant with the test that caught each.
 
 | Round | Head | Mutants | Killed at once | Survivors and outcome |
 | --- | --- | --- | --- | --- |
@@ -97,7 +125,7 @@ format, reader, segment and split rules, writer checks, rendering, model and com
 | 2 | 27c680c | 68 | 66 | M04 (zero special case) equivalent, code removed as redundant; M60 (blank line message) killed by a new contract; both in 25d5db7 |
 | 3 | bf6e04a | 89 | 87 | M69 (comment on a later row) and M80 (X cells of a Multi file) killed by new contracts in 2521431 |
 | 4 | f327621 | 92 | 91 | M92 (a one-row write lending the next write its step) killed by a new contract in b922222 |
-| 5 | 1d0436e | 100 | 99 | M80 had become equivalent once every X column is parsed while splitting segments; the redundant check was removed in the next commit. The list added the origin term of the split allowance, every Multi X column, padding after a split, codec messages, the fixed decimal context and the CSV X columns, all killed. Run in three parts on three workers at once |
+| 5 | 1d0436e | 100 | 99 | M80 had become equivalent once every X column is parsed while splitting segments; the redundant check was removed in the next commit. The list added the origin term of the split allowance, every Multi X column, padding after a split, codec messages, the fixed decimal context and the CSV X columns, all killed |
 
 Round 1 survivors and their contracts: Multi X cells from the first channel and Delta_X
 decimals at low precision (`test_the_files_labview_read_back_are_still_what_lvmio_writes`),
@@ -127,11 +155,10 @@ Each on its own in a fresh clone and venv: `ruff format --check .` exit 0 (62 fi
 `ruff check .` exit 0, `mypy --strict src tests` exit 0 (49 files), `pytest` 729 passed and
 1 skipped (the installed-script check, which the wheel run covers), `pytest --doctest-modules src` 18 passed.
 
-## Independent QA lenses (item 19), rounds so far
+## Independent QA lenses (item 19)
 
-Every lens was an independent reviewer that read the certification rules and CERT-1.0.md
-first, worked in its own clone, ran things rather than reading, and reported back
-privately. Findings were fixed, pinned by tests where they concern behaviour, and checked
+Every lens was an independent review against the certification rules and CERT-1.0.md that
+ran the code rather than only reading it. Findings were fixed, pinned by tests where they concern behaviour, and checked
 again by a new reviewer with the same lens.
 
 | Lens | Round | Head | Verdict | Findings and outcome |
@@ -162,6 +189,6 @@ again by a new reviewer with the same lens.
 | e | 2 | a12dd19 | FAIL | 227 mutations, 186 killed, 3 equivalent, 38 needing contracts (one on code removed in b3c1119); the 37 contracts added in dec6e72 (`tests/test_contract_e2_read.py`, `tests/test_contract_e2_split.py`), each confirmed by the reviewer to kill its mutant |
 | e | 3 | a7933d3 | FAIL | 337 mutations over all eleven modules, 297 killed, 8 equivalent (each explained: unreachable branches, `LookupError` subclasses, identical digits), 32 needing contracts; added in the next commit (`tests/test_contract_e3_lib.py`, `tests/test_contract_e3_cli.py`), each confirmed by the reviewer to fail on its mutant |
 | e | 4 | 37e4f60 | FAIL | 329 mutations over every module, 311 killed, 4 equivalent (an unreachable branch, two `LookupError` subclasses, a cap no message reaches), 14 needing contracts, among them `channels` listing only the first channel; added in the next commit (`tests/test_contract_e4.py`), each confirmed to fail on its mutant |
-| e | 5 | 7620bfe | FAIL | 327 mutations over every module on two machines (136 run on both, every verdict matched), 314 killed, 4 equivalent, 9 needing contracts (decoding offsets, the exact first line, a lone X column, X origin without an X column, a later write with an empty third X cell, refusal order, the path in CLI errors); added in the next commit (`tests/test_contract_e5.py`) |
+| e | 5 | 7620bfe | FAIL | 327 mutations over every module (136 of them run twice, with matching verdicts), 314 killed, 4 equivalent, 9 needing contracts (decoding offsets, the exact first line, a lone X column, X origin without an X column, a later write with an empty third X cell, refusal order, the path in CLI errors); added in the next commit (`tests/test_contract_e5.py`) |
 | e | 6 | b4c4034 | FAIL | 338 mutations, 328 killed, 3 equivalent, 7 needing contracts (quoting of unprintable encoding names, any `\XX` escape, the default operator of a segment, refusal spellings, the CLI message cap, exact `X_Value` spelling, the third-row rule for a channel's own step); added in the next commit (`tests/test_contract_e6.py`) |
 | e | 7 | bbf21d8 | PASS after contracts | bounded confirmation round: the seven round 6 survivors are killed by their contracts; a sweep of 40 new mutations on the code changed since the earlier reviews killed 31, 2 equivalent (the fixed decimal context's rounding and exponent limits, checked on about 400,000 doubles), 7 killed by the contracts added in the next commit (`tests/test_contract_e7.py`), each confirmed to fail on its mutant |

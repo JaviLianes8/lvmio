@@ -6,8 +6,6 @@
 [1.0, 2.5]
 """
 
-from __future__ import annotations
-
 from ._errors import LvmError
 from ._model import Channel, LvmFile, Segment
 from ._read import parse_lvm, read_lvm

@@ -97,6 +97,7 @@ format, reader, segment and split rules, writer checks, rendering, model and com
 | 2 | 27c680c | 68 | 66 | M04 (zero special case) equivalent, code removed as redundant; M60 (blank line message) killed by a new contract; both in 25d5db7 |
 | 3 | bf6e04a | 89 | 87 | M69 (comment on a later row) and M80 (X cells of a Multi file) killed by new contracts in 2521431 |
 | 4 | f327621 | 92 | 91 | M92 (a one-row write lending the next write its step) killed by a new contract in b922222 |
+| 5 | 1d0436e | 100 | 99 | M80 had become equivalent once every X column is parsed while splitting segments; the redundant check was removed in the next commit. The list added the origin term of the split allowance, every Multi X column, padding after a split, codec messages, the fixed decimal context and the CSV X columns, all killed. Run in three parts on three workers at once |
 
 Round 1 survivors and their contracts: Multi X cells from the first channel and Delta_X
 decimals at low precision (`test_the_files_labview_read_back_are_still_what_lvmio_writes`),

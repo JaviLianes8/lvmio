@@ -149,9 +149,9 @@ each in `tests/test_contract_edges.py`).
   `0.000000` then `1.000000E-9`, infinity `inf` then `Inf`, `format_lvm` absent then present,
   console script reports `lvmio 1.0.0`, `1_0` read as 10 then refused with `LvmError`.
 
-## Gates (item 15), final run at 890e56d
+## Gates (item 15), final run at 30b3739
 
-Each on its own in a fresh clone and venv: `ruff format --check .` exit 0 (62 files),
+Each on its own in a fresh clone and venv: `ruff format --check .` exit 0 (63 files),
 `ruff check .` exit 0, `mypy --strict src tests` exit 0 (49 files), `pytest` 729 passed and
 1 skipped (the installed-script check, which the wheel run covers), `pytest --doctest-modules src` 18 passed.
 

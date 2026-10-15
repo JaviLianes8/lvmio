@@ -1,0 +1,197 @@
+"""Capture .lvm ground truth from a local LabVIEW 2026 install (Windows only).
+
+LabVIEW writes measurement files through the Write To Measurement File express VI and
+its worker VI, and reads files through Read From Measurement File; both are driven over
+LabVIEW's ActiveX server. Everything lands in tests/fixtures/labview2026 with a
+manifest of sizes and SHA-256 sums. Needs pywin32.
+
+    python scripts/capture_labview.py
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import math
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+from _cases import COMMENTS, ONE_HEADER_LATER, exponent_ties, near_ties, numbers, ties, x0_offsets
+from _hand_inputs import write_hand_inputs
+from _hand_layouts import write_layouts
+from _labview_com import LabVIEW, express, read, relay, worker
+from _lvmio_inputs import write_inputs
+
+NEWLINE = chr(10)
+OUT = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "labview2026"
+BASIC = [[1.0, 2.5, -3.25], [4.0, 5.0, 6.0]]
+
+
+def main(argv: list[str]) -> int:
+    lv = LabVIEW()
+    if argv[:1] == ["--append"]:
+        # A second LabVIEW session appending to an existing file repeats the file header.
+        worker(lv, Path(argv[1]), [{"rows": [[7.0, 8.0]], "later_session": True}], 1)
+        return 0
+    OUT.mkdir(parents=True, exist_ok=True)
+    made: dict[str, str] = {}
+
+    def target(name: str, how: str) -> Path:
+        path = OUT / name
+        if path.exists():
+            path.unlink()
+        made[name] = how
+        return path
+
+    express(
+        lv,
+        target(
+            "express_default.lvm",
+            "Write To Measurement File express VI instance, default configuration",
+        ),
+        BASIC,
+    )
+    for code, label in ((0, "no"), (1, "one"), (2, "multi")):
+        worker(
+            lv,
+            target(f"x_columns_{label}.lvm", f"express worker VI, X columns code {code}"),
+            [{"rows": BASIC}],
+            code,
+        )
+    worker(
+        lv,
+        target("numbers.lvm", "express worker VI, seeded values over the double range"),
+        [{"rows": numbers()}],
+        1,
+    )
+    inputs = target("numbers_input.json", "the channels given to LabVIEW for numbers.lvm")
+    exact = [[value.hex() for value in channel] for channel in numbers()]
+    inputs.write_text(json.dumps(exact, indent=1) + "\n", encoding="utf-8")
+    specials = [[1.0, math.nan, -0.0], [math.inf, -math.inf, 0.0]]
+    worker(
+        lv,
+        target("specials.lvm", "express worker VI, NaN, infinities and signed zero"),
+        [{"rows": specials}],
+        1,
+    )
+    worker(
+        lv,
+        target(
+            "period_decimal.lvm",
+            "express worker VI, period chosen as decimal separator on a comma locale",
+        ),
+        [{"rows": BASIC, "decimal": "."}],
+        1,
+    )
+    passes = [
+        {"rows": BASIC, "comment": "first pass"},
+        {"rows": [[3.0, 4.0, 5.0]], "comment": "second pass"},
+        {"rows": [[6.0], [7.0], [8.0]]},
+    ]
+    worker(lv, target("segments.lvm", "express worker VI, three appends in one session"), passes, 1)
+    appended = target(
+        "appended_runs.lvm", "express worker VI, a second session appending to the first file"
+    )
+    worker(lv, appended, [{"rows": BASIC}], 1)
+    subprocess.run([sys.executable, __file__, "--append", str(appended)], check=True)
+    worker(
+        lv,
+        target("comment_cp1252.lvm", "express worker VI, a comment outside ASCII"),
+        [{"rows": BASIC, "comment": "caf\u00e9 \u00f1 \u00b5 \u20ac"}],
+        1,
+    )
+    worker(
+        lv,
+        target("ties.lvm", "express worker VI, exact rounding ties and notation boundaries"),
+        [{"rows": ties()}],
+        1,
+    )
+    exact_ties = [[value.hex() for value in channel] for channel in ties()]
+    target("ties_input.json", "the channels given to LabVIEW for ties.lvm").write_text(
+        json.dumps(exact_ties, indent=1) + "\n", encoding="utf-8"
+    )
+    for label, dt in (("quarter", 0.25), ("2048hz", 1 / 2048), ("1e-7", 1e-7)):
+        samples = [float(i % 7) for i in range(3000)]
+        how = f"express worker VI, one channel with an X increment of {dt!r}"
+        worker(lv, target(f"delta_x_{label}.lvm", how), [{"rows": [samples], "dt": dt}], 1)
+    first = {"rows": BASIC, "comment": "c1", "headings": 1}
+    for label, rows in (
+        ("same", [[5.0, 6.0, 7.0], [8.0, 9.0, 10.0]]),
+        ("fewer", [[5.0, 6.0]]),
+        ("more", [[5.0, 6.0], [7.0, 8.0], [9.0, 10.0]]),
+    ):
+        how = f"express worker VI, one header only, a later write with {label} channels"
+        later = {"rows": rows, "comment": "c2", "headings": 1}
+        worker(lv, target(f"one_header_{label}.lvm", how), [first, later], 1)
+    for label, writes in ONE_HEADER_LATER.items():
+        how = f"express worker VI, one header only, writes: {label.replace('_', ' ')}"
+        worker(lv, target(f"one_header_{label}.lvm", how), writes, 1)
+    how = "express worker VI, one waveform with a negative X increment"
+    worker(lv, target("negative_dx.lvm", how), [{"rows": [[1.0, 2.0, 3.0]], "dt": -1.0}], 1)
+    text = "line one" + chr(13) + chr(10) + "line two" + chr(9) + "x, y" + chr(92) + "z"
+    how = "express worker VI, a file description with a line break, a tab and a backslash"
+    worker(lv, target("description.lvm", how), [{"rows": BASIC, "description": text}], 1)
+    how = "express worker VI, 60 waveforms whose start sample sets a non-zero X0"
+    worker(lv, target("x0_offsets.lvm", how), x0_offsets(), 1)
+    for name, values in (("exponent_ties", exponent_ties()), ("near_ties", near_ties())):
+        how = f"express worker VI, {name.replace('_', ' ')}"
+        worker(lv, target(f"{name}.lvm", how), [{"rows": values}], 1)
+        exact = [[value.hex() for value in channel] for channel in values]
+        target(f"{name}_input.json", f"the channels given to LabVIEW for {name}.lvm").write_text(
+            json.dumps(exact, indent=1) + NEWLINE, encoding="utf-8"
+        )
+    passes = [{"rows": [[float(i)]], "comment": text} for i, text in enumerate(COMMENTS)]
+    worker(lv, target("comments.lvm", "express worker VI, one data set per comment"), passes, 1)
+    target("comments_input.json", "the comments given to LabVIEW for comments.lvm").write_text(
+        json.dumps(COMMENTS, indent=1) + "\n", encoding="utf-8"
+    )
+    for stale in (OUT / "read").glob("*.lvm"):
+        stale.unlink()
+    made.update(write_hand_inputs(OUT / "read"))
+    made.update(write_layouts(OUT / "read"))
+    made.update(write_inputs(OUT / "read"))
+
+    (OUT / "relay").mkdir(exist_ok=True)
+    for stale in (OUT / "relay").glob("*.lvm"):
+        stale.unlink()
+    names = (
+        "lvmio_unit_gap",
+        "lvmio_units",
+        "blank_delta_x",
+        "text_delta_x",
+        "lvmio_dates",
+        "lvmio_dimensions",
+        "lvmio_x0",
+    )
+    for name in names:
+        relayed = target(f"relay/{name}.lvm", f"LabVIEW read read/{name}.lvm and wrote it")
+        relay(lv, OUT / "read" / f"{name}.lvm", relayed)
+    relayed = target("relay/express_default.lvm", "LabVIEW read express_default.lvm and wrote it")
+    relay(lv, OUT / "express_default.lvm", relayed)
+    readback: dict[str, Any] = {}
+    sources = sorted((OUT / "read").glob("*.lvm"))
+    for source in [*sorted(OUT.glob("*.lvm")), *sources]:
+        readback[source.relative_to(OUT).as_posix()] = read(lv, source)
+    target(
+        "read_results.json", "what LabVIEW's Read From Measurement File returns for each .lvm here"
+    )
+    (OUT / "read_results.json").write_text(json.dumps(readback, indent=1) + "\n", encoding="utf-8")
+
+    manifest = {
+        "generated_by": f"LabVIEW {lv.version} (Windows x64) through its ActiveX server",
+        "locale_decimal": "comma (Spanish regional settings)",
+        "files": {name: _entry(OUT / name, how) for name, how in sorted(made.items())},
+    }
+    (OUT / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    return 0
+
+
+def _entry(path: Path, how: str) -> dict[str, Any]:
+    data = path.read_bytes()
+    return {"size": len(data), "sha256": hashlib.sha256(data).hexdigest(), "how": how}
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

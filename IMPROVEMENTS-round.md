@@ -1,18 +1,19 @@
 # Improvement round for lvmio
 
-A ranked list of substantial improvements, scored against genuine LabVIEW output
-(real `.lvm` files produced by NI software, now committed under `tests/fixtures/`)
-and cross-checked with the `lvm_read` package as an oracle. Items marked DONE are
-delivered in this round.
+A ranked list of substantial improvements, scored against the `.lvm` fixtures of the
+time and cross-checked with the `lvm_read` package as an oracle. Items marked DONE are
+delivered in this round. Note added for 1.0.0: those fixtures turned out to be of unknown
+origin and were replaced in 0.2.1 by generated files; files written by LabVIEW 2026 itself
+arrived with 1.0.0 (`tests/fixtures/labview2026`).
 
 ## 1. Correct column handling for real `X_Columns=No` files (DONE, correctness)
 
-Genuine LabVIEW files with `X_Columns=No` still emit the `X_Value` column in the
-data header and a leading empty X field on every data row (see the committed
-`short.lvm` and `comments_on_some_rows.lvm`). The old reader keyed the column offset
+The fixtures of the time with `X_Columns=No` (`short.lvm`, `comments_on_some_rows.lvm`,
+then taken to be LabVIEW output) still have an `X_Value` column in the data header and a
+leading empty X field on every data row. The old reader keyed the column offset
 off the `X_Columns` header field, so it read channel 0 from the empty X column and
 shifted every signal by one. The reader now derives the offset from the data
-header itself (a leading `X_Value` token), which matches NI output and `lvm_read`
+header itself (a leading `X_Value` token), which matches those files and `lvm_read`
 for both `No` and `One` files.
 
 ## 2. Empty data fields become NaN, not dropped (DONE, correctness)

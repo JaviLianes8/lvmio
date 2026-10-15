@@ -1,0 +1,28 @@
+LabVIEW Measurement	
+Writer_Version	2
+Reader_Version	2
+Separator	Tab
+Decimal_Separator	,
+Multi_Headings	No
+X_Columns	One
+Time_Pref	Relative
+Operator	Havie
+Date	2026/10/15
+Time	02:26:08,7690677642822265625
+***End_of_Header***	
+	
+Channels	1	
+Samples	3	
+Date	2026/10/15	
+Time	02:26:08,7690677642822265625	
+X_Dimension	Time	
+X0	0,0000000000000000E+0	
+Delta_X	1,000000	
+***End_of_Header***		
+X_Value	Untitled	Comment
+0,000000	1,000000
+1,000000	2,000000
+2,000000	3,000000
+6,000000	7,000000
+7,000000	8,000000
+8,000000	9,000000

@@ -1,4 +1,11 @@
-# Development dependencies: the package in editable mode plus its dev extras
-# (ruff, mypy, pytest, build, twine, and lvm-read + numpy for the cross-check
-# tests). Install with:  pip install -r requirements-dev.txt
--e .[dev]
+# Development dependencies: the package in editable mode, the gate tools, and
+# lvm-read + numpy for the cross-check tests. Install with:
+#   pip install -r requirements-dev.txt
+-e .
+ruff
+mypy
+pytest
+build
+twine
+lvm-read
+numpy

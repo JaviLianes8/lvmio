@@ -1,131 +1,123 @@
-"""Serialise typed objects to spec-faithful LabVIEW Measurement (.lvm) text."""
+"""Serialise typed objects to LabVIEW Measurement (.lvm) text, as LabVIEW writes it."""
 
 from __future__ import annotations
 
-import math
-from collections.abc import Mapping, Sequence
+import os
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import replace
-from pathlib import Path
+from operator import index as as_index
+from typing import SupportsFloat
 
+from ._check import as_file, canonical, check_file
 from ._model import Channel, LvmFile, Segment
+from ._number import shorten
+from ._read import encoding_name
+from ._render import render
 
-_END = "***End_of_Header***"
-_EOL = "\r\n"
 
-
-def write_lvm(
-    path: str | Path,
-    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Sequence[float]],
+def format_lvm(
+    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[SupportsFloat]],
     *,
     operator: str | None = None,
     date: str | None = None,
     time: str | None = None,
     decimal_separator: str | None = None,
     separator: str | None = None,
+    x_columns: str | None = None,
     precision: int = 6,
-) -> None:
-    """Write ``data`` to ``path`` as a LabVIEW Measurement file.
+) -> str:
+    """Return ``data`` as LabVIEW Measurement text, with CRLF line endings.
 
-    ``data`` may be a full ``LvmFile``, a single ``Segment``, a sequence of
-    ``Channel`` objects, or a mapping of channel name to samples. Keyword
-    arguments override the matching file header fields.
+    ``data`` may be a full ``LvmFile``, a single ``Segment``, a sequence of ``Channel``
+    objects, or a mapping of channel name to samples. Samples may be any iterable of real
+    numbers (a list, a NumPy array, a generator); ``bool`` and text are refused. Keyword
+    arguments override the matching file header fields: ``separator`` is ``"Tab"`` or ``"Comma"``,
+    ``decimal_separator`` is ``"."`` or ``","``, ``x_columns`` is ``"No"``, ``"One"`` or
+    ``"Multi"``. Samples use ``precision`` decimals in LabVIEW's number format.
+
+    >>> text = format_lvm({"V": [1.5, 1e-9]}, operator="lab", date="2026/10/14")
+    >>> text.splitlines()[-3:-1]
+    ['0.000000\\t1.500000', '1.000000\\t1.000000E-9']
+
+    Raises ``TypeError`` for data of the wrong type and ``ValueError`` for values that
+    cannot be written (a name holding the separator, an unknown separator, ...); the
+    guide lists every case.
     """
-    lvm = _as_file(data)
+    lvm = as_file(data)
     lvm = replace(
         lvm,
         operator=lvm.operator if operator is None else operator,
         date=lvm.date if date is None else date,
         time=lvm.time if time is None else time,
-        decimal_separator=(
-            lvm.decimal_separator if decimal_separator is None else decimal_separator
-        ),
+        decimal_separator=lvm.decimal_separator if decimal_separator is None else decimal_separator,
         separator=lvm.separator if separator is None else separator,
+        x_columns=lvm.x_columns if x_columns is None else x_columns,
     )
-    text = _EOL.join(_render(lvm, precision)) + _EOL
-    Path(path).write_text(text, encoding="utf-8", newline="")
+    if isinstance(precision, bool) or not hasattr(type(precision), "__index__"):
+        raise TypeError(f"precision must be an int, not {type(precision).__name__}")
+    precision = int.__index__(as_index(precision))
+    if not 0 <= precision <= 17:
+        raise ValueError("precision must be between 0 and 17")
+    lvm = check_file(canonical(lvm))
+    return "\r\n".join(render(lvm, precision)) + "\r\n"
 
 
-def _as_file(data: object) -> LvmFile:
-    if isinstance(data, LvmFile):
-        return data
-    if isinstance(data, Segment):
-        return LvmFile(segments=[data])
-    if isinstance(data, Mapping):
-        channels = [Channel(str(k), [float(v) for v in vals]) for k, vals in data.items()]
-        return LvmFile(segments=[Segment(channels)])
-    if isinstance(data, Sequence) and not isinstance(data, (str, bytes)):
-        items = list(data)
-        if not all(isinstance(c, Channel) for c in items):
-            raise TypeError("sequence must contain Channel objects")
-        return LvmFile(segments=[Segment(items)])
-    raise TypeError("unsupported data type for write_lvm")
+def write_lvm(
+    path: str | os.PathLike[str],
+    data: LvmFile | Segment | Sequence[Channel] | Mapping[str, Iterable[SupportsFloat]],
+    *,
+    operator: str | None = None,
+    date: str | None = None,
+    time: str | None = None,
+    decimal_separator: str | None = None,
+    separator: str | None = None,
+    x_columns: str | None = None,
+    precision: int = 6,
+    encoding: str = "utf-8",
+) -> None:
+    """Write ``data`` to ``path`` as a LabVIEW Measurement file.
+
+    Takes the same arguments as ``format_lvm``. ``encoding`` defaults to UTF-8; pass
+    ``"cp1252"`` to match what LabVIEW writes on a Western-European Windows system.
+    Nothing is written when the data is refused. Raises what ``format_lvm`` raises,
+    ``ValueError`` for text the encoding cannot hold, ``LookupError`` for an unknown
+    encoding and ``OSError`` when the file cannot be written.
+
+    >>> import lvmio, pathlib, tempfile
+    >>> path = pathlib.Path(tempfile.mkdtemp(), "run.lvm")
+    >>> write_lvm(path, [Channel("V", [1.0, 2.0], unit="V")], decimal_separator=",")
+    >>> lvmio.read_lvm(path).segments[0]["V"].data
+    [1.0, 2.0]
+    """
+    text = format_lvm(
+        data,
+        operator=operator,
+        date=date,
+        time=time,
+        decimal_separator=decimal_separator,
+        separator=separator,
+        x_columns=x_columns,
+        precision=precision,
+    )
+    name = encoding_name(encoding)
+    try:
+        payload = text.encode(encoding)
+    except UnicodeError as exc:
+        start = exc.start if isinstance(exc, UnicodeEncodeError) else -1
+        if not _fails_alone(text[start : start + 1], encoding):
+            raise ValueError(f"the text cannot be written as {name}") from None
+        character = shorten(text[start : start + 1])
+        raise ValueError(f"the character {character} cannot be written as {name}") from None
+    with open(os.fspath(path), "wb") as handle:
+        handle.write(payload)
 
 
-def _render(lvm: LvmFile, precision: int) -> list[str]:
-    delim = _delimiter(lvm.separator)
-    lines = _file_header(lvm, delim)
-    for seg in lvm.segments:
-        lines.append("")
-        lines.extend(_segment(seg, lvm, delim, precision))
-    return lines
-
-
-def _delimiter(separator: str) -> str:
-    return "," if separator.strip().lower() == "comma" else "\t"
-
-
-def _file_header(lvm: LvmFile, delim: str) -> list[str]:
-    return [
-        "LabVIEW Measurement" + delim,
-        f"Writer_Version{delim}{lvm.writer_version}",
-        f"Reader_Version{delim}{lvm.reader_version}",
-        f"Separator{delim}{lvm.separator}",
-        f"Decimal_Separator{delim}{lvm.decimal_separator}",
-        f"Multi_Headings{delim}{'Yes' if lvm.multi_headings else 'No'}",
-        f"X_Columns{delim}{lvm.x_columns}",
-        f"Time_Pref{delim}{lvm.time_pref}",
-        f"Operator{delim}{lvm.operator}",
-        f"Date{delim}{lvm.date}",
-        f"Time{delim}{lvm.time}",
-        _END + delim,
-    ]
-
-
-def _segment(seg: Segment, lvm: LvmFile, delim: str, precision: int) -> list[str]:
-    chans = seg.channels
-    n = len(chans)
-    has_x = lvm.x_columns.strip().lower() != "no"
-    dec = lvm.decimal_separator
-
-    def row(label: str, values: list[str]) -> str:
-        return delim.join([label, *values])
-
-    lines = [
-        f"Channels{delim}{n}",
-        row("Samples", [str(len(c.data)) for c in chans]),
-        row("Date", [seg.date] * n),
-        row("Time", [seg.time] * n),
-        row("Y_Unit_Label", [c.unit for c in chans]),
-        row("X_Dimension", [c.x_dimension for c in chans]),
-        row("X0", [_num(c.x0, precision, dec) for c in chans]),
-        row("Delta_X", [_num(c.delta_x, precision, dec) for c in chans]),
-        _END + delim,
-    ]
-    columns = (["X_Value"] if has_x else []) + [c.name for c in chans] + ["Comment"]
-    lines.append(delim.join(columns))
-
-    count = max((len(c.data) for c in chans), default=0)
-    x0 = chans[0].x0 if chans else 0.0
-    dx = chans[0].delta_x if chans else 1.0
-    for i in range(count):
-        fields = [_num(x0 + i * dx, precision, dec)] if has_x else []
-        fields += [_num(c.data[i], precision, dec) if i < len(c.data) else "" for c in chans]
-        lines.append(delim.join(fields))
-    return lines
-
-
-def _num(value: float, precision: int, decimal: str) -> str:
-    if math.isnan(value):
-        return ""
-    text = f"{value:.{precision}f}"
-    return text.replace(".", decimal) if decimal != "." else text
+def _fails_alone(character: str, encoding: str) -> bool:
+    """Whether the codec refuses this one character (some codecs refuse only whole texts)."""
+    if not character:
+        return False
+    try:
+        character.encode(encoding)
+    except UnicodeError:
+        return True
+    return False

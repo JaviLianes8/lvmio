@@ -2,165 +2,167 @@
 
 from __future__ import annotations
 
-import math
-from pathlib import Path
+import codecs
+import os
+import re
 
+from ._comment import unescape_comment
 from ._errors import LvmError
-from ._model import Channel, LvmFile, Segment
+from ._model import LvmFile, Segment
+from ._number import parse_number, shorten
+from ._segment import END, Lines, first_token, is_blank, parse_segment, skip_header
 
-_END = "***End_of_Header***"
+_MAGIC = "LabVIEW Measurement"
 
 
-def read_lvm(path: str | Path) -> LvmFile:
-    """Read a LabVIEW Measurement file and return its typed representation."""
-    return parse_lvm(Path(path).read_text(encoding="utf-8"))
+def read_lvm(path: str | os.PathLike[str], *, encoding: str | None = None) -> LvmFile:
+    """Read a LabVIEW Measurement file and return its typed representation.
+
+    With no ``encoding`` the file is read as UTF-8 and, when it is not valid UTF-8,
+    as Windows-1252: LabVIEW on Windows writes text in the system code page. Raises
+    ``LvmError`` for text that is not a measurement file (or not in the encoding),
+    ``OSError`` when the file cannot be read and ``LookupError`` for an unknown encoding.
+
+    >>> import lvmio, pathlib, tempfile
+    >>> folder = tempfile.mkdtemp()
+    >>> path = pathlib.Path(folder, "run.lvm")
+    >>> lvmio.write_lvm(path, {"V": [1.0, 2.0]}, encoding="cp1252", operator="Jos\\xe9")
+    >>> read_lvm(path).operator
+    'José'
+    """
+    if encoding is not None:
+        encoding_name(encoding)  # an unknown encoding is reported before the file is opened
+    with open(os.fspath(path), "rb") as handle:
+        data = handle.read()
+    return parse_lvm(decode(data, encoding))
+
+
+def encoding_name(encoding: str) -> str:
+    """The encoding as messages show it; ``LookupError`` with a short message if unknown."""
+    if not isinstance(encoding, str):
+        raise TypeError(f"encoding must be str, not {type(encoding).__name__}")
+    name = encoding if len(encoding) <= 40 and encoding.isprintable() else shorten(encoding)
+    try:
+        codecs.lookup(encoding)
+    except (LookupError, ValueError):
+        raise LookupError(f"unknown encoding: {name}") from None
+    return name
+
+
+def decode(data: bytes, encoding: str | None) -> str:
+    """Bytes to text: the given encoding, or UTF-8 and then Windows-1252."""
+    if encoding is not None:
+        name = encoding_name(encoding)
+        try:
+            return data.decode(encoding)
+        except UnicodeError as exc:
+            where = f" at byte {exc.start}" if isinstance(exc, UnicodeDecodeError) else ""
+            raise LvmError(f"not {name} text{where}") from None
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        try:
+            return data.decode("cp1252")
+        except UnicodeDecodeError as exc:
+            raise LvmError(f"neither UTF-8 nor Windows-1252 text at byte {exc.start}") from None
 
 
 def parse_lvm(text: str) -> LvmFile:
-    """Parse LabVIEW Measurement text and return its typed representation."""
-    lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
-    delim = _detect_delimiter(lines)
+    """Parse LabVIEW Measurement text and return its typed representation.
 
-    if not lines or _key(lines[0], delim) != "LabVIEW Measurement":
-        raise LvmError("not a LabVIEW Measurement file")
+    Raises ``LvmError`` for text that is not a measurement file and ``TypeError`` for
+    anything but ``str``.
 
-    header, index = _collect_header(lines, 1, delim)
-    decimal = header.get("Decimal_Separator", ".") or "."
-    x_columns = header.get("X_Columns", "One") or "One"
-
+    >>> text = "LabVIEW Measurement\\t\\nX_Columns\\tNo\\n***End_of_Header***\\t\\n\\n"
+    >>> text += "Channels\\t1\\n***End_of_Header***\\t\\nX_Value\\tV\\tComment\\n\\t1.5\\tok\\n"
+    >>> lvm = parse_lvm(text)
+    >>> lvm.x_columns, lvm.segments[0]["V"].data, lvm.segments[0].comment
+    ('No', [1.5], 'ok')
+    """
+    if not isinstance(text, str):
+        raise TypeError(f"parse_lvm expects str, not {type(text).__name__}")
+    text = str.__str__(text)
+    lines = text.removeprefix("\ufeff").replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    if lines[0].rstrip("\t, ") != _MAGIC:
+        raise LvmError(f"not a LabVIEW Measurement file: line 1 is {shorten(lines[0])}")
+    header, end, delim = _file_header(lines)
+    decimal = header.get("Decimal_Separator") or "."
+    if decimal not in (".", ","):
+        raise LvmError(f"Decimal_Separator must be '.' or ',', not {shorten(decimal)}")
+    if decimal == "," and delim == ",":
+        raise LvmError("a comma cannot be both the separator and the decimal separator")
+    cursor = Lines(lines, end + 1, delim)
     segments: list[Segment] = []
-    while index < len(lines):
-        index = _skip_blank(lines, index)
-        if index >= len(lines):
-            break
-        fields, index = _collect_segment_fields(lines, index, delim)
-        if index >= len(lines):
-            break
-        offset = 1 if _first_token(lines[index], delim) == "X_Value" else 0
-        names = _channel_names([p.strip() for p in lines[index].split(delim)], offset)
-        index += 1
-        rows, index = _collect_rows(lines, index, delim)
-        segments.append(_build_segment(names, rows, fields, offset, decimal))
-
+    while cursor.more():
+        line = cursor.current()
+        if is_blank(line, delim):
+            cursor.advance()
+        elif line.split(delim)[0].strip() == _MAGIC:
+            skip_header(cursor)
+        else:
+            if _looks_like_data(line, delim, decimal):
+                raise LvmError(
+                    f"line {cursor.number()}: a data row after a blank line"
+                    " (a blank line ends a segment)"
+                )
+            segments.extend(parse_segment(cursor, decimal))
     return LvmFile(
         segments=segments,
         writer_version=header.get("Writer_Version", "2"),
         reader_version=header.get("Reader_Version", "2"),
         separator=header.get("Separator", "Tab"),
         decimal_separator=decimal,
-        x_columns=x_columns,
+        x_columns=header.get("X_Columns") or "One",
         time_pref=header.get("Time_Pref", "Relative"),
         operator=header.get("Operator", "unknown"),
         date=header.get("Date", ""),
         time=header.get("Time", ""),
+        multi_headings=header.get("Multi_Headings", "").lower() == "yes",
+        description=unescape_comment(header.get("Description", "")),
     )
 
 
-def _detect_delimiter(lines: list[str]) -> str:
-    for line in lines:
-        if line.startswith("Separator"):
-            return "," if "Comma" in line else "\t"
-    return "\t"
-
-
-def _key(line: str, delim: str) -> str:
-    return line.split(delim)[0].strip()
-
-
-def _first_token(line: str, delim: str) -> str:
-    return line.split(delim)[0].strip()
-
-
-def _collect_header(lines: list[str], index: int, delim: str) -> tuple[dict[str, str], int]:
+def _file_header(lines: list[str]) -> tuple[dict[str, str], int, str]:
+    """The file header fields, the index of its end marker line and the delimiter."""
+    end = next((i for i, line in enumerate(lines) if _key(line) == END or _blank(line)), None)
+    if end is None or _key(lines[end]) != END:
+        raise LvmError(f"the file header has no {END} line before a blank line")
+    declared = None
+    for line in lines[1:end]:
+        if _key(line) == "Separator":
+            cells = re.split("[\t,]", line.strip())
+            declared = cells[1].strip() if len(cells) > 1 else ""
+    delim = "," if declared is not None and declared.lower() == "comma" else "\t"
     fields: dict[str, str] = {}
-    while index < len(lines) and _key(lines[index], delim) != _END:
-        parts = lines[index].split(delim)
+    for line in lines[1:end]:
+        parts = line.split(delim)
         key = parts[0].strip()
-        if key:
+        if key == "Decimal_Separator" and delim == "," and line.strip().startswith(key + ",,"):
+            fields[key] = ","
+        elif key:
             fields[key] = parts[1].strip() if len(parts) > 1 else ""
-        index += 1
-    return fields, index + 1
+    if declared is not None:
+        fields["Separator"] = declared
+    return fields, end, delim
 
 
-def _collect_segment_fields(
-    lines: list[str], index: int, delim: str
-) -> tuple[dict[str, list[str]], int]:
-    fields: dict[str, list[str]] = {}
-    while index < len(lines) and _key(lines[index], delim) != _END:
-        parts = lines[index].split(delim)
-        key = parts[0].strip()
-        if key:
-            fields[key] = [p.strip() for p in parts[1:]]
-        index += 1
-    return fields, index + 1
+def _blank(line: str) -> bool:
+    """A blank line under either separator."""
+    return not line.replace("\t", "").replace(",", "").strip()
 
 
-def _collect_rows(lines: list[str], index: int, delim: str) -> tuple[list[list[str]], int]:
-    rows: list[list[str]] = []
-    while index < len(lines):
-        line = lines[index]
-        if line.strip() == "" or _key(line, delim) in ("Channels", "LabVIEW Measurement"):
-            break
-        rows.append(line.split(delim))
-        index += 1
-    return rows, index
+def _key(line: str) -> str:
+    """The first token of a line, whichever of tab or comma separates it."""
+    return line.replace(",", "\t", 1).split("\t")[0].strip()
 
 
-def _channel_names(parts: list[str], offset: int) -> list[str]:
-    names = list(parts[offset:])
-    while names and names[-1] == "":
-        names.pop()
-    if names and names[-1].lower() == "comment":
-        names.pop()
-    return names
-
-
-def _build_segment(
-    names: list[str],
-    rows: list[list[str]],
-    fields: dict[str, list[str]],
-    offset: int,
-    decimal: str,
-) -> Segment:
-    units = fields.get("Y_Unit_Label", [])
-    dims = fields.get("X_Dimension", [])
-    x0s = fields.get("X0", [])
-    deltas = fields.get("Delta_X", [])
-    channels: list[Channel] = []
-    for idx, name in enumerate(names):
-        col = offset + idx
-        data = [_cell(r[col], decimal) if col < len(r) else math.nan for r in rows]
-        channels.append(
-            Channel(
-                name=name,
-                data=data,
-                unit=units[idx] if idx < len(units) else "",
-                x0=_to_float(x0s[idx], decimal) if idx < len(x0s) else 0.0,
-                delta_x=_to_float(deltas[idx], decimal) if idx < len(deltas) else 1.0,
-                x_dimension=dims[idx] if idx < len(dims) else "Time",
-            )
-        )
-    date = fields.get("Date", [""])
-    time = fields.get("Time", [""])
-    return Segment(channels, date[0] if date else "", time[0] if time else "")
-
-
-def _skip_blank(lines: list[str], index: int) -> int:
-    while index < len(lines) and lines[index].strip() == "":
-        index += 1
-    return index
-
-
-def _cell(text: str, decimal: str) -> float:
-    """A data cell: empty means a missing sample (NaN), as LabVIEW leaves gaps."""
-    if text.strip() == "":
-        return math.nan
-    return _to_float(text, decimal)
-
-
-def _to_float(text: str, decimal: str) -> float:
-    cleaned = text.strip().replace(decimal, ".") if decimal != "." else text.strip()
+def _looks_like_data(line: str, delim: str, decimal: str) -> bool:
+    """Whether a line that should open a segment header reads as a data row instead."""
+    token = first_token(line, delim)
+    if not token:
+        return True
     try:
-        return float(cleaned)
-    except ValueError as exc:
-        raise LvmError(f"not a number: {text!r}") from exc
+        parse_number(token, decimal, 0)
+    except LvmError:
+        return False
+    return True

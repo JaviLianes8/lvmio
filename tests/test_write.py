@@ -37,7 +37,7 @@ def test_decimal_formatting_uses_precision(tmp_path: Path) -> None:
     out = tmp_path / "m.lvm"
     write_lvm(out, [Channel("A", [1.5])], precision=3)
     rows = [line for line in out.read_text().splitlines() if line and line[0].isdigit()]
-    assert rows[-1].split("\t") == ["0.000", "1.500"]
+    assert rows[-1].split("\t") == ["0.000000", "1.500"]
 
 
 def test_comma_delimiter_round_trips(tmp_path: Path) -> None:

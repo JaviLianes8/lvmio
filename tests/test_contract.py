@@ -13,7 +13,16 @@ from pathlib import Path
 import pytest
 
 import lvmio
-from lvmio import Channel, LvmError, LvmFile, Segment, parse_lvm, read_lvm, write_lvm
+from lvmio import (
+    Channel,
+    LvmError,
+    LvmFile,
+    Segment,
+    format_lvm,
+    parse_lvm,
+    read_lvm,
+    write_lvm,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -24,6 +33,7 @@ PUBLIC_API: list[str] = [
     "LvmError",
     "LvmFile",
     "Segment",
+    "format_lvm",
     "parse_lvm",
     "read_lvm",
     "write_lvm",
@@ -80,9 +90,12 @@ def test_x_columns_no_file_reads_the_real_channels() -> None:
 
 def test_empty_fields_become_nan() -> None:
     lvm = read_lvm(FIXTURES / "with_empty_fields.lvm")
-    untitled = lvm.segments[0]["Spare"]
-    assert len(untitled) == 8
-    assert all(math.isnan(v) for v in untitled.data)
+    # The unconnected channel's Samples count is 0: its empty cells are padding, as LabVIEW
+    # reads it. An empty cell within a channel's count is a missing sample: NaN.
+    assert lvm.segments[0]["Spare"].data == []
+    text = format_lvm([Channel("A", [1.0, math.nan, 3.0]), Channel("B", [4.0])])
+    assert math.isnan(parse_lvm(text).segments[0]["A"].data[1])
+    assert parse_lvm(text).segments[0]["B"].data == [4.0]
     connected = lvm.segments[0]["Dev1/ai0"]
     assert connected.data[0] == pytest.approx(-0.02)
 
@@ -114,8 +127,13 @@ def test_lvmfile_iterates_segments_and_reports_multi_headings() -> None:
     assert len(one) == 1
     assert one.multi_headings is False
     two = LvmFile(segments=[Segment([Channel("A", [1.0])]), Segment([Channel("B", [2.0])])])
-    assert two.multi_headings is True
+    assert two.multi_headings is False
     assert [len(seg) for seg in two] == [1, 1]
+    # The writer marks a file with several segments, and the reader reports the field.
+    assert "Multi_Headings\tYes\r\n" in lvmio.format_lvm(two)
+    assert parse_lvm(lvmio.format_lvm(two)).multi_headings is True
+    assert parse_lvm(lvmio.format_lvm(one)).multi_headings is False
+    assert parse_lvm(lvmio.format_lvm(LvmFile(one.segments, multi_headings=True))).multi_headings
 
 
 def test_write_lvm_round_trips_every_input_shape(tmp_path: Path) -> None:

@@ -129,6 +129,7 @@ again by a new reviewer with the same lens.
 | --- | --- | --- | --- | --- |
 | a. API and docs | 1 | dcceacf | FAIL | NumPy arrays and generators refused by the writer, redirected CLI output on non-cp1252 names, exit 2 undocumented, header line numbers, private module names, docstring and CHANGELOG gaps; fixed in 6b464e7 |
 | a | 2 | a6942f0 | FAIL | generator data consumed by a first write, description blanks lost, CHANGELOG omissions, hints narrower than the docs, two inaccurate sentences; fixed in 1dac43c |
+| a | 3 | 1dac43c | FAIL | a stale GUIDE bullet, lvmio's own files with a large X0 split at precision 17, padded short channels read back with NaN; fixed in fe27684 and 85faffb |
 | b. Correctness and ground truth | 1 | 27c680c | FAIL | rounding of exact ties, comment escapes, undocumented reader differences; fixed in 21bb068 and 27c680c |
 | b | 2 | ac8c4dc | FAIL | exponent ties at decimal exponents 11, 16, 17, near ties, the 1e-4 rewrite boundary, UTF-8 in LabVIEW; fixed in 554d3cc |
 | b | 3 | 554d3cc | FAIL | Delta_X rounding and X cells, Delta_X floor unpinned, fixed-notation near ties; fixed in e99fb62 |
@@ -137,6 +138,11 @@ again by a new reviewer with the same lens.
 | b | 6 | bf121fe | FAIL | blank lines in headers, rows of empty cells, segment-header keys, spaces after a sign, BOM, unit shift; fixed in d11a62e and 3e58e77 |
 | b | 7 | 3e58e77 | FAIL | one-header mode, unit V for files without units, per-channel dates, Description and Notes; fixed in 9968457 |
 | b | 8 | 9968457 | FAIL | later-write comments and X origins in one-header files, Date/Time lines, X dimensions, X0 as a timestamp; fixed in 1dac43c |
+| b | 9 | 1dac43c | FAIL | a negative X increment split every row, a later write that jumps forward or changes step was merged; fixed in c13bf36 |
+| b | 10 | fe27684 | FAIL | the GUIDE misdescribed how LabVIEW reads per-channel Samples counts; corrected and pinned with two new LabVIEW reads in bf6e04a |
+| b and c | 11 | 2521431 | FAIL | a 25 % step allowance on later writes, one-row writes merged, `0e400` X cells overflowing, odd Samples counts; fixed in f327621 |
+| b and c | 12 | f327621 | FAIL | lvmio's own files splitting near X = 0 at precision 14 to 17, quadratic time on one-row-per-write logs, the caller's decimal context, later Multi X columns unchecked, padding after a split, two messages and wording; fixed in 730fceb and 5cddf3a |
+| b and c | 13 | 730fceb | PASS | fixes confirmed by 10k round-trip files, 160k grammar files and 24k mutated fixtures, linear time to 160k rows; five minor items (CSV `--time` X column for Multi, escaped names in `channels`, three doc points) fixed in 4945f4a |
 | c. Adversarial and robustness | 1 | 6b464e7 | FAIL | quadratic short rows, whitespace asymmetry, hostile decimal separator, Decimal overflow, sets as samples, lying subclasses; fixed in 21bb068 and 27c680c |
 | c | 2 | e10090d | FAIL | headers without an end marker, closed stdout, dropped segment dates, long encoding names; fixed in 07fd565 |
 | c | 3 | 07fd565 | FAIL | file header blank-line rule, encoding name echo, `undefined` codec; fixed in a6942f0 |

@@ -83,68 +83,26 @@ the `lvmio` command. Changed for 1.0.0 (all in CHANGELOG and the GUIDE upgrade s
 documented writer refusals (`TypeError`, `ValueError`) with nothing written on refusal;
 `python -m lvmio` and `--encoding`.
 
-## Author mutation round (item 18)
+## Author mutation rounds (item 18)
 
 Each mutation was applied alone to a fresh clone of the pushed branch on a separate build
-machine, the suite run with `-x`, no bytecode written (`-B`,
-`PYTHONDONTWRITEBYTECODE`, `__pycache__` purged before each run), a 900 s limit per
-mutant, and the file restored; the baseline was green before and after. 50 mutations: 41
-killed at once, 8 survived and were killed by new contracts in
-`tests/test_contract_edges.py`, 1 removed with its code (M23 guarded a header form the
-writer refuses and LabVIEW never produced).
+machine, the suite run with `-x`, no bytecode written (`-B`, `PYTHONDONTWRITEBYTECODE`,
+`__pycache__` purged before each run), a 900 s limit per mutant, and the file restored; the
+baseline was green before and after every round. The list grew with the code: number
+format, reader, segment and split rules, writer checks, rendering, model and command line.
 
-| Id | Mutation | File | Result | Caught by |
+| Round | Head | Mutants | Killed at once | Survivors and outcome |
 | --- | --- | --- | --- | --- |
-| M01 | fixed notation from 1e-5 | `_number.py` | killed | `test_labview_captures.py::test_rewriting_a_labview_file_gives_back_its_exact_bytes[numbers.lvm]` |
-| M02 | fixed notation up to 1e8 | `_number.py` | killed | same, `numbers.lvm` |
-| M03 | 1e7 itself in fixed notation | `_number.py` | killed | same, `numbers.lvm` |
-| M04 | zero not special-cased | `_number.py` | killed | `test_docs.py::test_module_doctests_pass[lvmio._write]` |
-| M05 | exponent padded to two digits | `_number.py` | killed | `test_docs.py::test_module_doctests_pass[lvmio._number]` |
-| M06 | NaN spelled nan | `_number.py` | killed | `test_rewriting_a_labview_file_gives_back_its_exact_bytes[specials.lvm]` |
-| M07 | negative infinity spelled -inf | `_number.py` | killed | `test_module_doctests_pass[lvmio._number]` |
-| M08 | X0 with 15 decimals | `_number.py` | killed | `test_module_doctests_pass[lvmio._number]` |
-| M09 | decimal comma not converted | `_number.py` | killed | `test_cli_edges.py::test_encoding_option_is_applied_and_checked` |
-| M10 | grammar check skipped | `_number.py` | killed | `test_cli_edges.py::test_a_huge_bad_cell_is_not_echoed_back` |
-| M11 | Infinity spelling unknown | `_number.py` | killed | `test_lvmio_reads_what_labview_reads[read/token_17.lvm]` |
-| M12 | sign of special values dropped | `_number.py` | killed | `test_cli_edges.py::test_json_dump_stays_valid_json_with_infinities` |
-| M13 | any Unicode blank stripped | `_number.py` | killed | `test_number.py::test_parse_number_refuses_everything_else[\xa07]` |
-| M14 | two signs accepted on specials | `_number.py` | killed | `test_parse_number_refuses_everything_else[++inf]` |
-| M15 | header cells not shifted for the X column | `_segment.py` | killed | `test_fixtures.py::test_short_tab_decimal_comma` |
-| M16 | Comment column read as a channel | `_segment.py` | killed | `test_encoding_option_is_applied_and_checked` |
-| M17 | X_Value columns read as channels | `_segment.py` | killed | `test_cli_edges.py::test_multi_x_columns_dump` |
-| M18 | empty cell read as zero | `_segment.py` | killed | `test_contract.py::test_empty_fields_become_nan` |
-| M19 | repeated file header parsed as a segment | `_read.py` | killed | `test_lvmio_reads_what_labview_reads[appended_runs.lvm]` |
-| M20 | missing segment end marker tolerated | `_segment.py` | killed | `test_hostile.py::test_truncated_and_empty_files_are_refused[5]` |
-| M21 | Latin-1 instead of Windows-1252 | `_read.py` | killed | `test_labview_writes_windows_1252_and_lvmio_reads_it` |
-| M22 | Multi_Headings never read | `_read.py` | killed | `test_contract.py::test_lvmfile_iterates_segments_and_reports_multi_headings` |
-| M23 | comma decimal in a comma file lost | `_read.py` | survived, code removed | the special case was dead for any file LabVIEW or lvmio writes |
-| M24 | comma separator never detected | `_read.py` | killed | `test_contract.py::test_parse_lvm_matches_read_lvm_on_the_same_bytes` |
-| M25 | no separator line after the file header | `_render.py` | killed | `test_rewriting_a_labview_file_gives_back_its_exact_bytes[comment_cp1252.lvm]` |
-| M26 | Multi header width one short | `_render.py` | killed | same, `x_columns_multi.lvm` |
-| M27 | Y_Unit_Label always written | `_render.py` | killed | same, `comment_cp1252.lvm` |
-| M28 | Multi_Headings Yes for one segment | `_render.py` | killed | `test_lvmfile_iterates_segments_and_reports_multi_headings` |
-| M29 | X values written in No files | `_render.py` | killed | same as M25, `express_default.lvm` |
-| M30 | comment on every row | `_render.py` | killed | same as M25, `comment_cp1252.lvm` |
-| M31 | Multi X cells from the first channel | `_render.py` | survived, then killed | new `test_contract_edges.py::test_the_files_labview_read_back_are_still_what_lvmio_writes` |
-| M32 | Delta_X with 6 decimals whatever the precision | `_render.py` | survived, then killed | same new test (`lvmio_precision.lvm`) |
-| M33 | bool accepted as a sample | `_check.py` | killed | `test_validation.py::test_bad_data_is_refused[data6-TypeError]` |
-| M34 | reserved channel names accepted | `_check.py` | killed | `test_bad_data_is_refused[data17-ValueError]` |
-| M35 | separator inside a field accepted | `_check.py` | killed | `test_bad_data_is_refused[data19-ValueError]` |
-| M36 | comma as separator and decimal accepted | `_check.py` | killed | `test_bad_data_is_refused[data29-ValueError]` |
-| M37 | precision up to 30 accepted | `_write.py` | killed | `test_bad_keywords_are_refused[kwargs1-ValueError]` |
-| M38 | file opened before the data is checked | `_write.py` | killed | `test_bad_data_is_refused[text-TypeError]` |
-| M39 | CSV rows end with CRLF again | `_cli_output.py` | killed | `test_multi_x_columns_dump` |
-| M40 | infinity left as a float in JSON | `_cli_output.py` | killed | `test_json_dump_stays_valid_json_with_infinities` |
-| M41 | closed pipe not handled | `_cli.py` | survived, then killed | new `test_a_closed_output_pipe_exits_zero_and_silently` (the first version wrote less than a pipe buffer) |
-| M42 | channel name in the error not shortened | `_cli.py` | survived, then killed | new `test_a_huge_unknown_channel_name_is_not_echoed` |
-| M43 | time axis one sample long | `_model.py` | killed | `test_json_dump_stays_valid_json_with_infinities` |
-| M44 | get returns the last match | `_model.py` | survived, then killed | new `test_get_returns_the_first_of_two_channels_with_one_name` |
-| M45 | comment cells joined without the separator | `_segment.py` | killed | `test_validation.py::test_the_comment_may_hold_the_separator_and_round_trips` |
-| M46 | byte order mark kept | `_read.py` | survived, then killed | new `test_a_byte_order_mark_is_ignored` |
-| M47 | messages quote the whole input | `_number.py` | killed | `test_a_huge_bad_cell_is_not_echoed_back` |
-| M48 | segment rows run into the next segment header | `_segment.py` | survived, then killed | new `test_a_segment_may_follow_the_rows_without_a_blank_line` |
-| M49 | stdin decoded with the default encoding | `_cli.py` | survived, then killed | new `test_standard_input_utf8_is_not_read_in_the_locale_encoding` |
-| M50 | encoding option ignored for files | `_cli.py` | killed | `test_encoding_option_is_applied_and_checked` |
+| 1 | 9d7ce79 | 50 | 41 | 8 killed by new contracts in `tests/test_contract_edges.py` (39b24b8); M23 (comma decimal in a comma file) removed with its dead code |
+| 2 | 27c680c | 68 | 66 | M04 (zero special case) equivalent, code removed as redundant; M60 (blank line message) killed by a new contract; both in 25d5db7 |
+| 3 | bf6e04a | 89 | 87 | M69 (comment on a later row) and M80 (X cells of a Multi file) killed by new contracts in 2521431 |
+| 4 | f327621 | 92 | 91 | M92 (a one-row write lending the next write its step) killed by a new contract in b922222 |
+
+Round 1 survivors and their contracts: Multi X cells from the first channel and Delta_X
+decimals at low precision (`test_the_files_labview_read_back_are_still_what_lvmio_writes`),
+closed pipe, shortened channel name in errors, `get` returning the first match, byte order
+mark, a segment following rows without a blank line, standard input decoding (one test
+each in `tests/test_contract_edges.py`).
 
 ## Packaging and end-to-end (items 8, 10, 14), author run
 

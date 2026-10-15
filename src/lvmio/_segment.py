@@ -136,10 +136,8 @@ def _build(
         values, cell = fields["X_Dimension"], column - shift
         return values[cell] if 0 <= cell < len(values) else ""
 
+    # Every X cell is parsed by ``starts``, so an X cell that is not a number is refused.
     x_columns = [i for i, name in enumerate(columns[:need]) if name == "X_Value"]
-    for column in x_columns:
-        for row, number in zip(rows, numbers, strict=True):
-            _cell(row, column, decimal, number)  # an X cell is empty or a number
     first, x_column = (positions[0] if positions else shift), (0 if shift else None)
     segments: list[Segment] = []
     axes = [(c, _step(header("Delta_X", c + 1), decimal, where)) for c in x_columns]

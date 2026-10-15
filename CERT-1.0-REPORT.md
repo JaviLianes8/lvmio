@@ -11,7 +11,7 @@ Progress:
 - [x] Packaging, e2e and upgrade from PyPI 0.2.1 (items 8, 10, 13, 14), author run
 - [x] Independent reviewer and five QA lenses report PASS (items 16, 19)
 - [x] Gates (item 15), final run
-- [ ] PR and trace guard CLEAN (item 17); merge and publish left to the maintainer
+- [x] PR #4 and trace guard CLEAN (item 17); merge and publish left to the maintainer
 
 ## Scorecard
 
@@ -35,7 +35,7 @@ Independent review (item 16) at 8c57de8, confirmed against the final head.
 | 14 | sdist and wheel contents | PASS: 20-file wheel, sdist without scratch files |
 | 15 | Gates each exit 0 | PASS: see Gates |
 | 16 | Independent reviewer | PASS: 18 items PASS, item 17 pending, no blocking findings |
-| 17 | PR and trace guard | see the pull request; merge and publish left to the maintainer |
+| 17 | PR and trace guard | PR #4, trace guard CLEAN; merge and publish left to the maintainer |
 | 18 | Contracts bite (mutations) | PASS: five author rounds (last: 100 mutants, 99 killed, 1 equivalent and removed) |
 | 19 | Five independent QA lenses | PASS: a round 4, b and c round 13, d round 4, e round 7 |
 

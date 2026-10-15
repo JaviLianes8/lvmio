@@ -119,3 +119,15 @@ def test_an_odd_samples_count_is_not_used(count: str) -> None:
     head = "LabVIEW Measurement\t\n***End_of_Header***\t\n\nChannels\t1\nSamples\t" + count + "\n"
     lvm = parse_lvm(head + "***End_of_Header***\t\nX_Value\tV\tComment\n0\t1\n1\t\n")
     assert len(lvm.segments[0].channels[0].data) == 2
+
+
+def test_a_one_row_write_does_not_lend_the_next_write_its_step() -> None:
+    head = "LabVIEW Measurement\t\n***End_of_Header***\t\n\nChannels\t1\nDelta_X\t1\n"
+    rows = "".join(f"{x}\t{x}\n" for x in (0, 1, 2, 10, 20, 21, 22))
+    lvm = parse_lvm(head + "***End_of_Header***\t\nX_Value\tV\tComment\n" + rows)
+    found = [(s.channels[0].x0, s.channels[0].delta_x, s.channels[0].data) for s in lvm]
+    assert found == [
+        (0.0, 1.0, [0.0, 1.0, 2.0]),
+        (10.0, 1.0, [10.0]),
+        (20.0, 1.0, [20.0, 21.0, 22.0]),
+    ]

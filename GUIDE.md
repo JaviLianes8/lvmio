@@ -125,7 +125,9 @@ decimal separator) and reads other text differently.
 more than one segment. `precision` sets the decimals of the samples, of the X values and of
 `Delta_X` (6 by default, as LabVIEW; X values and `Delta_X` never get fewer than 6, so a
 low precision cannot zero the X axis). With `precision=17` every value in exponent notation
-reads back exactly; values written in fixed notation keep 17 decimals.
+reads back exactly; values written in fixed notation keep 17 decimals. At some precisions
+a value within rounding of the largest double is written as text above it (`1.798E+308` at
+precision 3) and reads back as `Inf`, as the text says.
 
 LabVIEW reads a file in the Windows code page. Text written in UTF-8 (the default) comes
 back garbled in LabVIEW when it is not ASCII (`café` as `cafÃ©`); pass
@@ -137,7 +139,7 @@ The writer refuses, before writing anything:
 | --- | --- |
 | `TypeError` | data that is not an `LvmFile`, `Segment`, list of `Channel` or mapping of `str` to an iterable of numbers; a sample, `x0` or `delta_x` that is not a real number (`int`, `float`, `Fraction`, `Decimal` and NumPy numbers are; `bool`, `str` and `complex` are not); a text field that is not `str`; `precision` that is not an `int` |
 | `TypeError` (continued) | unordered samples (a `set` or a mapping) and `memoryview` samples, refused like `bytes` |
-| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an `x0` or `delta_x` that is not finite; a `description` starting or ending with whitespace; a comment on a segment with no samples (it has no row to go in), or a segment date or time on a segment with no channels (there is no cell for it); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character) |
+| `ValueError` | a separator other than Tab or Comma, a decimal separator other than `.` or `,`, a comma as both; `X_Columns` other than No, One or Multi; a name, unit, dimension or header field holding the separator or a line break, or starting or ending with any whitespace character (as Python's `str.strip` sees it, which is what the reader strips); an empty channel name or one called `X_Value` or `Comment`; an `x0` or `delta_x` that is not finite; a `description` starting or ending with whitespace; a comment on a segment with no samples (it has no row to go in), or a segment date or time on a segment with no channels (there is no cell for it); `precision` outside 0 to 17; a number too large for a double (`10**400`, `Decimal("1e400")`) or a signalling `Decimal` NaN; text the chosen encoding cannot hold (the message names the character, or says the text when the codec refuses it as a whole, as `idna` does) |
 | `LookupError` | `write_lvm` with an unknown encoding name |
 
 Text fields are copied to plain `str` and `precision` to a plain `int` before they are
@@ -170,7 +172,8 @@ Windows-1252; `encoding=` fixes the encoding instead. `parse_lvm(text)` takes te
   decimal point.
 - `X0` and `Delta_X` default to 0 and 1 when their line is missing, `X_Dimension` to
   `Time` when its line is missing (an empty cell stays empty), a unit to empty.
-- A row after the first starts a new segment when it carries a comment, or when its X cell
+- A row after the first starts a new segment when it carries a comment (a comment cell of
+  only spaces counts as empty), or when its X cell
   is not the previous X cell plus the increment, beyond half a unit of the `Delta_X` cell's
   last digit plus a unit of each X cell's last digit, plus a few units in the last place of
   a double for the rounding in computing X values: the X restarts, jumps or changes step.
@@ -308,8 +311,8 @@ not a `str`), and `parse_lvm` raises
 | Command | Output |
 | --- | --- |
 | `lvmio header FILE [--json]` | the file header fields and the number of segments |
-| `lvmio channels FILE` | per segment, each channel with its unit and sample count |
-| `lvmio dump FILE [--channel NAME] [--segment N] [--format csv\|json] [--time]` | the samples; CSV leaves missing samples empty and writes infinities as `Inf` and `-Inf`; JSON writes missing samples as `null` and infinities as `"Inf"` and `"-Inf"` |
+| `lvmio channels FILE` | per segment, each channel with its unit and sample count (control characters in names and units escaped as in comments) |
+| `lvmio dump FILE [--channel NAME] [--segment N] [--format csv\|json] [--time]` | the samples; CSV leaves missing samples empty and writes infinities as `Inf` and `-Inf`; JSON writes missing samples as `null` and infinities as `"Inf"` and `"-Inf"`; with `--time` CSV has one `X_Value` column when the channels share `X0` and `Delta_X`, otherwise one before each channel, and JSON gives each channel its own `time` |
 
 Every command takes `--encoding` and `-` for standard input. Output sent to a file or a pipe
 is UTF-8; with no standard output at all the command prints nothing. Exit status 0 on success; 1 on any reading error, with one line on standard

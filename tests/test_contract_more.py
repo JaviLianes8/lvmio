@@ -90,11 +90,28 @@ def test_cli_csv_writes_a_missing_sample_as_an_empty_cell(cli: list[str], tmp_pa
     assert result.stdout == "A,B\n1.0,3.0\n2.0,\n"
 
 
-def test_cli_csv_time_column_follows_the_first_channel(cli: list[str], tmp_path: Path) -> None:
-    seg = Segment([Channel("A", [1.0], x0=0.0), Channel("B", [2.0], x0=10.0)])
+def test_cli_csv_time_columns_follow_each_channel(cli: list[str], tmp_path: Path) -> None:
+    seg = Segment([Channel("A", [1.0], x0=0.0), Channel("B", [2.0, 3.0], x0=10.0)])
     path = _file(tmp_path, seg, x_columns="Multi")
     result = run(cli, "dump", path, "--time")
-    assert result.stdout == "X_Value,A,B\n0.0,1.0,2.0\n"
+    assert result.stdout == "X_Value,A,X_Value,B\n0.0,1.0,10.0,2.0\n,,11.0,3.0\n"
+
+
+def test_cli_csv_shared_time_column_spans_the_longest_channel(
+    cli: list[str], tmp_path: Path
+) -> None:
+    seg = Segment([Channel("A", [1.0], x0=5.0), Channel("B", [2.0, 3.0], x0=5.0)])
+    result = run(cli, "dump", _file(tmp_path, seg), "--time")
+    assert result.stdout == "X_Value,A,B\n5.0,1.0,2.0\n6.0,,3.0\n"
+
+
+def test_cli_channels_escapes_control_characters(cli: list[str], tmp_path: Path) -> None:
+    text = format_lvm([Channel("A", [1.0], unit="V")]).replace("\tA", "\tA" + chr(27) + "[2J")
+    path = tmp_path / "esc.lvm"
+    path.write_bytes(text.encode())
+    result = run(cli, "channels", str(path))
+    assert chr(27) not in result.stdout
+    assert "A" + chr(92) + "1B[2J [V]: 1 samples" in result.stdout
 
 
 def test_bare_carriage_return_line_endings_are_read() -> None:

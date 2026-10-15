@@ -88,6 +88,9 @@ files that LabVIEW 2026 wrote and read; the guide describes the format and the u
   produces an empty segment.
 - `1e-9` was written as `0.000000` and lost.
 - CSV output from `lvmio dump` had a blank line after every row on Windows.
+- `lvmio dump --time` as CSV gave every channel the first channel's X axis; channels with
+  their own `X0` or `Delta_X` now get their own `X_Value` column. `lvmio channels` escapes
+  control characters in names and units.
 
 ## [0.2.1]
 

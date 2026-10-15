@@ -56,8 +56,13 @@ def _print_channels(lvm: LvmFile) -> None:
             f"segment {index}: {len(segment)} channels, {max(segment.samples, default=0)} samples"
         )
         for channel in segment:
-            unit = f" [{channel.unit}]" if channel.unit else ""
-            print(f"  {channel.name}{unit}: {len(channel)} samples")
+            unit = f" [{_shown(channel.unit)}]" if channel.unit else ""
+            print(f"  {_shown(channel.name)}{unit}: {len(channel)} samples")
+
+
+def _shown(text: str) -> str:
+    """A name or unit with control characters escaped, so a file cannot drive the terminal."""
+    return escape_comment(text, "	")
 
 
 def _print_dump(lvm: LvmFile, args: argparse.Namespace) -> None:
@@ -88,13 +93,22 @@ def _at(data: list[float], index: int) -> float:
 def _dump_csv(channels: list[Channel], with_time: bool) -> None:
     out = io.StringIO()
     writer = csv.writer(out, lineterminator="\n")
-    header = (["X_Value"] if with_time else []) + [c.name for c in channels]
-    writer.writerow(header)
-    axis = channels[0].time_axis() if channels and with_time else []
     count = max((len(c.data) for c in channels), default=0)
+    axes = [c.time_axis() for c in channels] if with_time else []
+    # One X column when every channel has the same X0 and Delta_X, otherwise one per channel.
+    shared = with_time and len({(c.x0, c.delta_x) for c in channels}) <= 1
+    own = with_time and not shared
+    if shared and channels:
+        axes[0] = max(channels, key=len).time_axis()
+    header = (["X_Value"] if shared else []) + [
+        cell for c in channels for cell in (["X_Value", c.name] if own else [c.name])
+    ]
+    writer.writerow(header)
     for i in range(count):
-        time_cell = [_fmt(axis[i])] if with_time and i < len(axis) else ([""] if with_time else [])
-        writer.writerow(time_cell + [_fmt(_at(c.data, i)) for c in channels])
+        row = [_fmt(_at(axes[0], i))] if shared else []
+        for c, axis in zip(channels, axes if own else [[]] * len(channels), strict=True):
+            row += ([_fmt(_at(axis, i))] if own else []) + [_fmt(_at(c.data, i))]
+        writer.writerow(row)
     print(out.getvalue(), end="")
 
 

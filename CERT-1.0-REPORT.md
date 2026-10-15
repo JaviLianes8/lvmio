@@ -10,7 +10,7 @@ Progress:
 - [x] Docs: README, GUIDE, CHANGELOG (items 11, 12)
 - [x] Packaging, e2e and upgrade from PyPI 0.2.1 (items 8, 10, 13, 14), author run
 - [ ] Independent reviewer and five QA lenses report PASS (items 16, 19)
-- [ ] Gates (item 15), final run
+- [x] Gates (item 15), final run
 - [ ] PR and trace guard CLEAN (item 17); merge and publish left to the maintainer
 
 ## Scorecard
@@ -105,19 +105,27 @@ closed pipe, shortened channel name in errors, `get` returning the first match, 
 mark, a segment following rows without a blank line, standard input decoding (one test
 each in `tests/test_contract_edges.py`).
 
-## Packaging and end-to-end (items 8, 10, 14), author run
+## Packaging and end-to-end (items 8, 10, 14), final run at 890e56d
 
 - `python -m build` and `twine check --strict`: both artifacts PASSED.
-- Wheel: the twelve package modules, `py.typed`, LICENSE and metadata. Sdist: `src`, `tests`
+- Wheel (20 files): the fourteen package modules, `py.typed`, LICENSE and metadata. Sdist: `src`, `tests`
   with the LabVIEW captures and their manifest, README, GUIDE, CHANGELOG, CONTRIBUTING,
   LICENSE, pyproject, the fixture generator and the `.gitignore` hatchling adds; no capture
   script, report or process notes.
 - The wheel in a fresh venv on CPython 3.10.22, 3.11.17, 3.12.15, 3.13.16, 3.14.8 and
   3.14.8 free-threaded, with the suite run from the extracted sdist with `src` removed (so
-  it imports the installed wheel and drives its console script): exit 0 on all six.
+  it imports the installed wheel and drives its console script): 711 passed on all six (3
+  skipped: the NumPy and `lvm_read` cross-checks, not installed in these venvs).
+- Sabotage check: with the installed console script deleted, the suite fails (exit 1).
 - PyPI 0.2.1 installed, then upgraded in place to the 1.0.0 wheel: `1e-9` written as
   `0.000000` then `1.000000E-9`, infinity `inf` then `Inf`, `format_lvm` absent then present,
-  console script reports `lvmio 1.0.0`.
+  console script reports `lvmio 1.0.0`, `1_0` read as 10 then refused with `LvmError`.
+
+## Gates (item 15), final run at 890e56d
+
+Each on its own in a fresh clone and venv: `ruff format --check .` exit 0 (62 files),
+`ruff check .` exit 0, `mypy --strict src tests` exit 0 (49 files), `pytest` 729 passed and
+1 skipped (the installed-script check, which the wheel run covers), `pytest --doctest-modules src` 18 passed.
 
 ## Independent QA lenses (item 19), rounds so far
 

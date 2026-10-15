@@ -5,12 +5,12 @@ from __future__ import annotations
 import contextlib
 import decimal
 import io
-import time
 from pathlib import Path
+from typing import Any
 
 import pytest
 
-from lvmio import Channel, format_lvm, parse_lvm, read_lvm, write_lvm
+from lvmio import Channel, _segment, _split, format_lvm, parse_lvm, read_lvm, write_lvm
 from lvmio._cli_output import _print_channels
 from lvmio._number import format_number
 
@@ -32,22 +32,26 @@ def test_an_axis_heading_toward_zero_stays_one_segment(
     assert format_lvm(lvm, precision=precision) == text
 
 
-def test_a_logging_loop_of_one_row_per_write_reads_in_linear_time() -> None:
+def test_a_logging_loop_of_one_row_per_write_reads_in_linear_time(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     head = HEAD + "X_Columns\tOne\n***End_of_Header***\t\n\t\n"
     seg = "Channels\t1\t\nSamples\t1\t\nX0\t0\t\nDelta_X\t1\t\n***End_of_Header***\t\t\n"
+    seen: list[int] = []
+    original = _split.own_step
 
-    def seconds(rows: int) -> float:
-        lines = "".join(f"0.000000\t{i}\t\n" for i in range(rows))
-        best = float("inf")
-        for _ in range(2):
-            began = time.perf_counter()
-            lvm = parse_lvm(head + seg + "X_Value\tV\tComment\n" + lines)
-            best = min(best, time.perf_counter() - began)
-        assert len(lvm) == rows
-        return best
+    def own_step(rows: list[list[str]], *args: Any) -> Any:
+        seen.append(len(rows))
+        return original(rows, *args)
 
-    # Four times the rows; copying the remaining rows at every write made it about 11 times.
-    assert seconds(40000) < 7 * seconds(10000)
+    # Each write looks at its first three rows only; copying the remaining rows at every
+    # write made reading quadratic (40k rows took 6 s instead of 0.3 s).
+    monkeypatch.setattr(_split, "own_step", own_step)
+    monkeypatch.setattr(_segment, "own_step", own_step)
+    lines = "".join(f"0.000000\t{i}\t\n" for i in range(5000))
+    lvm = parse_lvm(head + seg + "X_Value\tV\tComment\n" + lines)
+    assert len(lvm) == 5000
+    assert seen and max(seen) <= 3
 
 
 def test_the_callers_decimal_context_does_not_change_what_is_written() -> None:

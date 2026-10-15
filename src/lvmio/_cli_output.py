@@ -62,7 +62,7 @@ def _print_channels(lvm: LvmFile) -> None:
 
 def _shown(text: str) -> str:
     """A name or unit with control characters escaped, so a file cannot drive the terminal."""
-    return escape_comment(text, "	")
+    return escape_comment(text, "\t")
 
 
 def _print_dump(lvm: LvmFile, args: argparse.Namespace) -> None:

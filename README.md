@@ -1,5 +1,7 @@
 # lvmio
 
+[![Lianes8 Certified](https://lianes8studio.com/certified/lianes8-certified-badge.svg)](https://lianes8studio.com/certified)
+
 Typed reader and writer for LabVIEW Measurement (`.lvm`) files, standard library only.
 
 `.lvm` is the text format LabVIEW's Write To Measurement File express VI produces. lvmio
